@@ -834,7 +834,17 @@ function VUHDO_startAuraButtonGlow(aAuraButton, aButtonSetup)
 
 	tGlowStyleName = aButtonSetup["glowStyle"] or VUHDO_DEFAULT_AURA_GLOW_STYLE;
 
-	VUHDO_startFrameGlow(aAuraButton, tGlowStyleName, sUnitGlowColorArray, nil, nil, "vuhdo", aButtonSetup["width"], aButtonSetup["height"]);
+	if aButtonSetup["durationBar"] then
+		if (aButtonSetup["iconType"] or 1) == 5 then
+			VUHDO_stopInPlaceFrameGlow(aAuraButton, "vuhdo");
+
+			return;
+		end
+
+		VUHDO_startFrameGlow(aAuraButton["IconFrame"] or aAuraButton, tGlowStyleName, sUnitGlowColorArray, nil, nil, "vuhdo", aButtonSetup["glowWidth"] or aButtonSetup["width"], aButtonSetup["glowHeight"] or aButtonSetup["height"]);
+	else
+		VUHDO_startFrameGlow(aAuraButton, tGlowStyleName, sUnitGlowColorArray, nil, nil, "vuhdo", aButtonSetup["width"], aButtonSetup["height"]);
+	end
 
 	return;
 

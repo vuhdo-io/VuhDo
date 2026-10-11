@@ -820,7 +820,7 @@ VUHDO_I18N_TT.K763 = "Show timer based on how long the aura has been active.";
 VUHDO_I18N_TT.K764 = "Only show timer text when remaining duration is at or below this threshold.";
 VUHDO_I18N_TT.K765 = "Enable a glow effect around this spell's icon.";
 VUHDO_I18N_TT.K766 = "Click to set the glow color for this spell's icon.";
-VUHDO_I18N_TT.K767 = "Enable vertex color tinting for this spell's icon.";
+VUHDO_I18N_TT.K767 = "Enable color tinting for this spell's icon.";
 VUHDO_I18N_TT.K768 = "Click to set the tint color for this spell's icon.";
 VUHDO_I18N_TT.K769 = "Override show timer setting for this spell (On/Default/Off).";
 VUHDO_I18N_TT.K770 = "Override show stacks setting for this spell (On/Default/Off).";
@@ -952,6 +952,14 @@ VUHDO_I18N_TT.K895 = "Exclude Bleed auras from this group.";
 VUHDO_I18N_TT.K896 = "Limit this aura group to friendly units, hostile units, or both.";
 VUHDO_I18N_TT.K897 = "Exclude Enrage auras from this group.";
 VUHDO_I18N_TT.K898 = "Match every aura with this spell's name (e.g. all ranks) instead of only this exact spell ID.";
+VUHDO_I18N_TT.K899 = "Color the aura icon during the aura refresh (pandemic) window. Default inherits from the aura anchor.";
+VUHDO_I18N_TT.K901 = "Flash the aura icon during the aura refresh (pandemic) window. Default inherits from the aura anchor.";
+VUHDO_I18N_TT.K902 = "Color used during the aura refresh (pandemic) window.";
+VUHDO_I18N_TT.K903 = "Color the aura icon during the aura refresh (pandemic) window.";
+VUHDO_I18N_TT.K904 = "Flash the aura icon during the aura refresh (pandemic) window.";
+VUHDO_I18N_TT.K905 = "Color used during the aura refresh (pandemic) window.";
+VUHDO_I18N_TT.K906 = "Color the aura icon during the aura refresh (pandemic) window. Global inherits from Colors > Auras.";
+VUHDO_I18N_TT.K907 = "Flash the aura icon during the aura refresh (pandemic) window. Global inherits from Colors > Auras.";
 
 VUHDO_I18N_DEFAULT_PROFILE = "Default Profile";
 VUHDO_I18N_DEFAULT_LAYOUT = "Default Layout";
@@ -1443,6 +1451,8 @@ VUHDO_I18N_FURY = "Fury";
 VUHDO_I18N_PAIN = "Pain";
 VUHDO_I18N_SPEC_3 = "Spec 3";
 VUHDO_I18N_SPEC_4 = "Spec 4";
+VUHDO_I18N_SPEC_PRIMARY = "Primary";
+VUHDO_I18N_SPEC_SECONDARY = "Secondary";
 
 VUHDO_I18N_ANNOUNCE_MASS_RES = "'Mass' Resurrection\nAnnouncement";
 
@@ -1748,6 +1758,8 @@ VUHDO_I18N_GLOW_STYLE_RETICLE = "Reticle";
 VUHDO_I18N_GLOW_STYLE_RIPPLE = "Ripple";
 VUHDO_I18N_GLOW_STYLE_EMBERS = "Embers";
 
+VUHDO_I18N_GLOW = "Glow";
+
 VUHDO_I18N_AURA_FILTER_HELPFUL_ALL_PURGEABLE = "All Purgeable Buffs";
 VUHDO_I18N_AURA_FILTER_HELPFUL_PURGEABLE = "Purgeable Buffs";
 VUHDO_I18N_AURA_CONDITION_STEALABLE = "Purgeable";
@@ -1781,3 +1793,6 @@ VUHDO_I18N_AURA_SHOW_ON = "Show On";
 VUHDO_I18N_AURA_SHOW_ON_FRIENDLY = "Friendly";
 VUHDO_I18N_AURA_SHOW_ON_BOTH = "Both";
 VUHDO_I18N_MATCH_BY_NAME = "Match by name";
+VUHDO_I18N_COLOR_ON_PANDEMIC = "Pandemic Color";
+VUHDO_I18N_FLASH_ON_PANDEMIC = "Pandemic Flash";
+VUHDO_I18N_PANDEMIC = "Pandemic";

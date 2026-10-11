@@ -724,7 +724,7 @@ do
 			if not InCombatLockdown() then
 				if VUHDO_RESET_SIZES then VUHDO_resetSizeCalcCaches(); end
 
-				if strfind(aModel, "AURA_ANCHORS", 1, true) or strfind(aModel, "AURA_DEFAULTS", 1, true) then
+				if strfind(aModel, "AURA_ANCHORS", 1, true) or strfind(aModel, "AURA_DEFAULTS", 1, true) or strfind(aModel, "AURA_PANDEMIC", 1, true) then
 					VUHDO_invalidateAuraContainerTemplateCache();
 				end
 

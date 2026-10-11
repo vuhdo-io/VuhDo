@@ -84,8 +84,8 @@ local VUHDO_classifyBouquetRestrictedMode;
 local VUHDO_buildListEntryContainerGroupTemplate;
 local VUHDO_buildMixedBouquetListSlotTemplates;
 local VUHDO_applyBarButtonSetupFields;
-local VUHDO_getAuraTimerFormatter;
-local VUHDO_getAuraTimerColorCurve;
+local VUHDO_getAuraDurationTextOptions;
+local VUHDO_getAuraBarDispelOverlayOptions;
 local VUHDO_getTriStateBool;
 local VUHDO_resolveAuraTriState;
 local VUHDO_buildAnchorButtonSetup;
@@ -239,8 +239,8 @@ function VUHDO_auraContainerFiltersInitLocalOverrides()
 	VUHDO_buildListEntryContainerGroupTemplate = _G["VUHDO_buildListEntryContainerGroupTemplate"];
 	VUHDO_buildMixedBouquetListSlotTemplates = _G["VUHDO_buildMixedBouquetListSlotTemplates"];
 	VUHDO_applyBarButtonSetupFields = _G["VUHDO_applyBarButtonSetupFields"];
-	VUHDO_getAuraTimerFormatter = _G["VUHDO_getAuraTimerFormatter"];
-	VUHDO_getAuraTimerColorCurve = _G["VUHDO_getAuraTimerColorCurve"];
+	VUHDO_getAuraDurationTextOptions = _G["VUHDO_getAuraDurationTextOptions"];
+	VUHDO_getAuraBarDispelOverlayOptions = _G["VUHDO_getAuraBarDispelOverlayOptions"];
 	VUHDO_getTriStateBool = _G["VUHDO_getTriStateBool"];
 	VUHDO_resolveAuraTriState = _G["VUHDO_resolveAuraTriState"];
 	VUHDO_buildAnchorButtonSetup = _G["VUHDO_buildAnchorButtonSetup"];
@@ -335,10 +335,23 @@ function VUHDO_rebuildDefaultAuraNameSpellIds()
 					tValue = tEntry["value"];
 
 					if tEntry["isNameMatch"] and type(tValue) == "number" then
-						tSpellName = GetSpellName(tValue);
+						tSpellId = tValue;
+						tSpellName = GetSpellName(tSpellId);
 
 						if tSpellName then
 							VUHDO_AURA_NAME_MATCH_SPELL_NAMES[tValue] = tSpellName;
+
+							tNameIds = VUHDO_AURA_NAME_TO_SPELL_IDS[tSpellName];
+
+							if not tNameIds then
+								tNameIds = { };
+
+								VUHDO_AURA_NAME_TO_SPELL_IDS[tSpellName] = tNameIds;
+							end
+
+							tNameIds[tSpellId] = true;
+
+							VUHDO_AURA_NAME_PREFERRED_SPELL_ID[tSpellName] = VUHDO_AURA_NAME_PREFERRED_SPELL_ID[tSpellName] or tSpellId;
 						end
 					end
 				end
@@ -1508,6 +1521,11 @@ do
 	local tEffectiveDurationMode;
 	local tEffectiveTimerThreshold;
 	local tColorCopy;
+	local tPandemicColor;
+	local tIsEntryColor;
+	local tIsEntryFlash;
+	local tIsColorPandemic;
+	local tIsFlashPandemic;
 	function VUHDO_buildListEntrySlotButtonSetup(aGroup, anEntry, aAnchorButtonSetup, anIsBar, anExcludeSpellIds)
 
 		if anEntry["mine"] == false and anEntry["others"] ~= true then
@@ -1541,13 +1559,19 @@ do
 		tSlotEntryShowStacks = VUHDO_getTriStateBool(anEntry, "showStacks", nil);
 		tSlotEntryShowClock = VUHDO_getTriStateBool(anEntry, "showClock", nil);
 
+		tIsEntryColor = VUHDO_getTriStateBool(anEntry, "colorOnPandemic", nil);
+		tIsEntryFlash = VUHDO_getTriStateBool(anEntry, "flashOnPandemic", nil);
+
 		tNeedsSlotButtonCopy = tSlotEntryDurationMode ~= tAnchorDurationMode
 			or tSlotEntryTimerThreshold ~= tAnchorTimerThreshold
 			or (tSlotEntryShowTimer ~= nil and tSlotEntryShowTimer ~= tAnchorShowTimer)
 			or (tSlotEntryShowStacks ~= nil and tSlotEntryShowStacks ~= aAnchorButtonSetup["applicationCount"])
 			or (tSlotEntryShowClock ~= nil and tSlotEntryShowClock ~= aAnchorButtonSetup["durationCooldown"])
 			or (anEntry["colorIcon"] and anEntry["colorIconColor"])
-			or anEntry["glowIcon"] == true;
+			or anEntry["glowIcon"] == true
+			or (tIsEntryColor ~= nil and tIsEntryColor ~= aAnchorButtonSetup["colorOnPandemic"])
+			or (tIsEntryFlash ~= nil and tIsEntryFlash ~= aAnchorButtonSetup["flashOnPandemic"])
+			or (anEntry["colorOnPandemic"] == 1 and anEntry["pandemicColor"] ~= nil);
 
 		if tNeedsSlotButtonCopy then
 			tSlotButtonSetup = { };
@@ -1589,13 +1613,7 @@ do
 				tEffectiveDurationMode = tSlotEntryDurationMode;
 				tEffectiveTimerThreshold = tSlotEntryTimerThreshold;
 
-				tSlotButtonSetup["durationTextOptions"] = {
-					["textFormatter"] = VUHDO_getAuraTimerFormatter(tEffectiveDurationMode, tEffectiveTimerThreshold),
-					["textColor"] = {
-						["curve"] = VUHDO_getAuraTimerColorCurve(tEffectiveDurationMode, tEffectiveTimerThreshold),
-						["property"] = Enum.DurationTextBindingProperty.RemainingDuration,
-					},
-				};
+				tSlotButtonSetup["durationTextOptions"] = VUHDO_getAuraDurationTextOptions(tEffectiveDurationMode, tEffectiveTimerThreshold);
 			else
 				tSlotButtonSetup["durationTextOptions"] = nil;
 			end
@@ -1626,6 +1644,54 @@ do
 
 			tSlotButtonSetup["glowColor"] = anEntry["glowIconColor"];
 			tSlotButtonSetup["glowStyle"] = anEntry["glowIconStyle"] or VUHDO_DEFAULT_AURA_GLOW_STYLE;
+
+			if anIsBar and tSlotButtonSetup["iconTextSize"] then
+				tSlotButtonSetup["glowWidth"] = tSlotButtonSetup["iconTextSize"];
+				tSlotButtonSetup["glowHeight"] = tSlotButtonSetup["iconTextSize"];
+			end
+		end
+
+		if tNeedsSlotButtonCopy then
+			if tIsEntryColor ~= nil then
+				tIsColorPandemic = tIsEntryColor;
+			else
+				tIsColorPandemic = aAnchorButtonSetup["colorOnPandemic"];
+			end
+
+			if tIsEntryFlash ~= nil then
+				tIsFlashPandemic = tIsEntryFlash;
+			else
+				tIsFlashPandemic = aAnchorButtonSetup["flashOnPandemic"];
+			end
+
+			if tIsColorPandemic or tIsFlashPandemic then
+				tSlotButtonSetup["hasPandemic"] = true;
+				tSlotButtonSetup["colorOnPandemic"] = tIsColorPandemic;
+				tSlotButtonSetup["flashOnPandemic"] = tIsFlashPandemic;
+
+				if tIsColorPandemic then
+					if anEntry["colorOnPandemic"] == 1 and anEntry["pandemicColor"] then
+						tSlotButtonSetup["pandemicColor"] = VUHDO_deepCopyTable(anEntry["pandemicColor"]);
+					elseif aAnchorButtonSetup["pandemicColor"] then
+						tSlotButtonSetup["pandemicColor"] = VUHDO_deepCopyTable(aAnchorButtonSetup["pandemicColor"]);
+					else
+						tPandemicColor = VUHDO_PANEL_SETUP and VUHDO_PANEL_SETUP["BAR_COLORS"] and VUHDO_PANEL_SETUP["BAR_COLORS"]["AURA_PANDEMIC"];
+
+						tSlotButtonSetup["pandemicColor"] = tPandemicColor and VUHDO_deepCopyTable(tPandemicColor) or nil;
+					end
+				else
+					tSlotButtonSetup["pandemicColor"] = nil;
+				end
+			else
+				tSlotButtonSetup["hasPandemic"] = nil;
+				tSlotButtonSetup["colorOnPandemic"] = nil;
+				tSlotButtonSetup["flashOnPandemic"] = nil;
+				tSlotButtonSetup["pandemicColor"] = nil;
+			end
+		end
+
+		if anIsBar and "debuff" == tSlotButtonSetup["barColorMode"] then
+			tSlotButtonSetup["dispelBarOverlayOptions"] = VUHDO_getAuraBarDispelOverlayOptions();
 		end
 
 		return tSlotButtonSetup, tSlotCandidateFilters;
@@ -2128,6 +2194,10 @@ do
 				tAnchorButtonSetup["barColor"] = (tBarColors and tBarColors["AURA_BAR_DEFAULT"]) or sAuraBarFallbackColor;
 			else
 				tAnchorButtonSetup["barColor"] = sAuraBarFallbackColor;
+			end
+
+			if "debuff" == tColorMode then
+				tAnchorButtonSetup["dispelBarOverlayOptions"] = VUHDO_getAuraBarDispelOverlayOptions();
 			end
 		end
 

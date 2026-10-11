@@ -3891,6 +3891,14 @@ do
 			tPanelSetup["AURA_DEFAULTS"]["rangeFade"] = true;
 		end
 
+		if tPanelSetup["AURA_DEFAULTS"]["colorOnPandemic"] == nil then
+			tPanelSetup["AURA_DEFAULTS"]["colorOnPandemic"] = false;
+		end
+
+		if tPanelSetup["AURA_DEFAULTS"]["flashOnPandemic"] == nil then
+			tPanelSetup["AURA_DEFAULTS"]["flashOnPandemic"] = false;
+		end
+
 		return;
 
 	end

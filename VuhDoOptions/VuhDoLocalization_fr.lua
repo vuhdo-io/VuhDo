@@ -960,6 +960,14 @@ VUHDO_I18N_TT.K895 = "Exclude Bleed auras from this group.";
 VUHDO_I18N_TT.K896 = "Limit this aura group to friendly units, hostile units, or both.";
 VUHDO_I18N_TT.K897 = "Exclude Enrage auras from this group.";
 VUHDO_I18N_TT.K898 = "Match every aura with this spell's name (e.g. all ranks) instead of only this exact spell ID.";
+VUHDO_I18N_TT.K899 = "Color the aura icon during the aura refresh (pandemic) window. Default inherits from the aura anchor.";
+VUHDO_I18N_TT.K901 = "Flash the aura icon during the aura refresh (pandemic) window. Default inherits from the aura anchor.";
+VUHDO_I18N_TT.K902 = "Color used during the aura refresh (pandemic) window.";
+VUHDO_I18N_TT.K903 = "Color the aura icon during the aura refresh (pandemic) window.";
+VUHDO_I18N_TT.K904 = "Flash the aura icon during the aura refresh (pandemic) window.";
+VUHDO_I18N_TT.K905 = "Color used during the aura refresh (pandemic) window.";
+VUHDO_I18N_TT.K906 = "Color the aura icon during the aura refresh (pandemic) window. Global inherits from Colors > Auras.";
+VUHDO_I18N_TT.K907 = "Flash the aura icon during the aura refresh (pandemic) window. Global inherits from Colors > Auras.";
 
 VUHDO_I18N_DEFAULT_PROFILE = "Profil\npar d\195\169faut";
 VUHDO_I18N_DEFAULT_LAYOUT = "Disposition \npar d\195\169faut";
@@ -1457,6 +1465,8 @@ VUHDO_I18N_FURY = "Fureur";
 VUHDO_I18N_PAIN = "Douleur";
 VUHDO_I18N_SPEC_3 = "Sp\195\169c. 3";
 VUHDO_I18N_SPEC_4 = "Sp\195\169c. 4";
+VUHDO_I18N_SPEC_PRIMARY = "Primary";
+VUHDO_I18N_SPEC_SECONDARY = "Secondary";
 
 VUHDO_I18N_ANNOUNCE_MASS_RES = "Annonce de\nR\195\169surrection \"de masse\"";
 
@@ -1761,6 +1771,8 @@ VUHDO_I18N_GLOW_STYLE_RETICLE = "Reticle";
 VUHDO_I18N_GLOW_STYLE_RIPPLE = "Ripple";
 VUHDO_I18N_GLOW_STYLE_EMBERS = "Embers";
 
+VUHDO_I18N_GLOW = "Glow";
+
 VUHDO_I18N_AURA_FILTER_HELPFUL_ALL_PURGEABLE = "All Purgeable Buffs";
 VUHDO_I18N_AURA_FILTER_HELPFUL_PURGEABLE = "Purgeable Buffs";
 VUHDO_I18N_AURA_CONDITION_STEALABLE = "Purgeable";
@@ -1794,3 +1806,6 @@ VUHDO_I18N_AURA_SHOW_ON = "Show On";
 VUHDO_I18N_AURA_SHOW_ON_FRIENDLY = "Friendly";
 VUHDO_I18N_AURA_SHOW_ON_BOTH = "Both";
 VUHDO_I18N_MATCH_BY_NAME = "Match by name";
+VUHDO_I18N_COLOR_ON_PANDEMIC = "Pandemic Color";
+VUHDO_I18N_FLASH_ON_PANDEMIC = "Pandemic Flash";
+VUHDO_I18N_PANDEMIC = "Pandemic";

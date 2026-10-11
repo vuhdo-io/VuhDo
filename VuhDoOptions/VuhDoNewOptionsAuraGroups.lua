@@ -113,10 +113,8 @@ VUHDO_SPELL_ENTRY_COLOR_ICON = false;
 VUHDO_SPELL_ENTRY_SHOW_TIMER = 2;
 VUHDO_SPELL_ENTRY_SHOW_STACKS = 2;
 VUHDO_SPELL_ENTRY_SHOW_CLOCK = 2;
-VUHDO_SPELL_ENTRY_FADE_ON_LOW = 2;
-VUHDO_SPELL_ENTRY_FADE_THRESHOLD = 3;
-VUHDO_SPELL_ENTRY_FLASH_ON_LOW = 2;
-VUHDO_SPELL_ENTRY_FLASH_THRESHOLD = 2;
+VUHDO_SPELL_ENTRY_COLOR_ON_PANDEMIC = 2;
+VUHDO_SPELL_ENTRY_FLASH_ON_PANDEMIC = 2;
 
 VUHDO_AURA_FILTER_OPTIONS = {
 	{ "HELPFUL", VUHDO_I18N_AURA_GROUP_ALL_BUFFS, nil, nil, VUHDO_I18N_TT.K635 },
@@ -3205,6 +3203,9 @@ function VUHDO_auraGroupsListAddSpell()
 		["fadeThreshold"] = nil,
 		["flashOnLow"] = 2,
 		["flashThreshold"] = nil,
+		["colorOnPandemic"] = 2,
+		["flashOnPandemic"] = 2,
+		["pandemicColor"] = nil,
 	});
 
 	tSpellComboEditBox:SetText("");
@@ -3463,10 +3464,11 @@ function VUHDO_spellEntrySettingsInitFromEntry(anEntry)
 	VUHDO_SPELL_ENTRY_SHOW_TIMER = tEntry["showTimer"] or 2;
 	VUHDO_SPELL_ENTRY_SHOW_STACKS = tEntry["showStacks"] or 2;
 	VUHDO_SPELL_ENTRY_SHOW_CLOCK = tEntry["showClock"] or 2;
-	VUHDO_SPELL_ENTRY_FADE_ON_LOW = tEntry["fadeOnLow"] or 2;
-	VUHDO_SPELL_ENTRY_FADE_THRESHOLD = tEntry["fadeThreshold"] or 3;
-	VUHDO_SPELL_ENTRY_FLASH_ON_LOW = tEntry["flashOnLow"] or 2;
-	VUHDO_SPELL_ENTRY_FLASH_THRESHOLD = tEntry["flashThreshold"] or 2;
+	VUHDO_SPELL_ENTRY_COLOR_ON_PANDEMIC = tEntry["colorOnPandemic"] or 2;
+	VUHDO_SPELL_ENTRY_FLASH_ON_PANDEMIC = tEntry["flashOnPandemic"] or 2;
+
+	VUHDO_SPELL_ENTRY_SETTINGS["PANDEMIC_COLOR"] = tEntry["pandemicColor"] and VUHDO_deepCopyTable(tEntry["pandemicColor"])
+		or VUHDO_deepCopyTable(VUHDO_PANEL_SETUP.BAR_COLORS["AURA_PANDEMIC"]);
 
 	return;
 
@@ -3508,10 +3510,10 @@ function VUHDO_spellEntrySettingsSaveToEntry()
 	tEntry["showTimer"] = VUHDO_SPELL_ENTRY_SHOW_TIMER;
 	tEntry["showStacks"] = VUHDO_SPELL_ENTRY_SHOW_STACKS;
 	tEntry["showClock"] = VUHDO_SPELL_ENTRY_SHOW_CLOCK;
-	tEntry["fadeOnLow"] = VUHDO_SPELL_ENTRY_FADE_ON_LOW;
-	tEntry["fadeThreshold"] = VUHDO_SPELL_ENTRY_FADE_THRESHOLD;
-	tEntry["flashOnLow"] = VUHDO_SPELL_ENTRY_FLASH_ON_LOW;
-	tEntry["flashThreshold"] = VUHDO_SPELL_ENTRY_FLASH_THRESHOLD;
+	tEntry["colorOnPandemic"] = VUHDO_SPELL_ENTRY_COLOR_ON_PANDEMIC;
+	tEntry["flashOnPandemic"] = VUHDO_SPELL_ENTRY_FLASH_ON_PANDEMIC;
+
+	tEntry["pandemicColor"] = VUHDO_deepCopyTable(VUHDO_SPELL_ENTRY_SETTINGS["PANDEMIC_COLOR"]);
 
 	VUHDO_initEntrySettingsCache();
 
@@ -3720,28 +3722,24 @@ local function VUHDO_initSpellEntrySettingsFromModel(aFrame)
 		VUHDO_lnfTriStateCheckButtonInitFromModel(tControl);
 	end
 
-	tControl = _G[tRootPane:GetName() .. "FadeOnLowTriState"];
+	tControl = _G[tRootPane:GetName() .. "ColorOnPandemicTriState"];
+
+	if tControl then
+		VUHDO_lnfTriStateCheckButtonInitFromModel(tControl);
+		VUHDO_lnfUpdateComponentsByConstraints(tControl);
+	end
+
+	tControl = _G[tRootPane:GetName() .. "FlashOnPandemicTriState"];
 
 	if tControl then
 		VUHDO_lnfTriStateCheckButtonInitFromModel(tControl);
 	end
 
-	tControl = _G[tRootPane:GetName() .. "FlashOnLowTriState"];
+	tControl = _G[tRootPane:GetName() .. "PandemicColorTexture"];
 
 	if tControl then
-		VUHDO_lnfTriStateCheckButtonInitFromModel(tControl);
-	end
-
-	tControl = _G[tRootPane:GetName() .. "FadeThresholdSliderSlider"];
-
-	if tControl then
-		VUHDO_lnfSliderInitFromModel(tControl);
-	end
-
-	tControl = _G[tRootPane:GetName() .. "FlashThresholdSliderSlider"];
-
-	if tControl then
-		VUHDO_lnfSliderInitFromModel(tControl);
+		VUHDO_lnfColorSwatchInitFromModel(tControl);
+		VUHDO_lnfUpdateComponentsByConstraints(tControl);
 	end
 
 	return;
