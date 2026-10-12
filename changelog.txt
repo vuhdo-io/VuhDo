@@ -22,7 +22,8 @@ Bugfixes:
   
   
 Improvements:  
--- Added Shaman 'Water Shield' to Buff Watch (Forever)  
+-- Added Shaman 'Water Shield' to Buff Watch (Forever)
+-- Added new default aura group 'Priest Weakened Soul' (Forever)  
 -- Added aura icon flash and color change during pandemic window  
   
   

@@ -1,3 +1,5 @@
+local GetSpellName = C_Spell.GetSpellName;
+
 VUHDO_DEFAULT_TANKS_CDS_EXTD_BOUQUET = {
 	[VUHDO_I18N_DEF_TANK_CDS_EXTENDED] = {
 	},
@@ -47,4 +49,27 @@ VUHDO_DEFAULT_RAID_CDS_SPELLS = {
 VUHDO_DEFAULT_PVP_FLAGS_SPELLS = {
 	23333, -- Warsong Flag
 	23335, -- Silverwing Flag
+};
+
+
+
+VUHDO_DEFAULT_BOUQUET_ITEM_REPLACEMENTS = {
+	[VUHDO_I18N_DEF_BOUQUET_PW_S_WEAKENED_SOUL] = {
+		{
+			["fromName"] = GetSpellName(6788), -- Weakened Soul
+			["item"] = {
+				["name"] = "AURA_GROUP_ACTIVE",
+				["mine"] = true,
+				["others"] = true,
+				["icon"] = 9,
+				["color"] = VUHDO_makeFullColorForBouquet(1, 0.623, 0.305, 1, 1, 1, 1, 1),
+				["custom"] = {
+					[1] = 1,
+					["radio"] = 1,
+					["bright"] = 1.0,
+					["auraGroupId"] = "PRIEST_WEAKENED_SOUL",
+				},
+			},
+		},
+	},
 };

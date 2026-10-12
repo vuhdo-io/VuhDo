@@ -997,6 +997,8 @@ do
 
 						VUHDO_applyOverlayShapePrototypeFields(tOverlayEntry, aOverlayTarget);
 
+						VUHDO_applyAuraGroupScopeFlags(tOverlayEntry, aGroup);
+
 						sOverlayBuild["groupOverlayEntries"][#sOverlayBuild["groupOverlayEntries"] + 1] = tOverlayEntry;
 					end
 				elseif aEffectiveColorType == VUHDO_AURA_GROUP_COLOR_DISPEL then
@@ -1090,6 +1092,8 @@ do
 							["staticColor"] = VUHDO_applyOverlayStaticColorBright(tItemColor, aItem, aBaseProduct),
 							["border"] = true,
 						};
+
+						VUHDO_applyAuraGroupScopeFlags(tOverlayEntry, aGroup);
 
 						sOverlayBuild["groupOverlayEntries"][#sOverlayBuild["groupOverlayEntries"] + 1] = tOverlayEntry;
 					end
@@ -1242,6 +1246,8 @@ do
 					VUHDO_applyOverlayDotIconFields(tOverlayEntry, aItem, tOverlayEntry["staticColor"], aOverlayTarget);
 
 					if aEffectiveColorType == VUHDO_AURA_GROUP_COLOR_CUSTOM and aCustomColor then
+						VUHDO_applyAuraGroupScopeFlags(tOverlayEntry, aGroup);
+					elseif aEffectiveColorType == VUHDO_AURA_GROUP_COLOR_OFF then
 						VUHDO_applyAuraGroupScopeFlags(tOverlayEntry, aGroup);
 					end
 

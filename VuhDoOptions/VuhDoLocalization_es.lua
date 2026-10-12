@@ -966,6 +966,7 @@ VUHDO_I18N_TT.K904 = "Flash the aura icon during the aura refresh (pandemic) win
 VUHDO_I18N_TT.K905 = "Color used during the aura refresh (pandemic) window.";
 VUHDO_I18N_TT.K906 = "Color the aura icon during the aura refresh (pandemic) window. Global inherits from Colors > Auras.";
 VUHDO_I18N_TT.K907 = "Flash the aura icon during the aura refresh (pandemic) window. Global inherits from Colors > Auras.";
+VUHDO_I18N_TT.K908 = "Tracks Weakened Soul from yourself and from others.";
 
 VUHDO_I18N_DEFAULT_PROFILE = "Perfil\npredeterminado";
 VUHDO_I18N_DEFAULT_LAYOUT = "Disposici\195\179n\npredeterminada";

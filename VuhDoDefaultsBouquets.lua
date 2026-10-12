@@ -856,6 +856,53 @@ VUHDO_SANE_BOUQUET_ITEM = {
 local pairs = pairs;
 
 --
+local tBouquetStored;
+local tRule;
+local tItemCopy;
+function VUHDO_applyBouquetItemReplacements(aStoredBouquets, anIsPreserveLook)
+
+	if not aStoredBouquets or not VUHDO_DEFAULT_BOUQUET_ITEM_REPLACEMENTS then
+		return;
+	end
+
+	for tBouquetName, tReplacementRules in pairs(VUHDO_DEFAULT_BOUQUET_ITEM_REPLACEMENTS) do
+		tBouquetStored = aStoredBouquets[tBouquetName];
+		tBouquetStored = VUHDO_decompressIfCompressed(tBouquetStored);
+
+		if type(tBouquetStored) == "table" then
+			for tIndex, tItem in pairs(tBouquetStored) do
+				for tRuleCnt = 1, #tReplacementRules do
+					tRule = tReplacementRules[tRuleCnt];
+
+					if tItem["name"] == tRule["fromName"] then
+						tItemCopy = VUHDO_deepCopyTable(tRule["item"]);
+
+						if anIsPreserveLook then
+							if tItem["color"] then
+								tItemCopy["color"] = VUHDO_deepCopyTable(tItem["color"]);
+							end
+
+							if tItem["icon"] then
+								tItemCopy["icon"] = tItem["icon"];
+							end
+						end
+
+						tBouquetStored[tIndex] = tItemCopy;
+					end
+				end
+			end
+
+			aStoredBouquets[tBouquetName] = tBouquetStored;
+		end
+	end
+
+	return;
+
+end
+
+
+
+--
 local function VUHDO_addDefaultBouquet(aName)
 	if (aName == nil) then
 		return;
@@ -1490,6 +1537,12 @@ function VUHDO_loadDefaultBouquets()
 				end
 			end
 		end
+	end
+
+	if VUHDO_BOUQUETS["VERSION"] < 38 then
+		VUHDO_BOUQUETS["VERSION"] = 38;
+
+		VUHDO_applyBouquetItemReplacements(VUHDO_BOUQUETS["STORED"], true);
 	end
 
 	VUHDO_buildGenericHealthBarBouquet();

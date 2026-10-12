@@ -83,6 +83,7 @@ local VUHDO_applyAuraGroupScopeFlags;
 local VUHDO_classifyBouquetRestrictedMode;
 local VUHDO_buildListEntryContainerGroupTemplate;
 local VUHDO_buildMixedBouquetListSlotTemplates;
+local VUHDO_bouquetHasAuraGroupItems;
 local VUHDO_applyBarButtonSetupFields;
 local VUHDO_getAuraDurationTextOptions;
 local VUHDO_getAuraBarDispelOverlayOptions;
@@ -238,6 +239,7 @@ function VUHDO_auraContainerFiltersInitLocalOverrides()
 	VUHDO_classifyBouquetRestrictedMode = _G["VUHDO_classifyBouquetRestrictedMode"];
 	VUHDO_buildListEntryContainerGroupTemplate = _G["VUHDO_buildListEntryContainerGroupTemplate"];
 	VUHDO_buildMixedBouquetListSlotTemplates = _G["VUHDO_buildMixedBouquetListSlotTemplates"];
+	VUHDO_bouquetHasAuraGroupItems = _G["VUHDO_bouquetHasAuraGroupItems"];
 	VUHDO_applyBarButtonSetupFields = _G["VUHDO_applyBarButtonSetupFields"];
 	VUHDO_getAuraDurationTextOptions = _G["VUHDO_getAuraDurationTextOptions"];
 	VUHDO_getAuraBarDispelOverlayOptions = _G["VUHDO_getAuraBarDispelOverlayOptions"];
@@ -1963,6 +1965,21 @@ do
 					VUHDO_applyListSlotLayoutFlags(tSlotTemplate, tEntryIndex);
 
 					tinsert(tSlots, tSlotTemplate);
+				elseif tEntry["entryType"] == VUHDO_AURA_LIST_ENTRY_BOUQUET and VUHDO_classifyBouquetRestrictedMode(tEntry["value"]) == VUHDO_BOUQUET_RESTRICTED_AURA_CONTAINER and VUHDO_bouquetHasAuraGroupItems(tEntry["value"]) then
+					tMixedSlotTemplates = VUHDO_buildMixedBouquetListSlotTemplates(tEntry["value"], tEntryIndex, tSlotX, tSlotY, aPixelWidth, aPixelHeight, aTemplateName, aAnchorButtonSetup, aGroup);
+
+					if anIsFixedLayout and tFixedSlotAnchor then
+						for tMixedSlotCnt = 1, #tMixedSlotTemplates do
+							tMixedSlotTemplates[tMixedSlotCnt]["anchor"] = tFixedSlotAnchor;
+							tMixedSlotTemplates[tMixedSlotCnt]["relPoint"] = tFixedSlotRelPoint;
+						end
+					end
+
+					for tMixedSlotCnt = 1, #tMixedSlotTemplates do
+						VUHDO_applyListSlotLayoutFlags(tMixedSlotTemplates[tMixedSlotCnt], tEntryIndex);
+
+						tinsert(tSlots, tMixedSlotTemplates[tMixedSlotCnt]);
+					end
 				elseif tEntry["entryType"] == VUHDO_AURA_LIST_ENTRY_BOUQUET and VUHDO_classifyBouquetRestrictedMode(tEntry["value"]) == VUHDO_BOUQUET_RESTRICTED_AURA_CONTAINER then
 					tBouquetSlotTemplate = VUHDO_buildListEntryContainerGroupTemplate(tEntry["value"]);
 
