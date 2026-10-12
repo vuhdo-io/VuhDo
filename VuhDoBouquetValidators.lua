@@ -26,12 +26,15 @@ local VUHDO_UNIT_HOT_TYPE_BOTH;
 local VUHDO_EMERGENCIES;
 
 local VUHDO_AURA_GROUP_ACTIVE_NO_COLOR;
+local VUHDO_SWIFTMEND_HOT_SPELL_IDS;
+local VUHDO_UNIT_AURA_SOURCE_MINE;
 
 local VUHDO_getChosenDebuffInfo;
 local VUHDO_getCurrentPlayerTarget;
 local VUHDO_getCurrentPlayerFocus;
 local VUHDO_getCurrentMouseOver;
-local VUHDO_isUnitSwiftmendable;
+local VUHDO_hasUnitAura;
+local VUHDO_isSwiftmendReady;
 local VUHDO_getDebuffColor;
 local VUHDO_getIsCurrentBouquetActive;
 local VUHDO_getUnitDebuffSchoolInfos;
@@ -127,12 +130,15 @@ function VUHDO_bouquetValidatorsInitLocalOverrides()
 	VUHDO_EMERGENCIES = _G["VUHDO_EMERGENCIES"];
 
 	VUHDO_AURA_GROUP_ACTIVE_NO_COLOR = _G["VUHDO_AURA_GROUP_ACTIVE_NO_COLOR"];
+	VUHDO_SWIFTMEND_HOT_SPELL_IDS = _G["VUHDO_SWIFTMEND_HOT_SPELL_IDS"];
+	VUHDO_UNIT_AURA_SOURCE_MINE = _G["VUHDO_UNIT_AURA_SOURCE_MINE"];
 
 	VUHDO_getChosenDebuffInfo = _G["VUHDO_getChosenDebuffInfo"];
 	VUHDO_getCurrentPlayerTarget = _G["VUHDO_getCurrentPlayerTarget"];
 	VUHDO_getCurrentPlayerFocus = _G["VUHDO_getCurrentPlayerFocus"];
 	VUHDO_getCurrentMouseOver = _G["VUHDO_getCurrentMouseOver"];
-	VUHDO_isUnitSwiftmendable = _G["VUHDO_isUnitSwiftmendable"];
+	VUHDO_hasUnitAura = _G["VUHDO_hasUnitAura"];
+	VUHDO_isSwiftmendReady = _G["VUHDO_isSwiftmendReady"];
 	VUHDO_getDebuffColor = _G["VUHDO_getDebuffColor"];
 	VUHDO_getUnitDebuffSchoolInfos = _G["VUHDO_getUnitDebuffSchoolInfos"];
 	VUHDO_getDebuffTypeAuraInstanceId = _G["VUHDO_getDebuffTypeAuraInstanceId"];
@@ -407,13 +413,37 @@ end
 
 
 --
+local tSwiftmendReady;
+local tHotSpellId;
 local function VUHDO_swiftmendValidator(anInfo, _)
 
 	if not anInfo["unit"] then
 		return false, nil, -1, -1, -1;
 	end
 
-	return VUHDO_isUnitSwiftmendable(anInfo["unit"]), nil, -1, -1, -1;
+	if VUHDO_isAuraModeContainers() then
+		return false, nil, -1, -1, -1;
+	end
+
+	if VUHDO_isAuraDataRestricted() then
+		return false, nil, -1, -1, -1;
+	end
+
+	tSwiftmendReady = VUHDO_isSwiftmendReady();
+
+	if tSwiftmendReady ~= true then
+		return false, nil, -1, -1, -1;
+	end
+
+	for tCnt = 1, #VUHDO_SWIFTMEND_HOT_SPELL_IDS do
+		tHotSpellId = VUHDO_SWIFTMEND_HOT_SPELL_IDS[tCnt];
+
+		if VUHDO_hasUnitAura(anInfo["unit"], tHotSpellId, "HELPFUL", VUHDO_UNIT_AURA_SOURCE_MINE) then
+			return true, nil, -1, -1, -1;
+		end
+	end
+
+	return false, nil, -1, -1, -1;
 
 end
 
@@ -1853,6 +1883,9 @@ VUHDO_BOUQUET_BUFFS_SPECIAL = {
 		["secretType"] = VUHDO_SECRET_TYPE_NONE,
 		["hasValue"] = false,
 		["isGlobal"] = false,
+		["auraSpellIds"] = _G["VUHDO_SWIFTMEND_HOT_SPELL_IDS"],
+		["auraFilterString"] = "HELPFUL|PLAYER",
+		["overlayGate"] = "SWIFTMEND",
 	},
 
 	["DEBUFF_MAGIC"] = {
@@ -2432,6 +2465,7 @@ VUHDO_BOUQUET_SPECIAL_REQUIREMENTS = {
 	["DK_TANK"] = { VUHDO_FLAVOR_REQ_CLASS, VUHDO_ID_DEATH_KNIGHT },
 	["MONK_TANK"] = { VUHDO_FLAVOR_REQ_CLASS, VUHDO_ID_MONKS },
 	["DEMON_HUNTER_TANK"] = { VUHDO_FLAVOR_REQ_CLASS, VUHDO_ID_DEMON_HUNTERS },
+	["SWIFTMEND"] = { VUHDO_FLAVOR_REQ_CLASS, VUHDO_ID_DRUIDS },
 	["CHI_HARMONY_ICON_MINE"] = { VUHDO_FLAVOR_REQ_CLASS, VUHDO_ID_MONKS },
 	["CHI_HARMONY_ICON_OTHERS"] = { VUHDO_FLAVOR_REQ_CLASS, VUHDO_ID_MONKS },
 	["CHI_HARMONY_ICON_BOTH"] = { VUHDO_FLAVOR_REQ_CLASS, VUHDO_ID_MONKS },

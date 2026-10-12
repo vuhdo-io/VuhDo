@@ -127,6 +127,7 @@ local VUHDO_checkAuraDataRestrictedState;
 local VUHDO_syncAuraContainersForUnit;
 local VUHDO_syncAuraContainersForAllRaidUnits;
 local VUHDO_syncOverlaysForUnit;
+local VUHDO_syncSwiftmendOverlayGates;
 local VUHDO_resetAuraContainersForUnit;
 local VUHDO_resetOverlaysForUnit;
 local VUHDO_clearOverlaysForUnit;
@@ -635,6 +636,7 @@ local function VUHDO_eventHandlerInitFunctionOverrides()
 	VUHDO_syncAuraContainersForUnit = _G["VUHDO_syncAuraContainersForUnit"];
 	VUHDO_syncAuraContainersForAllRaidUnits = _G["VUHDO_syncAuraContainersForAllRaidUnits"];
 	VUHDO_syncOverlaysForUnit = _G["VUHDO_syncOverlaysForUnit"];
+	VUHDO_syncSwiftmendOverlayGates = _G["VUHDO_syncSwiftmendOverlayGates"];
 	VUHDO_resetAuraContainersForUnit = _G["VUHDO_resetAuraContainersForUnit"];
 	VUHDO_resetOverlaysForUnit = _G["VUHDO_resetOverlaysForUnit"];
 	VUHDO_clearOverlaysForUnit = _G["VUHDO_clearOverlaysForUnit"];
@@ -659,6 +661,7 @@ local function VUHDO_eventHandlerInitLocalOverrides()
 	VUHDO_initTaskSystem();
 
 	VUHDO_syncOverlaysForUnit = _G["VUHDO_deferSyncOverlaysForUnit"];
+	VUHDO_syncSwiftmendOverlayGates = _G["VUHDO_deferSyncSwiftmendOverlayGates"];
 	VUHDO_flushPendingOverlayRebuild = _G["VUHDO_deferFlushPendingOverlayRebuild"];
 	VUHDO_updateHealth = _G["VUHDO_deferUpdateHealth"];
 	VUHDO_updateBouquetsForEvent = _G["VUHDO_deferUpdateBouquetsForEvent"];
@@ -1475,6 +1478,13 @@ do
 				VUHDO_scheduleSpellbookRefresh();
 			end
 
+		elseif "SPELL_UPDATE_COOLDOWN" == anEvent or "SPELL_UPDATE_CHARGES" == anEvent then
+			if VUHDO_VARIABLES_LOADED and VUHDO_isPlayerKnowsSwiftmend() then
+				VUHDO_refreshSwiftmendCooldown();
+
+				VUHDO_syncSwiftmendOverlayGates();
+			end
+
 		elseif "VARIABLES_LOADED" == anEvent then
 			VUHDO_init();
 
@@ -2209,6 +2219,8 @@ function VUHDO_updateGlobalToggles()
 
 	VUHDO_UnRegisterEvent(not VUHDO_CONFIG["IS_READY_CHECK_DISABLED"],
 		"READY_CHECK", "READY_CHECK_CONFIRM", "READY_CHECK_FINISHED");
+
+	VUHDO_UnRegisterEvent(VUHDO_isPlayerKnowsSwiftmend(), "SPELL_UPDATE_COOLDOWN", "SPELL_UPDATE_CHARGES");
 
 	tIsShieldInterest =
 		VUHDO_PANEL_SETUP["BAR_COLORS"]["HOTS"]["showShieldAbsorb"]

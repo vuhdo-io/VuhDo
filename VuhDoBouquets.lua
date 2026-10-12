@@ -183,7 +183,6 @@ local sIsDispelColorType = { };
 
 local sAuraConsumingSpecialNames = {
 	["OTHER"] = true,
-	["SWIFTMEND"] = true,
 	["CHI_HARMONY_ICON_MINE"] = true,
 	["CHI_HARMONY_ICON_OTHERS"] = true,
 	["CHI_HARMONY_ICON_BOTH"] = true,
@@ -4012,6 +4011,10 @@ do
 						tAllDispel = false;
 					end
 				elseif tName == "DEBUFF_BAR_COLOR" then
+					tHasAuraItem = true;
+					tHasOverlayAuraItem = true;
+					tAllHelpfulSpells = false;
+				elseif tSpecial["auraSpellIds"] then
 					tHasAuraItem = true;
 					tHasOverlayAuraItem = true;
 					tAllHelpfulSpells = false;

@@ -121,6 +121,7 @@ VUHDO_INDICATOR_OVERLAY_TARGETS = {
 		["shape"] = "dot",
 		["getter"] = "VUHDO_getBarRoleIcon",
 		["iconIndex"] = 51,
+		["addLevel"] = 2,
 	},
 	["THREAT_MARK"] = {
 		["shape"] = "dot",
