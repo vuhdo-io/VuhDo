@@ -18,6 +18,7 @@ Bugfixes:
 -- Fixed Buff Watch missing buff bar color target selection  
 -- Fixed header text alignment when panel is horizontal  
 -- Fixed Swiftmendable bouquet  
+-- Fixed Special Dot indicator bar glow  
   
   
 Improvements:  

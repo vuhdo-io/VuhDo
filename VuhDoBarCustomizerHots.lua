@@ -1567,7 +1567,7 @@ function VUHDO_swiftmendIndicatorBouquetCallback(aUnit, anIsActive, anIcon, aTim
 
 				tIcon:Show();
 
-				if VUHDO_INDICATOR_CONFIG[tPanelNum]["CUSTOM"]["SWIFTMEND_INDICATOR"]["isBarGlow"] then
+				if (VUHDO_INDICATOR_CONFIG[tPanelNum]["CUSTOM"]["SWIFTMEND_INDICATOR"]["barGlowStyle"] or "none") ~= "none" then
 					VUHDO_LibCustomGlow.PixelGlow_Start(
 						tButton,
 						{

@@ -664,7 +664,7 @@ VUHDO_DEFAULT_HEAL_ABSORB_COUNTER_BOUQUET = {
 
 --
 VUHDO_DEFAULT_INDICATOR_CONFIG = {
-	["VERSION"] = 3,
+	["VERSION"] = 4,
 };
 
 
@@ -715,6 +715,7 @@ VUHDO_DEFAULT_INDICATOR_CONFIG_PER_PANEL = {
 		},
 		["SWIFTMEND_INDICATOR"] = {
 			["SCALE"] = 1,
+			["barGlowStyle"] = "none",
 		},
 		["THREAT_BAR"] = {
 			["HEIGHT"] = 4,
@@ -1241,6 +1242,7 @@ local sEmpty = { };
 
 --
 local tOriginalVersion;
+local tSwiftmendCustom;
 function VUHDO_loadDefaultBouquets()
 
 	if not VUHDO_BOUQUETS then
@@ -1556,6 +1558,13 @@ function VUHDO_loadDefaultBouquets()
 			end
 		end
 
+		if tOriginalVersion < 4 and tPanelIndicatorConfig["CUSTOM"] and tPanelIndicatorConfig["CUSTOM"]["SWIFTMEND_INDICATOR"] then
+			tSwiftmendCustom = tPanelIndicatorConfig["CUSTOM"]["SWIFTMEND_INDICATOR"];
+
+			tSwiftmendCustom["barGlowStyle"] = tSwiftmendCustom["isBarGlow"] and "vuhdoants" or "none";
+			tSwiftmendCustom["isBarGlow"] = nil;
+		end
+
 		VUHDO_INDICATOR_CONFIG[tPanelNum] = VUHDO_ensureSanity("VUHDO_INDICATOR_CONFIG[" .. tPanelNum .. "]", VUHDO_INDICATOR_CONFIG[tPanelNum], VUHDO_DEFAULT_INDICATOR_CONFIG_PER_PANEL);
 	end
 
@@ -1567,6 +1576,10 @@ function VUHDO_loadDefaultBouquets()
 
 	if tOriginalVersion < 3 then
 		VUHDO_INDICATOR_CONFIG["VERSION"] = 3;
+	end
+
+	if tOriginalVersion < 4 then
+		VUHDO_INDICATOR_CONFIG["VERSION"] = 4;
 	end
 
 	VUHDO_INDICATOR_CONFIG = VUHDO_ensureSanity("VUHDO_INDICATOR_CONFIG", VUHDO_INDICATOR_CONFIG, VUHDO_DEFAULT_INDICATOR_CONFIG);

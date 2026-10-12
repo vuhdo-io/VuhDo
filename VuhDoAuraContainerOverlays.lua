@@ -3831,6 +3831,71 @@ do
 
 
 	--
+	local function VUHDO_buildSwiftmendBarGlowOverlaysForButton(aButton, aPanelNum)
+
+		tBarGlowPlannedCount = 0;
+
+		if not VUHDO_INDICATOR_CONFIG[aPanelNum] then
+			return tBarGlowPlannedCount;
+		end
+
+		tBarGlowGroup = VUHDO_INDICATOR_CONFIG[aPanelNum]["CUSTOM"]["SWIFTMEND_INDICATOR"];
+
+		if not tBarGlowGroup or not tBarGlowGroup["barGlowStyle"] or tBarGlowGroup["barGlowStyle"] == "none" then
+			return tBarGlowPlannedCount;
+		end
+
+		tBarGlowGroupId = VUHDO_INDICATOR_CONFIG[aPanelNum]["BOUQUETS"]["SWIFTMEND_INDICATOR"];
+
+		if not tBarGlowGroupId or tBarGlowGroupId == "" then
+			return tBarGlowPlannedCount;
+		end
+
+		tBarGlowResolved = VUHDO_buildOverlayEntryPrototypes(aPanelNum, "SWIFTMEND_INDICATOR", tBarGlowGroupId);
+
+		if not tBarGlowResolved then
+			return tBarGlowPlannedCount;
+		end
+
+		tBarGlowDefaultColor = VUHDO_PANEL_SETUP and VUHDO_PANEL_SETUP["BAR_COLORS"] and VUHDO_PANEL_SETUP["BAR_COLORS"]["DEBUFF_BAR_GLOW"];
+
+		for tBarGlowBranchIdx = 1, #tBarGlowResolved do
+			tBarGlowGroupData = tBarGlowResolved[tBarGlowBranchIdx];
+
+			if tBarGlowGroupData["overlayGate"] then
+				tBarGlowEntry = {
+					["filterString"] = tBarGlowGroupData["filterString"],
+					["candidateFilters"] = VUHDO_copyOverlayCandidateFilters(tBarGlowGroupData["candidateFilters"], nil),
+					["friendlyOnly"] = tBarGlowGroupData["friendlyOnly"],
+					["overlayGate"] = tBarGlowGroupData["overlayGate"],
+					["shape"] = "glow",
+					["glowIcon"] = false,
+					["hideIcon"] = true,
+					["auraGroupBarGlow"] = true,
+					["unitButton"] = aButton,
+					["glowStyle"] = tBarGlowGroup["barGlowStyle"],
+					["glowColorType"] = VUHDO_AURA_GROUP_COLOR_CUSTOM,
+					["glowColor"] = tBarGlowDefaultColor,
+					["frameLevelOffset"] = 8,
+				};
+
+				tBarGlowEntry["entryKey"] = "swiftmendGlow:" .. (tBarGlowGroupData["entryKey"] or tBarGlowBranchIdx);
+
+				tBarGlowEntry["sublevelSlots"] = VUHDO_allocateOverlaySublevels(aButton, 1, "SWIFTMEND_BAR_GLOW", aPanelNum);
+
+				VUHDO_planOverlaySlot(aButton, "SWIFTMEND_BAR_GLOW", tBarGlowEntry["entryKey"], aButton, tBarGlowEntry);
+
+				tBarGlowPlannedCount = tBarGlowPlannedCount + 1;
+			end
+		end
+
+		return tBarGlowPlannedCount;
+
+	end
+
+
+
+	--
 	local tExpectsCanColorBarGroups;
 	local function VUHDO_areOverlayPlanInputsUsable(aPanelNum, anBuildBouquetOverlays)
 
@@ -3998,6 +4063,11 @@ do
 
 		if tBuildBouquetOverlays and VUHDO_INDICATOR_CONFIG[aPanelNum] then
 			tBarGlowPlannedCount = VUHDO_buildAuraGroupBarGlowOverlaysForButton(aButton, aPanelNum);
+
+			tPlannedCount = tPlannedCount + tBarGlowPlannedCount;
+			tPlannedBouquetCount = tPlannedBouquetCount + tBarGlowPlannedCount;
+
+			tBarGlowPlannedCount = VUHDO_buildSwiftmendBarGlowOverlaysForButton(aButton, aPanelNum);
 
 			tPlannedCount = tPlannedCount + tBarGlowPlannedCount;
 			tPlannedBouquetCount = tPlannedBouquetCount + tBarGlowPlannedCount;

@@ -149,7 +149,7 @@ local VUHDO_DEFAULT_PROFILES = {
 				},
 				["SWIFTMEND_INDICATOR"] = {
 					["SCALE"] = 1,
-					["isBarGlow"] = false,
+					["barGlowStyle"] = "none",
 					["anchor"] = "TOPLEFT",
 					["xAdjust"] = 5.5,
 					["yAdjust"] = -14,
@@ -913,7 +913,7 @@ local VUHDO_DEFAULT_PROFILES = {
 				},
 				["SWIFTMEND_INDICATOR"] = {
 					["SCALE"] = 1,
-					["isBarGlow"] = false,
+					["barGlowStyle"] = "none",
 					["anchor"] = "TOPLEFT",
 					["xAdjust"] = 5.5,
 					["yAdjust"] = -14,					
