@@ -124,6 +124,10 @@ local VUHDO_clearBooleanOverlays;
 local VUHDO_clearUnitAuraFrames;
 local VUHDO_updateGlobalToggles;
 local VUHDO_invalidateAllOverlayPlans;
+local VUHDO_startSpecialDotBarGlow;
+local VUHDO_stopSpecialDotBarGlow;
+local VUHDO_getSpecialDotBoolGlowHolder;
+local VUHDO_stopAllSpecialDotBarGlows;
 
 local VUHDO_PANEL_SETUP;
 local VUHDO_HEALING_HOTS;
@@ -132,6 +136,7 @@ local VUHDO_AURA_FRAMES;
 
 local sIsClusterIcons;
 local sIsOthersHots;
+local sSpecialDotBarGlowColor = { 1, 1, 1, 1 };
 
 function VUHDO_customHotsInitLocalOverrides()
 
@@ -167,6 +172,10 @@ function VUHDO_customHotsInitLocalOverrides()
 	VUHDO_clearUnitAuraFrames = _G["VUHDO_clearUnitAuraFrames"];
 	VUHDO_updateGlobalToggles = _G["VUHDO_updateGlobalToggles"];
 	VUHDO_invalidateAllOverlayPlans = _G["VUHDO_invalidateAllOverlayPlans"];
+	VUHDO_startSpecialDotBarGlow = _G["VUHDO_startSpecialDotBarGlow"];
+	VUHDO_stopSpecialDotBarGlow = _G["VUHDO_stopSpecialDotBarGlow"];
+	VUHDO_getSpecialDotBoolGlowHolder = _G["VUHDO_getSpecialDotBoolGlowHolder"];
+	VUHDO_stopAllSpecialDotBarGlows = _G["VUHDO_stopAllSpecialDotBarGlows"];
 
 	sBarColors = VUHDO_PANEL_SETUP["BAR_COLORS"];
 	sHotCols = sBarColors["HOTS"];
@@ -1542,6 +1551,11 @@ end
 --
 local tIcon;
 local tPanelNum;
+local tBarGlowStyle;
+local tIsUnitButtonGlowActive;
+local tBoolResultSlot;
+local tBoolHolder;
+local tDebuffBarGlowColor;
 function VUHDO_swiftmendIndicatorBouquetCallback(aUnit, anIsActive, anIcon, aTimer, aCounter, aDuration, aColor, aBuffName, aBouquetName, anImpact, aTimer2, aClipL, aClipR, aClipT, aClipB, aMaxColor, aLayerTemplate)
 
 	if sIsSpecialDotSuspended then
@@ -1567,24 +1581,65 @@ function VUHDO_swiftmendIndicatorBouquetCallback(aUnit, anIsActive, anIcon, aTim
 
 				tIcon:Show();
 
-				if (VUHDO_INDICATOR_CONFIG[tPanelNum]["CUSTOM"]["SWIFTMEND_INDICATOR"]["barGlowStyle"] or "none") ~= "none" then
-					VUHDO_LibCustomGlow.PixelGlow_Start(
-						tButton,
-						{
-							VUHDO_PANEL_SETUP.BAR_COLORS["DEBUFF_BAR_GLOW"]["R"],
-							VUHDO_PANEL_SETUP.BAR_COLORS["DEBUFF_BAR_GLOW"]["G"],
-							VUHDO_PANEL_SETUP.BAR_COLORS["DEBUFF_BAR_GLOW"]["B"],
-							VUHDO_PANEL_SETUP.BAR_COLORS["DEBUFF_BAR_GLOW"]["O"]
-						},
-						14,                             -- number of particles
-						0.3,                            -- frequency
-						8,                              -- length
-						2,                              -- thickness
-						0,                              -- x offset
-						0,                              -- y offset
-						false,                          -- border
-						VUHDO_CUSTOM_GLOW_SWIFTMEND_FRAME_KEY
-					);
+				tBarGlowStyle = VUHDO_INDICATOR_CONFIG[tPanelNum]["CUSTOM"]["SWIFTMEND_INDICATOR"]["barGlowStyle"] or "none";
+
+				if tBarGlowStyle == "none" then
+					VUHDO_stopAllSpecialDotBarGlows(tButton);
+				else
+					tDebuffBarGlowColor = VUHDO_PANEL_SETUP["BAR_COLORS"]["DEBUFF_BAR_GLOW"];
+
+					sSpecialDotBarGlowColor[1] = tDebuffBarGlowColor["R"];
+					sSpecialDotBarGlowColor[2] = tDebuffBarGlowColor["G"];
+					sSpecialDotBarGlowColor[3] = tDebuffBarGlowColor["B"];
+					sSpecialDotBarGlowColor[4] = tDebuffBarGlowColor["O"];
+
+					tIsUnitButtonGlowActive = false;
+
+					if not aLayerTemplate then
+						tIsUnitButtonGlowActive = true;
+					else
+						for tCnt = 1, #aLayerTemplate["nonSecretResults"] do
+							if aLayerTemplate["nonSecretResults"][tCnt]["isActive"] then
+								tIsUnitButtonGlowActive = true;
+
+								break;
+							end
+						end
+
+						if not tIsUnitButtonGlowActive and aLayerTemplate["auraResults"] then
+							for tCnt = 1, #aLayerTemplate["auraResults"] do
+								if aLayerTemplate["auraResults"][tCnt]["isActive"] then
+									tIsUnitButtonGlowActive = true;
+
+									break;
+								end
+							end
+						end
+					end
+
+					if tIsUnitButtonGlowActive then
+						VUHDO_startSpecialDotBarGlow(tButton, tBarGlowStyle, sSpecialDotBarGlowColor);
+					else
+						VUHDO_stopSpecialDotBarGlow(tButton);
+					end
+
+					if aLayerTemplate and aLayerTemplate["hasBools"] then
+						for tCnt = 1, #aLayerTemplate["booleanResults"] do
+							tBoolResultSlot = aLayerTemplate["booleanResults"][tCnt];
+
+							tBoolHolder = VUHDO_getSpecialDotBoolGlowHolder(tButton, aLayerTemplate["booleanValidators"][tCnt]["item"]["name"]);
+
+							if tBoolResultSlot["secretBool"] ~= nil then
+								VUHDO_startSpecialDotBarGlow(tBoolHolder, tBarGlowStyle, sSpecialDotBarGlowColor);
+
+								tBoolHolder:SetAlphaFromBoolean(tBoolResultSlot["secretBool"], tBoolResultSlot["trueAlpha"] > 0 and 1 or 0, tBoolResultSlot["falseAlpha"] > 0 and 1 or 0);
+							else
+								VUHDO_stopSpecialDotBarGlow(tBoolHolder);
+
+								tBoolHolder:SetAlpha(0);
+							end
+						end
+					end
 				end
 
 				if VUHDO_INDICATOR_CONFIG[tPanelNum]["CUSTOM"]["SWIFTMEND_INDICATOR"]["isIconGlow"] then
@@ -1607,7 +1662,7 @@ function VUHDO_swiftmendIndicatorBouquetCallback(aUnit, anIsActive, anIcon, aTim
 					);
 				end
 			else
-				VUHDO_LibCustomGlow.PixelGlow_Stop(tButton, VUHDO_CUSTOM_GLOW_SWIFTMEND_FRAME_KEY);
+				VUHDO_stopAllSpecialDotBarGlows(tButton);
 
 				tIcon = VUHDO_getBarRoleIcon(tButton, 51);
 				VUHDO_LibCustomGlow.PixelGlow_Stop(tIcon, VUHDO_CUSTOM_GLOW_SWIFTMEND_ICON_KEY);

@@ -2263,6 +2263,7 @@ do
 			["glowStyle"] = anOverlayEntry["glowStyle"],
 			["glowColorType"] = anOverlayEntry["glowColorType"],
 			["auraGroupBarGlow"] = anOverlayEntry["auraGroupBarGlow"],
+			["specialDotBarGlow"] = anOverlayEntry["specialDotBarGlow"],
 			["unitButton"] = anOverlayEntry["unitButton"],
 			["dispelOverlayChrome"] = anOverlayEntry["dispelOverlayChrome"],
 			["width"] = tTargetWidth,
@@ -2409,6 +2410,7 @@ do
 			["valueGates"] = anOverlayEntry["valueGates"] or nil,
 			["isValueGateActiveVariant"] = anOverlayEntry["isValueGateActiveVariant"] or nil,
 			["auraGroupBarGlow"] = anOverlayEntry["auraGroupBarGlow"] or nil,
+			["specialDotBarGlow"] = anOverlayEntry["specialDotBarGlow"] or nil,
 			["glowGroupId"] = anOverlayEntry["glowGroupId"] or nil,
 			["glowStyle"] = anOverlayEntry["glowStyle"] or nil,
 			["glowColorType"] = anOverlayEntry["glowColorType"] or nil,
@@ -2450,6 +2452,7 @@ do
 		aSlotRecord["valueGates"] = aSlotSpec["valueGates"];
 		aSlotRecord["isValueGateActiveVariant"] = aSlotSpec["isValueGateActiveVariant"];
 		aSlotRecord["auraGroupBarGlow"] = aSlotSpec["auraGroupBarGlow"];
+		aSlotRecord["specialDotBarGlow"] = aSlotSpec["specialDotBarGlow"];
 		aSlotRecord["glowGroupId"] = aSlotSpec["glowGroupId"];
 		aSlotRecord["glowStyle"] = aSlotSpec["glowStyle"];
 		aSlotRecord["glowColorType"] = aSlotSpec["glowColorType"];
@@ -3868,22 +3871,38 @@ do
 		for tBarGlowBranchIdx = 1, #tBarGlowResolved do
 			tBarGlowGroupData = tBarGlowResolved[tBarGlowBranchIdx];
 
-			if tBarGlowGroupData["overlayGate"] then
+			if not (tBarGlowGroupData["shadowBar"] and tBarGlowGroupData["shadowValueMode"] ~= "duration") then
 				tBarGlowEntry = {
 					["filterString"] = tBarGlowGroupData["filterString"],
 					["candidateFilters"] = VUHDO_copyOverlayCandidateFilters(tBarGlowGroupData["candidateFilters"], nil),
 					["friendlyOnly"] = tBarGlowGroupData["friendlyOnly"],
+					["hostileOnly"] = tBarGlowGroupData["hostileOnly"],
+					["identityGate"] = tBarGlowGroupData["identityGate"],
+					["isCompoundFilterString"] = tBarGlowGroupData["isCompoundFilterString"],
+					["alwaysEnabled"] = tBarGlowGroupData["alwaysEnabled"],
+					["valueGates"] = tBarGlowGroupData["valueGates"],
+					["isValueGateActiveVariant"] = tBarGlowGroupData["isValueGateActiveVariant"],
 					["overlayGate"] = tBarGlowGroupData["overlayGate"],
+					["bouquetIdx"] = tBarGlowGroupData["bouquetIdx"],
 					["shape"] = "glow",
 					["glowIcon"] = false,
 					["hideIcon"] = true,
 					["auraGroupBarGlow"] = true,
+					["specialDotBarGlow"] = true,
 					["unitButton"] = aButton,
 					["glowStyle"] = tBarGlowGroup["barGlowStyle"],
 					["glowColorType"] = VUHDO_AURA_GROUP_COLOR_CUSTOM,
-					["glowColor"] = tBarGlowDefaultColor,
 					["frameLevelOffset"] = 8,
 				};
+
+				if tBarGlowDefaultColor then
+					tBarGlowEntry["glowColor"] = {
+						["R"] = tBarGlowDefaultColor["R"],
+						["G"] = tBarGlowDefaultColor["G"],
+						["B"] = tBarGlowDefaultColor["B"],
+						["O"] = tBarGlowDefaultColor["O"],
+					};
+				end
 
 				tBarGlowEntry["entryKey"] = "swiftmendGlow:" .. (tBarGlowGroupData["entryKey"] or tBarGlowBranchIdx);
 
@@ -4565,7 +4584,7 @@ do
 								end
 							end
 
-							if tSlotRecord["auraGroupBarGlow"] then
+							if tSlotRecord["auraGroupBarGlow"] and not tSlotRecord["specialDotBarGlow"] then
 								if VUHDO_syncAuraGroupBarGlowOverlay(tSlotRecord["unitButton"] or tButton, tSlotRecord, tSlotEnabled) then
 									tUnitGlowApplied = true;
 								end
