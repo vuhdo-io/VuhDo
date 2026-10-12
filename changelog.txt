@@ -32,7 +32,6 @@ Known issues:
 --   Many Hitpoints option (e.g. Show Effective) are not yet working  
 --   Raid Icon bar and text color filtring are not yet working  
 --   Emergency Mode is not yet working  
---   Swiftmendable bouquet is not yet working  
 --   Incoming Spell Trace (i.e. targeted spells) is not yet working  
 -- Blizzard continues to have a bug that breaks proper spell targeting.  
 --   Under 'Game Menu > Options > Gameplay > Combat' deselect 'Auto Self Cast'  
@@ -43,10 +42,13 @@ Bugfixes:
 -- Fixed item mouse bindings after login  
 -- Fixed Buff Watch missing buff bar color target selection  
 -- Fixed header text alignment when panel is horizontal  
+-- Fixed Swiftmendable bouquet  
+-- Fixed Special Dot indicator bar glow  
   
   
 Improvements:  
--- Added Shaman 'Water Shield' to Buff Watch (Forever)  
+-- Added Shaman 'Water Shield' to Buff Watch (Forever)
+-- Added new default aura group 'Priest Weakened Soul' (Forever)  
 -- Added aura icon flash and color change during pandemic window  
   
   
