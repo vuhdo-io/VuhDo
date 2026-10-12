@@ -1373,10 +1373,94 @@ do
 	--
 	local tColor;
 	local tRegion;
-	local tParent;
 	local tFlashRegion;
 	local tFlashAnimGroup;
 	local tFlashAnim;
+	function VUHDO_addAuraButtonPandemicRegions(aButtonSetup, aAuraButton, aParent, aAnchor, aColorKey, aFlashKey, aAnimGroupKey)
+
+		if aButtonSetup["colorOnPandemic"] then
+			tColor = aButtonSetup["pandemicColor"];
+
+			tRegion = aAuraButton[aColorKey];
+
+			if not tRegion then
+				tRegion = aParent:CreateTexture(nil, "ARTWORK", nil, 1);
+				aAuraButton[aColorKey] = tRegion;
+
+				tRegion:SetTexture("Interface\\Buttons\\WHITE8X8");
+
+				VUHDO_PixelUtil.ApplySettings(tRegion);
+			end
+
+			tRegion:SetAllPoints(aAnchor);
+			tRegion:SetDrawLayer("ARTWORK", 1);
+			tRegion:SetBlendMode("MOD");
+
+			if tColor then
+				tRegion:SetVertexColor(tColor["R"] or 1, tColor["G"] or 1, tColor["B"] or 1, 1);
+			end
+
+			aAuraButton:AddPandemicRegion(tRegion);
+		end
+
+		if aButtonSetup["flashOnPandemic"] then
+			tFlashRegion = aAuraButton[aFlashKey];
+
+			if not tFlashRegion then
+				tFlashRegion = aParent:CreateTexture(nil, "ARTWORK", nil, 2);
+				aAuraButton[aFlashKey] = tFlashRegion;
+
+				tFlashRegion:SetTexture("Interface\\Buttons\\WHITE8X8");
+
+				VUHDO_PixelUtil.ApplySettings(tFlashRegion);
+
+				tFlashAnimGroup = tFlashRegion:CreateAnimationGroup();
+				aAuraButton[aAnimGroupKey] = tFlashAnimGroup;
+
+				tFlashAnimGroup:SetLooping("BOUNCE");
+
+				tFlashAnim = tFlashAnimGroup:CreateAnimation("Alpha");
+				tFlashAnim:SetFromAlpha(0);
+				tFlashAnim:SetToAlpha(1);
+				tFlashAnim:SetDuration(0.4);
+			else
+				tFlashAnimGroup = aAuraButton[aAnimGroupKey];
+			end
+
+			tFlashRegion:SetAllPoints(aAnchor);
+			tFlashRegion:SetDrawLayer("ARTWORK", 2);
+			tFlashRegion:SetBlendMode("BLEND");
+
+			tColor = aButtonSetup["pandemicColor"];
+
+			if tColor then
+				tFlashRegion:SetVertexColor(tColor["R"] or 1, tColor["G"] or 1, tColor["B"] or 1, 0.7);
+			else
+				tFlashRegion:SetVertexColor(1, 0.2, 0.2, 0.7);
+			end
+
+			tFlashRegion:Show();
+
+			tFlashAnimGroup:Play();
+
+			aAuraButton:AddPandemicRegion(tFlashRegion);
+		end
+
+		return;
+
+	end
+end
+
+
+
+do
+	--
+	local tRegion;
+	local tParent;
+	local tAnchor;
+	local tStatusBarTexture;
+	local tFlashRegion;
+	local tFlashAnimGroup;
 	function VUHDO_applyAuraButtonPandemicRegions(aButtonSetup, aAuraButton)
 
 		aAuraButton:ClearPandemicRegions();
@@ -1399,84 +1483,50 @@ do
 			tFlashAnimGroup:Stop();
 		end
 
+		tRegion = aAuraButton["VuhDoPandemicIconColor"];
+
+		if tRegion then
+			tRegion:Hide();
+		end
+
+		tFlashRegion = aAuraButton["VuhDoPandemicIconFlash"];
+
+		if tFlashRegion then
+			tFlashRegion:Hide();
+		end
+
+		tFlashAnimGroup = aAuraButton["VuhDoPandemicIconFlashAnimGroup"];
+
+		if tFlashAnimGroup then
+			tFlashAnimGroup:Stop();
+		end
+
 		if not aButtonSetup["hasPandemic"] then
 			return;
 		end
 
-		if aButtonSetup["durationBar"] and aAuraButton["DurationBar"] then
-			tParent = aAuraButton["DurationBar"];
-		elseif aAuraButton["IconFrame"] then
-			tParent = aAuraButton["IconFrame"];
-		else
-			tParent = aAuraButton;
+		if aButtonSetup["pandemicOnBarFill"] and aAuraButton["DurationBar"] then
+			tStatusBarTexture = aAuraButton["DurationBar"]:GetStatusBarTexture();
+
+			if tStatusBarTexture then
+				tParent = aAuraButton["DurationBar"];
+
+				VUHDO_addAuraButtonPandemicRegions(aButtonSetup, aAuraButton, tParent, tStatusBarTexture, "VuhDoPandemicColor", "VuhDoPandemicFlash", "VuhDoPandemicFlashAnimGroup");
+			end
 		end
 
-		if aButtonSetup["colorOnPandemic"] then
-			tColor = aButtonSetup["pandemicColor"];
+		if aButtonSetup["pandemicOnIcon"] then
+			if aButtonSetup["durationBar"] and aAuraButton["IconFrame"] then
+				tParent = aAuraButton;
+				tAnchor = aAuraButton["IconFrame"];
 
-			tRegion = aAuraButton["VuhDoPandemicColor"];
-
-			if not tRegion then
-				tRegion = tParent:CreateTexture(nil, "ARTWORK", nil, 1);
-				aAuraButton["VuhDoPandemicColor"] = tRegion;
-
-				tRegion:SetTexture("Interface\\Buttons\\WHITE8X8");
-
-				VUHDO_PixelUtil.ApplySettings(tRegion);
-			end
-
-			tRegion:SetAllPoints(tParent);
-			tRegion:SetDrawLayer("ARTWORK", 1);
-			tRegion:SetBlendMode("MOD");
-
-			if tColor then
-				tRegion:SetVertexColor(tColor["R"] or 1, tColor["G"] or 1, tColor["B"] or 1, 1);
-			end
-
-			aAuraButton:AddPandemicRegion(tRegion);
-		end
-
-		if aButtonSetup["flashOnPandemic"] then
-			tFlashRegion = aAuraButton["VuhDoPandemicFlash"];
-
-			if not tFlashRegion then
-				tFlashRegion = tParent:CreateTexture(nil, "ARTWORK", nil, 2);
-				aAuraButton["VuhDoPandemicFlash"] = tFlashRegion;
-
-				tFlashRegion:SetTexture("Interface\\Buttons\\WHITE8X8");
-
-				VUHDO_PixelUtil.ApplySettings(tFlashRegion);
-
-				tFlashAnimGroup = tFlashRegion:CreateAnimationGroup();
-				aAuraButton["VuhDoPandemicFlashAnimGroup"] = tFlashAnimGroup;
-
-				tFlashAnimGroup:SetLooping("BOUNCE");
-
-				tFlashAnim = tFlashAnimGroup:CreateAnimation("Alpha");
-				tFlashAnim:SetFromAlpha(0);
-				tFlashAnim:SetToAlpha(1);
-				tFlashAnim:SetDuration(0.4);
+				VUHDO_addAuraButtonPandemicRegions(aButtonSetup, aAuraButton, tParent, tAnchor, "VuhDoPandemicIconColor", "VuhDoPandemicIconFlash", "VuhDoPandemicIconFlashAnimGroup");
 			else
-				tFlashAnimGroup = aAuraButton["VuhDoPandemicFlashAnimGroup"];
+				tParent = aAuraButton;
+				tAnchor = aAuraButton;
+
+				VUHDO_addAuraButtonPandemicRegions(aButtonSetup, aAuraButton, tParent, tAnchor, "VuhDoPandemicColor", "VuhDoPandemicFlash", "VuhDoPandemicFlashAnimGroup");
 			end
-
-			tFlashRegion:SetAllPoints(tParent);
-			tFlashRegion:SetDrawLayer("ARTWORK", 2);
-			tFlashRegion:SetBlendMode("BLEND");
-
-			tColor = aButtonSetup["pandemicColor"];
-
-			if tColor then
-				tFlashRegion:SetVertexColor(tColor["R"] or 1, tColor["G"] or 1, tColor["B"] or 1, 0.7);
-			else
-				tFlashRegion:SetVertexColor(1, 0.2, 0.2, 0.7);
-			end
-
-			tFlashRegion:Show();
-
-			tFlashAnimGroup:Play();
-
-			aAuraButton:AddPandemicRegion(tFlashRegion);
 		end
 
 		return;
@@ -2996,6 +3046,8 @@ do
 		tinsert(aSignatureParts, aButtonSetup["hasPandemic"] and "1" or "0");
 		tinsert(aSignatureParts, aButtonSetup["flashOnPandemic"] and "1" or "0");
 		tinsert(aSignatureParts, aButtonSetup["colorOnPandemic"] and "1" or "0");
+		tinsert(aSignatureParts, aButtonSetup["pandemicOnIcon"] and "1" or "0");
+		tinsert(aSignatureParts, aButtonSetup["pandemicOnBarFill"] and "1" or "0");
 
 		VUHDO_appendAuraButtonSetupColorSignature(aSignatureParts, aButtonSetup["pandemicColor"]);
 		VUHDO_appendAuraButtonSetupColorSignature(aSignatureParts, aButtonSetup["iconColor"]);
@@ -4823,6 +4875,9 @@ function VUHDO_buildAnchorButtonSetup(anAnchorConfig, aPixelWidth, aPixelHeight,
 				tButtonSetup["pandemicColor"] = VUHDO_deepCopyTable(tPandemicColor);
 			end
 		end
+
+		tButtonSetup["pandemicOnBarFill"] = anIsBar;
+		tButtonSetup["pandemicOnIcon"] = (not anIsBar) or (tIconType <= 3 and (tButtonSetup["iconTextSize"] or 0) > 0);
 	end
 
 	return tButtonSetup;

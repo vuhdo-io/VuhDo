@@ -1670,6 +1670,8 @@ do
 				tSlotButtonSetup["hasPandemic"] = true;
 				tSlotButtonSetup["colorOnPandemic"] = tIsColorPandemic;
 				tSlotButtonSetup["flashOnPandemic"] = tIsFlashPandemic;
+				tSlotButtonSetup["pandemicOnBarFill"] = anIsBar;
+				tSlotButtonSetup["pandemicOnIcon"] = (not anIsBar) or ((tSlotButtonSetup["iconType"] or 1) <= 3 and (tSlotButtonSetup["iconTextSize"] or 0) > 0);
 
 				if tIsColorPandemic then
 					if anEntry["colorOnPandemic"] == 1 and anEntry["pandemicColor"] then
@@ -1689,6 +1691,8 @@ do
 				tSlotButtonSetup["colorOnPandemic"] = nil;
 				tSlotButtonSetup["flashOnPandemic"] = nil;
 				tSlotButtonSetup["pandemicColor"] = nil;
+				tSlotButtonSetup["pandemicOnIcon"] = nil;
+				tSlotButtonSetup["pandemicOnBarFill"] = nil;
 			end
 		end
 
