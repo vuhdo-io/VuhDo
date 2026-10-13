@@ -194,6 +194,7 @@ local sAuraConsumingSpecialNames = {
 
 local sRestrictedModeClassCache = { };
 local sHasAuraGroupItemCache = { };
+local sIsContainerGroupExpressibleCache = { };
 
 
 
@@ -4128,11 +4129,70 @@ do
 
 		twipe(sRestrictedModeClassCache);
 		twipe(sHasAuraGroupItemCache);
+		twipe(sIsContainerGroupExpressibleCache);
 
 		return;
 
 	end
 
+end
+
+
+
+do
+	--
+	local tBouquet;
+	local tItem;
+	local tName;
+	local tSpecial;
+	local tHasAuraGroupItem;
+	local tSpellItemCount;
+	local tDispelItemCount;
+	local tIsExpressible;
+	function VUHDO_isBouquetContainerGroupExpressible(aBouquetName)
+
+		if not aBouquetName then
+			return false;
+		end
+
+		if sIsContainerGroupExpressibleCache[aBouquetName] ~= nil then
+			return sIsContainerGroupExpressibleCache[aBouquetName];
+		end
+
+		tBouquet = VUHDO_BOUQUETS["STORED"] and VUHDO_BOUQUETS["STORED"][aBouquetName];
+		tBouquet = VUHDO_decompressIfCompressed(tBouquet);
+
+		tHasAuraGroupItem = false;
+		tSpellItemCount = 0;
+		tDispelItemCount = 0;
+
+		if type(tBouquet) == "table" then
+			for tCnt = 1, #tBouquet do
+				tItem = tBouquet[tCnt];
+				tName = tItem["name"];
+				tSpecial = VUHDO_BOUQUET_BUFFS_SPECIAL[tName];
+
+				if tSpecial and tSpecial["custom_type"] == VUHDO_BOUQUET_CUSTOM_TYPE_AURA_GROUP then
+					tHasAuraGroupItem = true;
+				elseif sDispelSpecialToDispelName[tName] then
+					tDispelItemCount = tDispelItemCount + 1;
+				elseif not tSpecial and not VUHDO_strempty(tName) and VUHDO_resolveAuraContainerSpellId(tName) then
+					tSpellItemCount = tSpellItemCount + 1;
+				end
+			end
+		end
+
+		if tHasAuraGroupItem or (tSpellItemCount > 0 and tDispelItemCount > 0) then
+			tIsExpressible = false;
+		else
+			tIsExpressible = tSpellItemCount > 0 or tDispelItemCount > 0;
+		end
+
+		sIsContainerGroupExpressibleCache[aBouquetName] = tIsExpressible;
+
+		return tIsExpressible;
+
+	end
 end
 
 

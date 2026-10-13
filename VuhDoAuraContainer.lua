@@ -7,6 +7,7 @@ local tconcat = table.concat;
 local tsort = table.sort;
 local twipe = table.wipe;
 local format = string.format;
+local max = math.max;
 
 local CreateFrame = CreateFrame;
 local InCombatLockdown = InCombatLockdown;
@@ -786,7 +787,8 @@ do
 
 		tMainTexture = aAuraButton["IconTexture"] or aAuraButton["FillTexture"];
 
-		if aButtonSetup["staticColor"] and tMainTexture and not aButtonSetup["shadowBar"] and not aButtonSetup["border"] then
+		if aButtonSetup["staticColor"] and tMainTexture and not aButtonSetup["shadowBar"] and not aButtonSetup["border"]
+			and (aButtonSetup["staticIcon"] or not aAuraButton["IconTexture"]) then
 			tStaticColor = aButtonSetup["staticColor"];
 
 			if aButtonSetup["staticIcon"] then
@@ -2620,9 +2622,15 @@ do
 			elseif AnchorUtil.FlowLayoutAxis.Vertical == tContainerLayout["layoutAxis"] and tContainerLayout["elementHeight"] then
 				tMaxLineSize = (tContainerLayout["maxColumns"] or 1) * (tContainerLayout["elementHeight"] + (tContainerLayout["spacing"] or 0));
 
+				tMaxLineSize = tMaxLineSize - (tContainerLayout["leadingSpacing"] or 0);
+				tMaxLineSize = max(tMaxLineSize, tContainerLayout["elementHeight"]);
+
 				tContainer:SetFlowLayoutMaximumLineSize(tMaxLineSize);
 			elseif tContainerLayout["elementWidth"] then
 				tMaxLineSize = (tContainerLayout["maxColumns"] or 1) * (tContainerLayout["elementWidth"] + (tContainerLayout["spacing"] or 0));
+
+				tMaxLineSize = tMaxLineSize - (tContainerLayout["leadingSpacing"] or 0);
+				tMaxLineSize = max(tMaxLineSize, tContainerLayout["elementWidth"]);
 
 				tContainer:SetFlowLayoutMaximumLineSize(tMaxLineSize);
 			end
@@ -3040,6 +3048,11 @@ do
 		tinsert(aSignatureParts, format("%.3f", aButtonSetup["timerThreshold"] or 0));
 		tinsert(aSignatureParts, tostring(aButtonSetup["staticIcon"] or ""));
 		tinsert(aSignatureParts, aButtonSetup["staticColor"] and "1" or "0");
+
+		if not aButtonSetup["staticIcon"] then
+			VUHDO_appendAuraButtonSetupColorSignature(aSignatureParts, aButtonSetup["staticColor"]);
+		end
+
 		tinsert(aSignatureParts, format("%.3f", aButtonSetup["dispelBright"] or 0));
 		tinsert(aSignatureParts, format("%.3f", aButtonSetup["dispelOpacity"] or 0));
 		tinsert(aSignatureParts, aButtonSetup["barColorMode"] or "");
@@ -3114,6 +3127,7 @@ do
 			tinsert(aSignatureParts, format("%d", tContainerLayout["layoutAxis"] or 0));
 			tinsert(aSignatureParts, format("%d", tContainerLayout["horizontalDir"] or 0));
 			tinsert(aSignatureParts, format("%d", tContainerLayout["verticalDir"] or 0));
+			tinsert(aSignatureParts, format("%d", tContainerLayout["leadingSpacing"] or 0));
 		end
 
 		for _, tSlot in ipairs(aContainerTemplate["slots"] or sEmpty) do
