@@ -496,6 +496,12 @@ function VUHDO_setHealth(aUnit, aMode)
 				tInfo["hasSecretIdentity"] = false;
 			end
 
+			if tInfo["hasSecretIdentity"] then
+				tInfo["fullName"] = nil;
+			else
+				tInfo["fullName"] = VUHDO_buildUnitFullName(tName, tRealm);
+			end
+
 			tInfo["number"] = VUHDO_getUnitNo(aUnit);
 			tInfo["unit"] = aUnit;
 			tInfo["guid"] = UnitGUID(aUnit);
@@ -562,13 +568,6 @@ function VUHDO_setHealth(aUnit, aMode)
 			tInfo["sortMaxHp"] = VUHDO_getUnitSortMaxHp(aUnit);
 			tInfo["role"] = VUHDO_determineRole(aUnit);
 			tInfo["healthLossPerc"] = GetUnitTotalModifiedMaxHealthPercent(aUnit);
-
-			if tInfo["hasSecretIdentity"] then
-				tInfo["fullName"] = nil;
-			else
-				tInfo["fullName"] = VUHDO_buildUnitFullName(tName, tRealm);
-			end
-
 			tInfo["raidIcon"] = GetRaidTargetIndex(aUnit);
 
 			if sSecretsEnabled then
