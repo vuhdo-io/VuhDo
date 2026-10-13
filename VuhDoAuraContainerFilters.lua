@@ -643,6 +643,11 @@ do
 	local tDispelTypes;
 	local tDispelSnapshot;
 	local tValue;
+	local tBouquetTemplate;
+	local tBouquetBranch;
+	local tHasBouquetBranch;
+	local tGroupBaseCandidate;
+	local tTemplateFilters;
 	function VUHDO_isAuraGroupContainerExpressible(aGroup)
 
 		if not aGroup or aGroup["enabled"] == false or aGroup["isInferred"] then
@@ -708,9 +713,14 @@ do
 
 		tType = aGroup["type"] or VUHDO_AURA_GROUP_TYPE_FILTER;
 
-		if tType == VUHDO_AURA_GROUP_TYPE_LIST and (not tCandidateFilters or not tCandidateFilters["includeSpellIDs"]) then
-			tSpellIds = nil;
+		tSpellIds = nil;
+		tHasBouquetBranch = false;
+		tGroupBaseCandidate = nil;
+		tBouquetTemplate = nil;
+		tBouquetBranch = nil;
+		tTemplateFilters = nil;
 
+		if tType == VUHDO_AURA_GROUP_TYPE_LIST then
 			for _, tEntry in ipairs(aGroup["entries"] or sEmpty) do
 				if tEntry["entryType"] == VUHDO_AURA_LIST_ENTRY_SPELL and tEntry["value"] then
 					tSpellIds = tSpellIds or { };
@@ -723,7 +733,27 @@ do
 				tSpellIds = nil;
 			end
 
-			if tSpellIds then
+			tGroupBaseCandidate = VUHDO_copyCandidateFilterTable(tCandidateBranches and tCandidateBranches[1]);
+
+			if tGroupBaseCandidate then
+				tGroupBaseCandidate["includeSpellIDs"] = nil;
+			end
+
+			if not tCandidateFilters or not tCandidateFilters["includeSpellIDs"] then
+				if tSpellIds then
+					for tBranchCnt = 1, #(tCandidateBranches or sEmpty) do
+						tCandidateBranches[tBranchCnt] = tCandidateBranches[tBranchCnt] or { };
+
+						tCandidateBranches[tBranchCnt]["includeSpellIDs"] = tSpellIds;
+					end
+
+					tCandidateFilters = tCandidateBranches[1];
+				else
+					tCandidateBranches = { };
+					tBranchFilterStrings = { };
+					tCandidateFilters = nil;
+				end
+			elseif tSpellIds then
 				for tBranchCnt = 1, #(tCandidateBranches or sEmpty) do
 					tCandidateBranches[tBranchCnt] = tCandidateBranches[tBranchCnt] or { };
 
@@ -732,6 +762,47 @@ do
 
 				tCandidateFilters = tCandidateBranches[1];
 			end
+
+			for _, tEntry in ipairs(aGroup["entries"] or sEmpty) do
+				if tEntry["entryType"] == VUHDO_AURA_LIST_ENTRY_BOUQUET and tEntry["value"]
+					and VUHDO_classifyBouquetRestrictedMode(tEntry["value"]) == VUHDO_BOUQUET_RESTRICTED_AURA_CONTAINER
+					and not VUHDO_bouquetHasAuraGroupItems(tEntry["value"]) then
+					tBouquetTemplate = VUHDO_buildListEntryContainerGroupTemplate(tEntry["value"]);
+
+					if tBouquetTemplate then
+						tBouquetBranch = VUHDO_copyCandidateFilterTable(tGroupBaseCandidate) or { };
+
+						tTemplateFilters = tBouquetTemplate["candidateFilters"];
+
+						if tTemplateFilters then
+							for tMergeKey, tMergeValue in pairs(tTemplateFilters) do
+								tBouquetBranch[tMergeKey] = tMergeValue;
+							end
+						end
+
+						if not tCandidateBranches then
+							tCandidateBranches = { };
+						end
+
+						if not tBranchFilterStrings then
+							tBranchFilterStrings = { };
+						end
+
+						tinsert(tCandidateBranches, tBouquetBranch);
+						tinsert(tBranchFilterStrings, tBouquetTemplate["filterString"] or tFilterString);
+
+						tHasBouquetBranch = true;
+					end
+				end
+			end
+
+			if tCandidateBranches and tCandidateBranches[1] then
+				tCandidateFilters = tCandidateBranches[1];
+			else
+				tCandidateFilters = nil;
+			end
+
+			tExpressible = tHasBouquetBranch or tSpellIds ~= nil;
 		end
 
 		tCached = {
@@ -2366,7 +2437,7 @@ end
 do
 	--
 	local tCopy;
-	local function VUHDO_copyCandidateFilterTable(aSource)
+	function VUHDO_copyCandidateFilterTable(aSource)
 
 		if not aSource then
 			return nil;
@@ -2389,7 +2460,6 @@ do
 	local tCandidate;
 	local tSpellIds;
 	local tExcludeIds;
-	local tValue;
 	local tCandidateBooleans;
 	local tBoolKey;
 	local tResolvedBool;

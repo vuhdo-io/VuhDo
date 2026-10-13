@@ -1271,7 +1271,6 @@ do
 	local tGroup;
 	local tEffectiveColorType;
 	local tResolved;
-	local tHasListSpell;
 	local tFilterString;
 	local tCandidateFilters;
 	local tCandidateBranches;
@@ -1305,19 +1304,7 @@ do
 		end
 
 		if not tResolved["expressible"] then
-			tHasListSpell = false;
-
-			if (tGroup["type"] or VUHDO_AURA_GROUP_TYPE_FILTER) == VUHDO_AURA_GROUP_TYPE_LIST and tEffectiveColorType == VUHDO_AURA_GROUP_COLOR_CUSTOM and tGroup["entries"] then
-				for _, tEntry in ipairs(tGroup["entries"]) do
-					if tEntry["entryType"] == VUHDO_AURA_LIST_ENTRY_SPELL and tEntry["value"] then
-						tHasListSpell = true;
-
-						break;
-					end
-				end
-			end
-
-			if not tHasListSpell then
+			if not (tResolved["candidateFilters"] and tResolved["candidateFilters"]["includeSpellIDs"]) then
 				return sOverlayBuild["canColorGroupEntries"];
 			end
 		end
@@ -3733,7 +3720,6 @@ do
 	local tBarGlowEntry;
 	local tBarGlowPlannedCount;
 	local tBarGlowCanBuild;
-	local tBarGlowHasListSpell;
 	local function VUHDO_buildAuraGroupBarGlowOverlaysForButton(aButton, aPanelNum)
 
 		tBarGlowPlannedCount = 0;
@@ -3755,20 +3741,7 @@ do
 					tBarGlowCanBuild = tBarGlowResolved["expressible"];
 
 					if not tBarGlowCanBuild then
-						tBarGlowHasListSpell = false;
-						tBarGlowColorType = tBarGlowGroup["colorType"] or VUHDO_AURA_GROUP_COLOR_DISPEL;
-
-						if (tBarGlowGroupData["type"] or VUHDO_AURA_GROUP_TYPE_FILTER) == VUHDO_AURA_GROUP_TYPE_LIST and tBarGlowColorType == VUHDO_AURA_GROUP_COLOR_CUSTOM and tBarGlowGroupData["entries"] then
-							for _, tEntry in ipairs(tBarGlowGroupData["entries"]) do
-								if tEntry["entryType"] == VUHDO_AURA_LIST_ENTRY_SPELL and tEntry["value"] then
-									tBarGlowHasListSpell = true;
-
-									break;
-								end
-							end
-						end
-
-						tBarGlowCanBuild = tBarGlowHasListSpell;
+						tBarGlowCanBuild = tBarGlowResolved["candidateFilters"] and tBarGlowResolved["candidateFilters"]["includeSpellIDs"];
 					end
 
 					if tBarGlowCanBuild then
