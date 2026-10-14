@@ -424,6 +424,8 @@ do
 
 
 
+	--
+	local tIsTextColorAllowed;
 	function VUHDO_rebuildAuraGroupCaches(anIsFilterCacheDirty, anIsAnchorIndexDirty, anIsSoundsDirty)
 
 		if anIsFilterCacheDirty then
@@ -461,6 +463,8 @@ do
 
 		sAnyGlowGroups = false;
 
+		tIsTextColorAllowed = not VUHDO_isAuraModeContainers();
+
 		for tGroupId, tGroup in pairs(VUHDO_CONFIG["AURA_GROUPS"] or sEmpty) do
 			tEffectiveColorType = tGroup["colorType"] or ((tGroup["canColorBar"] or tGroup["canColorText"]) and VUHDO_AURA_GROUP_COLOR_DISPEL or VUHDO_AURA_GROUP_COLOR_OFF);
 
@@ -481,11 +485,7 @@ do
 						tColorBarGroup["canColorBar"] = false;
 					end
 
-					if tGroup["canColorText"] then
-						tColorBarGroup["canColorText"] = true;
-					else
-						tColorBarGroup["canColorText"] = false;
-					end
+					tColorBarGroup["canColorText"] = (tGroup["canColorText"] and tIsTextColorAllowed) == true;
 
 					if tGroup["canGlowBar"] then
 						tColorBarGroup["canGlowBar"] = true;
@@ -519,11 +519,7 @@ do
 						tColorBarGroup["canColorBar"] = false;
 					end
 
-					if tGroup["canColorText"] then
-						tColorBarGroup["canColorText"] = true;
-					else
-						tColorBarGroup["canColorText"] = false;
-					end
+					tColorBarGroup["canColorText"] = (tGroup["canColorText"] and tIsTextColorAllowed) == true;
 
 					if tGroup["canGlowBar"] then
 						tColorBarGroup["canGlowBar"] = true;
@@ -601,11 +597,7 @@ do
 							tColorBarGroup["canColorBar"] = false;
 						end
 
-						if tGroup["canColorText"] then
-							tColorBarGroup["canColorText"] = true;
-						else
-							tColorBarGroup["canColorText"] = false;
-						end
+						tColorBarGroup["canColorText"] = (tGroup["canColorText"] and tIsTextColorAllowed) == true;
 
 						if tGroup["canGlowBar"] then
 							tColorBarGroup["canGlowBar"] = true;
@@ -641,11 +633,7 @@ do
 							tColorBarGroup["canColorBar"] = false;
 						end
 
-						if tGroup["canColorText"] then
-							tColorBarGroup["canColorText"] = true;
-						else
-							tColorBarGroup["canColorText"] = false;
-						end
+						tColorBarGroup["canColorText"] = (tGroup["canColorText"] and tIsTextColorAllowed) == true;
 
 						if tGroup["canGlowBar"] then
 							tColorBarGroup["canGlowBar"] = true;

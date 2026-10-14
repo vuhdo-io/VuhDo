@@ -1825,6 +1825,11 @@ do
 				tCanColorTextCheck:Disable();
 				tCanColorTextCheck:SetAlpha(0.5);
 			end
+
+			if VUHDO_isAuraModeContainers() then
+				tCanColorTextCheck:Disable();
+				tCanColorTextCheck:SetAlpha(0.5);
+			end
 		end
 
 		if tCustomColorSwatch and tGroup then
@@ -1848,7 +1853,7 @@ do
 				VUHDO_lnfSetModel(tCustomColorSwatch, "VUHDO_CONFIG.AURA_GROUPS." .. sSelectedGroupId .. ".customColor");
 				tCustomColorSwatch:SetAttribute("custom_function_post", VUHDO_auraGroupsCustomColorChanged);
 
-				tCanUseCustomColor = VUHDO_AURA_GROUPS_COLOR_TYPE == VUHDO_AURA_GROUP_COLOR_CUSTOM and (VUHDO_AURA_GROUPS_CAN_COLOR_BAR or VUHDO_AURA_GROUPS_CAN_COLOR_TEXT);
+				tCanUseCustomColor = VUHDO_AURA_GROUPS_COLOR_TYPE == VUHDO_AURA_GROUP_COLOR_CUSTOM and VUHDO_AURA_GROUPS_CAN_COLOR_BAR;
 
 				tCustomColorSwatch:SetAttribute("disabled", not tCanUseCustomColor);
 				tCustomColorSwatch:SetAlpha(tCanUseCustomColor and 1 or 0.5);
@@ -2756,7 +2761,7 @@ function VUHDO_auraGroupsUpdateCustomColorSwatchState()
 	tCustomColorSwatchForUpdate = _G["VuhDoNewOptionsAuraGroupsStorePanelCustomColorTexture"];
 
 	if tCustomColorSwatchForUpdate and tCustomColorSwatchForUpdate:IsShown() then
-		tCanUseCustomColorForUpdate = VUHDO_AURA_GROUPS_COLOR_TYPE == VUHDO_AURA_GROUP_COLOR_CUSTOM and (VUHDO_AURA_GROUPS_CAN_COLOR_BAR or VUHDO_AURA_GROUPS_CAN_COLOR_TEXT);
+		tCanUseCustomColorForUpdate = VUHDO_AURA_GROUPS_COLOR_TYPE == VUHDO_AURA_GROUP_COLOR_CUSTOM and VUHDO_AURA_GROUPS_CAN_COLOR_BAR;
 
 		tCustomColorSwatchForUpdate:SetAttribute("disabled", not tCanUseCustomColorForUpdate);
 		tCustomColorSwatchForUpdate:SetAlpha(tCanUseCustomColorForUpdate and 1 or 0.5);

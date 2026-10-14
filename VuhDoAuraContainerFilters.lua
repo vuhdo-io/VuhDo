@@ -85,6 +85,7 @@ local VUHDO_applyAuraGroupScopeFlags;
 local VUHDO_classifyBouquetRestrictedMode;
 local VUHDO_buildListEntryContainerGroupTemplate;
 local VUHDO_buildMixedBouquetListSlotTemplates;
+local VUHDO_buildBouquetAuraFilterPieces;
 local VUHDO_isBouquetContainerGroupExpressible;
 local VUHDO_applyBarButtonSetupFields;
 local VUHDO_getAuraDurationTextOptions;
@@ -247,6 +248,7 @@ function VUHDO_auraContainerFiltersInitLocalOverrides()
 	VUHDO_classifyBouquetRestrictedMode = _G["VUHDO_classifyBouquetRestrictedMode"];
 	VUHDO_buildListEntryContainerGroupTemplate = _G["VUHDO_buildListEntryContainerGroupTemplate"];
 	VUHDO_buildMixedBouquetListSlotTemplates = _G["VUHDO_buildMixedBouquetListSlotTemplates"];
+	VUHDO_buildBouquetAuraFilterPieces = _G["VUHDO_buildBouquetAuraFilterPieces"];
 	VUHDO_isBouquetContainerGroupExpressible = _G["VUHDO_isBouquetContainerGroupExpressible"];
 	VUHDO_applyBarButtonSetupFields = _G["VUHDO_applyBarButtonSetupFields"];
 	VUHDO_getAuraDurationTextOptions = _G["VUHDO_getAuraDurationTextOptions"];
@@ -634,23 +636,7 @@ do
 	local tType;
 	local tBouquetClass;
 	local tSpellId;
-	local tCached;
-	local tFilterString;
-	local tCandidateFilters;
-	local tCandidateBranches;
-	local tDroppedBranchKeys;
-	local tBranchFilterStrings;
-	local tDroppedBranchTokens;
-	local tExpressible;
-	local tSpellIds;
-	local tDispelTypes;
-	local tDispelSnapshot;
 	local tValue;
-	local tBouquetTemplate;
-	local tBouquetBranch;
-	local tHasBouquetBranch;
-	local tGroupBaseCandidate;
-	local tTemplateFilters;
 	function VUHDO_isAuraGroupContainerExpressible(aGroup)
 
 		if not aGroup or aGroup["enabled"] == false or aGroup["isInferred"] then
@@ -694,6 +680,49 @@ do
 
 	end
 
+end
+
+
+
+do
+	--
+	local tCached;
+	local tFilterString;
+	local tCandidateFilters;
+	local tCandidateBranches;
+	local tDroppedBranchKeys;
+	local tBranchFilterStrings;
+	local tDroppedBranchTokens;
+	local tExpressible;
+	local tSpellIds;
+	local tType;
+	local tBouquetTemplate;
+	local tBouquetBranch;
+	local tHasBouquetBranch;
+	local tGroupBaseCandidate;
+	local tTemplateFilters;
+	local tBouquetPiecesByEntry;
+	local tPieces;
+	local tPiece;
+	local tPieceFilters;
+	local function VUHDO_collectListGroupBouquetPieces(aGroup, aPiecesByEntry)
+
+		if (aGroup["type"] or VUHDO_AURA_GROUP_TYPE_FILTER) ~= VUHDO_AURA_GROUP_TYPE_LIST then
+			return aPiecesByEntry;
+		end
+
+		for tEntryIdx, tEntry in ipairs(aGroup["entries"] or sEmpty) do
+			if tEntry["entryType"] == VUHDO_AURA_LIST_ENTRY_BOUQUET and tEntry["value"]
+				and VUHDO_classifyBouquetRestrictedMode(tEntry["value"]) == VUHDO_BOUQUET_RESTRICTED_AURA_CONTAINER
+				and not VUHDO_isBouquetContainerGroupExpressible(tEntry["value"]) then
+				aPiecesByEntry[tEntryIdx] = VUHDO_buildBouquetAuraFilterPieces(tEntry["value"]);
+			end
+		end
+
+		return aPiecesByEntry;
+
+	end
+
 
 
 	--
@@ -708,6 +737,8 @@ do
 		if tCached then
 			return tCached;
 		end
+
+		tBouquetPiecesByEntry = VUHDO_collectListGroupBouquetPieces(aGroup, { });
 
 		tFilterString = VUHDO_buildAuraGroupNativeFilterString(aGroup);
 		tCandidateBranches, tDroppedBranchKeys, tBranchFilterStrings, tDroppedBranchTokens = VUHDO_buildAuraGroupCandidateBranches(aGroup, nil);
@@ -766,7 +797,7 @@ do
 				tCandidateFilters = tCandidateBranches[1];
 			end
 
-			for _, tEntry in ipairs(aGroup["entries"] or sEmpty) do
+			for tEntryIdx, tEntry in ipairs(aGroup["entries"] or sEmpty) do
 				if tEntry["entryType"] == VUHDO_AURA_LIST_ENTRY_BOUQUET and tEntry["value"]
 					and VUHDO_classifyBouquetRestrictedMode(tEntry["value"]) == VUHDO_BOUQUET_RESTRICTED_AURA_CONTAINER
 					and VUHDO_isBouquetContainerGroupExpressible(tEntry["value"]) then
@@ -796,6 +827,37 @@ do
 
 						tHasBouquetBranch = true;
 					end
+				elseif tBouquetPiecesByEntry[tEntryIdx] then
+					tPieces = tBouquetPiecesByEntry[tEntryIdx];
+
+					for tPieceIdx = 1, #tPieces do
+						tPiece = tPieces[tPieceIdx];
+
+						if not tPiece["isStatic"] then
+							tBouquetBranch = VUHDO_copyCandidateFilterTable(tGroupBaseCandidate) or { };
+
+							tPieceFilters = tPiece["candidateFilters"];
+
+							if tPieceFilters then
+								for tMergeKey, tMergeValue in pairs(tPieceFilters) do
+									tBouquetBranch[tMergeKey] = tMergeValue;
+								end
+							end
+
+							if not tCandidateBranches then
+								tCandidateBranches = { };
+							end
+
+							if not tBranchFilterStrings then
+								tBranchFilterStrings = { };
+							end
+
+							tinsert(tCandidateBranches, tBouquetBranch);
+							tinsert(tBranchFilterStrings, tPiece["filterString"] or tFilterString);
+
+							tHasBouquetBranch = true;
+						end
+					end
 				end
 			end
 
@@ -824,9 +886,15 @@ do
 
 	end
 
+end
 
 
+
+do
 	--
+	local tDispelTypes;
+	local tDispelSnapshot;
+	local tGroup;
 	function VUHDO_invalidateAuraGroupFilterCache()
 
 		twipe(sGroupResolvedFilterCache);
@@ -840,7 +908,6 @@ do
 
 
 	--
-	local tGroup;
 	function VUHDO_invalidateAuraGroupFilterCacheForGroup(aGroupId)
 
 		if not aGroupId then

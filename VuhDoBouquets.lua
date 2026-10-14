@@ -84,6 +84,8 @@ local VUHDO_BOUQUET_LAYER_TYPE_SPRITECELL;
 local VUHDO_BOUQUET_LAYER_TYPE_BOOLEAN;
 local VUHDO_BOUQUET_CUSTOM_TYPE_STATUSBAR;
 
+local VUHDO_AURA_NAME_MATCH_SPELL_NAMES;
+
 local VUHDO_LAST_EVALUATED_BOUQUETS = { };
 setmetatable(VUHDO_LAST_EVALUATED_BOUQUETS, VUHDO_META_NEW_ARRAY);
 local VUHDO_REGISTERED_BOUQUETS = { };
@@ -204,6 +206,8 @@ local sGroupFlagStack = { };
 local sKeyStack = { };
 local sVisitedBouquets = { };
 local sVisitedGroups = { };
+local sResolvingAuraGroups = { };
+local sSoundMatcherSpellIds = { };
 
 
 
@@ -283,6 +287,8 @@ function VUHDO_bouquetsInitLocalOverrides()
 	VUHDO_BOUQUET_LAYER_TYPE_SPRITECELL = _G["VUHDO_BOUQUET_LAYER_TYPE_SPRITECELL"];
 	VUHDO_BOUQUET_LAYER_TYPE_BOOLEAN = _G["VUHDO_BOUQUET_LAYER_TYPE_BOOLEAN"];
 	VUHDO_BOUQUET_CUSTOM_TYPE_STATUSBAR = _G["VUHDO_BOUQUET_CUSTOM_TYPE_STATUSBAR"];
+
+	VUHDO_AURA_NAME_MATCH_SPELL_NAMES = _G["VUHDO_AURA_NAME_MATCH_SPELL_NAMES"];
 
 	VUHDO_bouquetsInitLocalOverridesFunctions();
 
@@ -4179,6 +4185,404 @@ do
 		twipe(sIsContainerGroupExpressibleCache);
 		twipe(sRestrictedModeClassInProgress);
 		twipe(sIsAuraGroupExpressibleCache);
+		twipe(sResolvingAuraGroups);
+
+		return;
+
+	end
+
+end
+
+
+
+do
+	--
+	local tResolved;
+	local tCandidateBranches;
+	local tBranchFilterStrings;
+	local tFilterString;
+	local tCandidateFilters;
+	local tIsHarmful;
+	local function VUHDO_appendAuraGroupFilterPieces(aResult, anItemIndex, anAuraGroup)
+
+		if not anAuraGroup or sResolvingAuraGroups[anAuraGroup] or not VUHDO_isAuraGroupContainerExpressible(anAuraGroup) then
+			return false;
+		end
+
+		sResolvingAuraGroups[anAuraGroup] = true;
+
+		tResolved = VUHDO_getAuraGroupResolvedFilters(anAuraGroup);
+
+		sResolvingAuraGroups[anAuraGroup] = nil;
+
+		tCandidateBranches = tResolved and tResolved["candidateBranches"];
+		tBranchFilterStrings = tResolved and tResolved["candidateBranchFilterStrings"];
+
+		if not tCandidateBranches or #tCandidateBranches == 0 then
+			return false;
+		end
+
+		for tBranchIdx = 1, #tCandidateBranches do
+			tFilterString = (tBranchFilterStrings and tBranchFilterStrings[tBranchIdx]) or (tResolved and tResolved["filterString"]) or "HARMFUL";
+
+			tCandidateFilters = VUHDO_deepCopyTable(tCandidateBranches[tBranchIdx]);
+
+			tIsHarmful = strfind(tFilterString, "HARMFUL", 1, true) ~= nil;
+
+			tinsert(aResult, {
+				["itemIndex"] = anItemIndex,
+				["branchIndex"] = tBranchIdx,
+				["filterString"] = tFilterString,
+				["candidateFilters"] = tCandidateFilters,
+				["isHarmful"] = tIsHarmful,
+				["auraGroup"] = anAuraGroup,
+			});
+		end
+
+		return true;
+
+	end
+
+
+
+	--
+	local tName;
+	local tSpecial;
+	local tSpellId;
+	local tIncludeSpellIds;
+	local tDispelName;
+	local tAuraGroupId;
+	local tAuraGroup;
+	local function VUHDO_appendBouquetItemFilterPieces(aResult, anItemIndex, anItem)
+
+		tName = anItem["name"];
+		tSpecial = VUHDO_BOUQUET_BUFFS_SPECIAL[tName];
+		tSpellId = nil;
+		tDispelName = nil;
+
+		if not tSpecial then
+			tIncludeSpellIds = { };
+
+			VUHDO_addResolvedAuraContainerSpellIds(tIncludeSpellIds, tName);
+
+			if next(tIncludeSpellIds) then
+				tSpellId = VUHDO_resolveAuraContainerSpellId(tName);
+			end
+		elseif sDispelSpecialToDispelName[tName] then
+			tDispelName = sDispelSpecialToDispelName[tName];
+		elseif tSpecial["custom_type"] == VUHDO_BOUQUET_CUSTOM_TYPE_AURA_GROUP then
+			tAuraGroupId = anItem["custom"] and anItem["custom"]["auraGroupId"];
+
+			tAuraGroup = VUHDO_getAuraGroup(tAuraGroupId);
+
+			if VUHDO_appendAuraGroupFilterPieces(aResult, anItemIndex, tAuraGroup) then
+				return;
+			end
+		end
+
+		if tSpellId then
+			if anItem["mine"] ~= false and anItem["others"] ~= true then
+				tFilterString = "HELPFUL|PLAYER";
+			elseif anItem["others"] == true and anItem["mine"] == false then
+				tFilterString = "HELPFUL|!PLAYER";
+			else
+				tFilterString = "HELPFUL";
+			end
+
+			tinsert(aResult, {
+				["itemIndex"] = anItemIndex,
+				["filterString"] = tFilterString,
+				["candidateFilters"] = {
+					["includeSpellIDs"] = tIncludeSpellIds,
+				},
+				["isHarmful"] = false,
+				["friendlyOnly"] = true,
+			});
+
+			return;
+		end
+
+		if tDispelName then
+			if VUHDO_isDispelNameHostile(tDispelName) then
+				tFilterString = "HELPFUL|DISPELLABLE";
+				tIsHarmful = false;
+			else
+				tFilterString = "HARMFUL|DISPELLABLE";
+				tIsHarmful = true;
+			end
+
+			tinsert(aResult, {
+				["itemIndex"] = anItemIndex,
+				["filterString"] = tFilterString,
+				["candidateFilters"] = {
+					["includeDispelTypes"] = {
+						[tDispelName] = true,
+					},
+				},
+				["isHarmful"] = tIsHarmful,
+				["friendlyOnly"] = tIsHarmful,
+				["hostileOnly"] = not tIsHarmful,
+			});
+
+			return;
+		end
+
+		tinsert(aResult, {
+			["itemIndex"] = anItemIndex,
+			["isStatic"] = true,
+		});
+
+		return;
+
+	end
+
+
+
+	--
+	local function VUHDO_appendBouquetFilterPieces(aBouquet, aResult)
+
+		for tItemIdx = 1, #aBouquet do
+			VUHDO_appendBouquetItemFilterPieces(aResult, tItemIdx, aBouquet[tItemIdx]);
+		end
+
+		return;
+
+	end
+
+
+
+	--
+	local tBouquet;
+	local tResult;
+	function VUHDO_buildBouquetAuraFilterPieces(aBouquetName)
+
+		if not aBouquetName then
+			return { };
+		end
+
+		tBouquet = VUHDO_BOUQUETS["STORED"] and VUHDO_BOUQUETS["STORED"][aBouquetName];
+		tBouquet = VUHDO_decompressIfCompressed(tBouquet);
+
+		if type(tBouquet) ~= "table" then
+			return { };
+		end
+
+		tResult = { };
+
+		VUHDO_appendBouquetFilterPieces(tBouquet, tResult);
+
+		return tResult;
+
+	end
+
+end
+
+
+
+do
+	--
+	local sEmpty = { };
+	local tSourceFilter;
+	local function VUHDO_addAuraSoundMatcherSpell(aMatcher, aKey, anIsMine, anIsOthers)
+
+		if not aKey then
+			return;
+		end
+
+		tSourceFilter = aMatcher["spells"][aKey];
+
+		if not tSourceFilter then
+			tSourceFilter = {
+				["mine"] = anIsMine,
+				["others"] = anIsOthers,
+			};
+
+			aMatcher["spells"][aKey] = tSourceFilter;
+		end
+
+		return;
+
+	end
+
+
+
+	--
+	local tMatchValue;
+	local tIsMine;
+	local tIsOthers;
+	local function VUHDO_addAuraSoundMatcherListEntry(aMatcher, anEntry)
+
+		if not anEntry or not anEntry["value"] then
+			return;
+		end
+
+		tMatchValue = anEntry["value"];
+
+		if anEntry["isNameMatch"] and type(tMatchValue) == "number" then
+			tMatchValue = VUHDO_AURA_NAME_MATCH_SPELL_NAMES[tMatchValue] or tMatchValue;
+		end
+
+		tIsMine = anEntry["mine"] ~= false;
+		tIsOthers = anEntry["others"] == true;
+
+		twipe(sSoundMatcherSpellIds);
+		VUHDO_addResolvedAuraContainerSpellIds(sSoundMatcherSpellIds, tMatchValue);
+
+		for tSpellId in pairs(sSoundMatcherSpellIds) do
+			VUHDO_addAuraSoundMatcherSpell(aMatcher, tSpellId, tIsMine, tIsOthers);
+		end
+
+		if type(tMatchValue) == "string" or type(tMatchValue) == "number" then
+			VUHDO_addAuraSoundMatcherSpell(aMatcher, tMatchValue, tIsMine, tIsOthers);
+		end
+
+		return;
+
+	end
+
+
+
+	--
+	local tGroup;
+	local tGroupType;
+	local function VUHDO_appendAuraSoundMatcherFromAuraGroupId(anAuraGroupId, aMatcher, aVisitedGroupIds)
+
+		if not anAuraGroupId or aVisitedGroupIds[anAuraGroupId] then
+			return;
+		end
+
+		aVisitedGroupIds[anAuraGroupId] = true;
+
+		tGroup = VUHDO_getAuraGroup(anAuraGroupId);
+
+		if not tGroup then
+			return;
+		end
+
+		tGroupType = tGroup["type"] or VUHDO_AURA_GROUP_TYPE_FILTER;
+
+		if tGroupType == VUHDO_AURA_GROUP_TYPE_LIST then
+			VUHDO_appendAuraSoundMatcherFromListGroup(tGroup, anAuraGroupId, aMatcher, aVisitedGroupIds, false);
+		else
+			tinsert(aMatcher["groupIds"], anAuraGroupId);
+		end
+
+		return;
+
+	end
+
+
+
+	--
+	function VUHDO_appendAuraSoundMatcherFromListGroup(aGroup, aGroupId, aMatcher, aVisitedGroupIds, anIsSkipSpellEntries)
+
+		if not aGroup then
+			return;
+		end
+
+		if aGroupId and aVisitedGroupIds[aGroupId] then
+			return;
+		end
+
+		if aGroupId then
+			aVisitedGroupIds[aGroupId] = true;
+		end
+
+		for _, tEntry in ipairs(aGroup["entries"] or sEmpty) do
+			if tEntry["entryType"] == VUHDO_AURA_LIST_ENTRY_SPELL and not anIsSkipSpellEntries then
+				VUHDO_addAuraSoundMatcherListEntry(aMatcher, tEntry);
+			elseif tEntry["entryType"] == VUHDO_AURA_LIST_ENTRY_BOUQUET and tEntry["value"] then
+				VUHDO_appendAuraSoundMatcherFromBouquet(tEntry["value"], aMatcher, aVisitedGroupIds);
+			end
+		end
+
+		return;
+
+	end
+
+
+
+	--
+	local tName;
+	local tSpecial;
+	local tAuraGroupId;
+	local tSpellId;
+	local function VUHDO_appendAuraSoundMatcherFromBouquetItem(anItem, aMatcher, aVisitedGroupIds)
+
+		tName = anItem["name"];
+		tSpecial = VUHDO_BOUQUET_BUFFS_SPECIAL[tName];
+
+		if not tSpecial then
+			tIsMine = anItem["mine"] ~= false;
+			tIsOthers = anItem["others"] == true;
+
+			twipe(sSoundMatcherSpellIds);
+			VUHDO_addResolvedAuraContainerSpellIds(sSoundMatcherSpellIds, tName);
+
+			for tResolvedSpellId in pairs(sSoundMatcherSpellIds) do
+				VUHDO_addAuraSoundMatcherSpell(aMatcher, tResolvedSpellId, tIsMine, tIsOthers);
+			end
+
+			tSpellId = VUHDO_resolveAuraContainerSpellId(tName);
+
+			if tSpellId then
+				VUHDO_addAuraSoundMatcherSpell(aMatcher, tSpellId, tIsMine, tIsOthers);
+			end
+
+			if not VUHDO_strempty(tName) then
+				VUHDO_addAuraSoundMatcherSpell(aMatcher, tName, tIsMine, tIsOthers);
+			end
+
+			return;
+		end
+
+		if sDispelSpecialToDispelName[tName] then
+			aMatcher["dispels"][sDispelSpecialToDispelName[tName]] = true;
+
+			return;
+		end
+
+		if tSpecial["custom_type"] == VUHDO_BOUQUET_CUSTOM_TYPE_AURA_GROUP then
+			tAuraGroupId = anItem["custom"] and anItem["custom"]["auraGroupId"];
+
+			VUHDO_appendAuraSoundMatcherFromAuraGroupId(tAuraGroupId, aMatcher, aVisitedGroupIds);
+		end
+
+		return;
+
+	end
+
+
+
+	--
+	local tBouquet;
+	local function VUHDO_appendAuraSoundMatcherFromBouquetItems(aBouquet, aMatcher, aVisitedGroupIds)
+
+		for tItemIdx = 1, #aBouquet do
+			VUHDO_appendAuraSoundMatcherFromBouquetItem(aBouquet[tItemIdx], aMatcher, aVisitedGroupIds);
+		end
+
+		return;
+
+	end
+
+
+
+	--
+	function VUHDO_appendAuraSoundMatcherFromBouquet(aBouquetName, aMatcher, aVisitedGroupIds)
+
+		if not aBouquetName then
+			return;
+		end
+
+		tBouquet = VUHDO_BOUQUETS["STORED"] and VUHDO_BOUQUETS["STORED"][aBouquetName];
+		tBouquet = VUHDO_decompressIfCompressed(tBouquet);
+
+		if type(tBouquet) ~= "table" then
+			return;
+		end
+
+		VUHDO_appendAuraSoundMatcherFromBouquetItems(tBouquet, aMatcher, aVisitedGroupIds);
 
 		return;
 
@@ -4353,14 +4757,9 @@ end
 
 do
 	--
-	local tBouquet;
-	local tItem;
-	local tName;
-	local tSpecial;
-	local tSpellId;
 	local tListBouquetIconColor;
 	local tSourceColor;
-	local function VUHDO_buildListBouquetIconColorFromItem(aItem)
+	function VUHDO_buildListBouquetIconColorFromItem(aItem)
 
 		if not aItem or not aItem["color"] or not aItem["color"]["R"] or not aItem["color"]["useBackground"] then
 			return nil;
@@ -4378,10 +4777,17 @@ do
 		return tListBouquetIconColor;
 
 	end
+end
 
 
 
+do
 	--
+	local tBouquet;
+	local tItem;
+	local tName;
+	local tSpecial;
+	local tSpellId;
 	local tEntries;
 	local tEntryCount;
 	local tDispelTypes;
@@ -4539,242 +4945,123 @@ do
 		return tResult;
 
 	end
+end
 
 
 
+do
 	--
-	local tMixedResult;
-	local tMixedItemCount;
-	local tMixedItem;
-	local tMixedItemStackLevel;
-	local tMixedPieceKey;
-	local tMixedSpellId;
-	local tMixedIncludeSpellIds;
-	local tMixedDispelName;
-	local tMixedFilterString;
-	local tMixedCandidateFilters;
-	local tMixedButtonSetup;
-	local tMixedFrameLevelOffset;
-	local tAuraGroupId;
-	local tAuraGroup;
-	local tResolved;
-	local tCandidateBranches;
-	local tBranchFilterStrings;
-	local tMixedIsHarmful;
-	local tMixedAuraGroupHandled;
+	local tBouquet;
+	local tResult;
+	local tItemCount;
+	local tItem;
+	local tStackLevel;
+	local tSlotKey;
+	local tPieces;
+	local tPiece;
+	local tButtonSetup;
+	local tFrameLevelOffset;
 	function VUHDO_buildMixedBouquetListSlotTemplates(aBouquetName, aListEntryIndex, aSlotX, aSlotY, aPixelWidth, aPixelHeight, aTemplateName, aAnchorButtonSetup, aGroup)
 
-		tMixedResult = { };
+		tResult = { };
 
 		if not aBouquetName then
-			return tMixedResult;
+			return tResult;
 		end
+
+		tPieces = VUHDO_buildBouquetAuraFilterPieces(aBouquetName);
 
 		tBouquet = VUHDO_BOUQUETS["STORED"] and VUHDO_BOUQUETS["STORED"][aBouquetName];
 		tBouquet = VUHDO_decompressIfCompressed(tBouquet);
 
 		if type(tBouquet) ~= "table" then
-			return tMixedResult;
+			return tResult;
 		end
 
-		tMixedItemCount = #tBouquet;
+		tItemCount = #tBouquet;
 
-		for tMixedItemIdx = 1, tMixedItemCount do
-			tMixedItem = tBouquet[tMixedItemIdx];
-			tName = tMixedItem["name"];
-			tSpecial = VUHDO_BOUQUET_BUFFS_SPECIAL[tName];
-			tMixedItemStackLevel = tMixedItemCount - tMixedItemIdx + 1;
-			tMixedFrameLevelOffset = 1 + tMixedItemStackLevel;
-			tMixedPieceKey = format("slot%d:%d", aListEntryIndex, tMixedItemIdx);
-			tMixedSpellId = nil;
-			tMixedDispelName = nil;
-			tMixedAuraGroupHandled = false;
+		for tPieceIdx = 1, #tPieces do
+			tPiece = tPieces[tPieceIdx];
+			tItem = tBouquet[tPiece["itemIndex"]];
+			tStackLevel = tItemCount - tPiece["itemIndex"] + 1;
+			tFrameLevelOffset = 1 + tStackLevel;
+			tSlotKey = format("slot%d:%d", aListEntryIndex, tPiece["itemIndex"]);
 
-			if not tSpecial then
-				tMixedIncludeSpellIds = { };
+			if tPiece["isStatic"] then
+				tButtonSetup = { };
 
-				VUHDO_addResolvedAuraContainerSpellIds(tMixedIncludeSpellIds, tName);
-
-				if next(tMixedIncludeSpellIds) then
-					tMixedSpellId = VUHDO_resolveAuraContainerSpellId(tName);
-				else
-					tMixedSpellId = nil;
-				end
-			elseif sDispelSpecialToDispelName[tName] then
-				tMixedDispelName = sDispelSpecialToDispelName[tName];
-			elseif tSpecial and tSpecial["custom_type"] == VUHDO_BOUQUET_CUSTOM_TYPE_AURA_GROUP then
-				tAuraGroupId = tMixedItem["custom"] and tMixedItem["custom"]["auraGroupId"];
-
-				tAuraGroup = VUHDO_getAuraGroup(tAuraGroupId);
-
-				if tAuraGroup and VUHDO_isAuraGroupContainerExpressible(tAuraGroup) then
-					tResolved = VUHDO_getAuraGroupResolvedFilters(tAuraGroup);
-
-					tCandidateBranches = tResolved and tResolved["candidateBranches"];
-					tBranchFilterStrings = tResolved and tResolved["candidateBranchFilterStrings"];
-
-					if tCandidateBranches and #tCandidateBranches > 0 then
-						for tBranchIdx = 1, #tCandidateBranches do
-							tMixedFilterString = (tBranchFilterStrings and tBranchFilterStrings[tBranchIdx]) or (tResolved and tResolved["filterString"]) or "HARMFUL";
-
-							tMixedCandidateFilters = VUHDO_deepCopyTable(tCandidateBranches[tBranchIdx]);
-
-							tMixedIsHarmful = strfind(tMixedFilterString, "HARMFUL", 1, true) ~= nil;
-
-							tMixedButtonSetup = { };
-
-							for tMixedKey, tMixedValue in pairs(aAnchorButtonSetup) do
-								tMixedButtonSetup[tMixedKey] = tMixedValue;
-							end
-
-							tMixedButtonSetup["frameLevelOffset"] = tMixedFrameLevelOffset;
-
-							tMixedButtonSetup["iconColor"] = VUHDO_buildListBouquetIconColorFromItem(tMixedItem);
-
-							if tMixedItem["icon"] and tMixedItem["icon"] ~= 1 and VUHDO_CUSTOM_ICONS[tMixedItem["icon"]] then
-								tMixedButtonSetup["staticIcon"] = VUHDO_CUSTOM_ICONS[tMixedItem["icon"]][2];
-							end
-
-							tinsert(tMixedResult, {
-								["key"] = format("%s:b%d", tMixedPieceKey, tBranchIdx),
-								["filterString"] = tMixedFilterString,
-								["candidateFilters"] = tMixedCandidateFilters,
-								["isHarmful"] = tMixedIsHarmful,
-								["mixedEntryIndex"] = aListEntryIndex,
-								["mixedItemIndex"] = tMixedItemIdx,
-								["auraGroupScopeApplied"] = true,
-								["templateName"] = aTemplateName,
-								["buttonSetup"] = tMixedButtonSetup,
-								["x"] = aSlotX,
-								["y"] = aSlotY,
-								["width"] = aPixelWidth,
-								["height"] = aPixelHeight,
-							});
-
-							VUHDO_applyAuraGroupScopeFlags(tMixedResult[#tMixedResult], tAuraGroup);
-						end
-
-						tMixedAuraGroupHandled = true;
-					end
-				end
-			end
-
-			if tMixedSpellId then
-				if tMixedItem["mine"] ~= false and tMixedItem["others"] ~= true then
-					tMixedFilterString = "HELPFUL|PLAYER";
-				elseif tMixedItem["others"] == true and tMixedItem["mine"] == false then
-					tMixedFilterString = "HELPFUL|!PLAYER";
-				else
-					tMixedFilterString = "HELPFUL";
+				for tSetupKey, tSetupValue in pairs(aAnchorButtonSetup) do
+					tButtonSetup[tSetupKey] = tSetupValue;
 				end
 
-				tMixedCandidateFilters = {
-					["includeSpellIDs"] = tMixedIncludeSpellIds,
-				};
+				tButtonSetup["frameLevelOffset"] = tFrameLevelOffset;
 
-				tMixedButtonSetup = { };
-
-				for tMixedKey, tMixedValue in pairs(aAnchorButtonSetup) do
-					tMixedButtonSetup[tMixedKey] = tMixedValue;
-				end
-
-				tMixedButtonSetup["frameLevelOffset"] = tMixedFrameLevelOffset;
-
-				tMixedButtonSetup["iconColor"] = VUHDO_buildListBouquetIconColorFromItem(tMixedItem);
-
-				if tMixedItem["icon"] and tMixedItem["icon"] ~= 1 and VUHDO_CUSTOM_ICONS[tMixedItem["icon"]] then
-					tMixedButtonSetup["staticIcon"] = VUHDO_CUSTOM_ICONS[tMixedItem["icon"]][2];
-				end
-
-				tinsert(tMixedResult, {
-					["key"] = tMixedPieceKey,
-					["filterString"] = tMixedFilterString,
-					["candidateFilters"] = tMixedCandidateFilters,
-					["isHarmful"] = false,
-					["friendlyOnly"] = true,
-					["mixedEntryIndex"] = aListEntryIndex,
-					["mixedItemIndex"] = tMixedItemIdx,
-					["templateName"] = aTemplateName,
-					["buttonSetup"] = tMixedButtonSetup,
-					["x"] = aSlotX,
-					["y"] = aSlotY,
-					["width"] = aPixelWidth,
-					["height"] = aPixelHeight,
-				});
-			elseif tMixedDispelName then
-				tMixedButtonSetup = { };
-
-				for tMixedKey, tMixedValue in pairs(aAnchorButtonSetup) do
-					tMixedButtonSetup[tMixedKey] = tMixedValue;
-				end
-
-				tMixedButtonSetup["frameLevelOffset"] = tMixedFrameLevelOffset;
-
-				tMixedButtonSetup["iconColor"] = VUHDO_buildListBouquetIconColorFromItem(tMixedItem);
-
-				if VUHDO_isDispelNameHostile(tMixedDispelName) then
-					tMixedFilterString = "HELPFUL|DISPELLABLE";
-					tIsHarmful = false;
-				else
-					tMixedFilterString = "HARMFUL|DISPELLABLE";
-					tIsHarmful = true;
-				end
-
-				tinsert(tMixedResult, {
-					["key"] = tMixedPieceKey,
-					["filterString"] = tMixedFilterString,
-					["candidateFilters"] = {
-						["includeDispelTypes"] = {
-							[tMixedDispelName] = true,
-						},
-					},
-					["isHarmful"] = tIsHarmful,
-					["friendlyOnly"] = tIsHarmful,
-					["hostileOnly"] = not tIsHarmful,
-					["mixedEntryIndex"] = aListEntryIndex,
-					["mixedItemIndex"] = tMixedItemIdx,
-					["templateName"] = aTemplateName,
-					["buttonSetup"] = tMixedButtonSetup,
-					["x"] = aSlotX,
-					["y"] = aSlotY,
-					["width"] = aPixelWidth,
-					["height"] = aPixelHeight,
-				});
-			elseif not tMixedAuraGroupHandled then
-				tMixedButtonSetup = { };
-
-				for tMixedKey, tMixedValue in pairs(aAnchorButtonSetup) do
-					tMixedButtonSetup[tMixedKey] = tMixedValue;
-				end
-
-				tMixedButtonSetup["frameLevelOffset"] = tMixedFrameLevelOffset;
-
-				tinsert(tMixedResult, {
-					["key"] = tMixedPieceKey,
+				tinsert(tResult, {
+					["key"] = tSlotKey,
 					["isStaticBouquetSlot"] = true,
 					["isMixedBouquetItem"] = true,
 					["bouquetName"] = aBouquetName,
 					["entryIndex"] = aListEntryIndex,
-					["itemIndex"] = tMixedItemIdx,
-					["frameLevelOffset"] = tMixedFrameLevelOffset,
-					["buttonSetup"] = tMixedButtonSetup,
+					["itemIndex"] = tPiece["itemIndex"],
+					["frameLevelOffset"] = tFrameLevelOffset,
+					["buttonSetup"] = tButtonSetup,
 					["x"] = aSlotX,
 					["y"] = aSlotY,
 					["width"] = aPixelWidth,
 					["height"] = aPixelHeight,
 				});
-			end
-		end
+			else
+				tButtonSetup = { };
 
-		if aGroup then
-			for tMixedSlotCnt = 1, #tMixedResult do
-				if not tMixedResult[tMixedSlotCnt]["isStaticBouquetSlot"] and not tMixedResult[tMixedSlotCnt]["auraGroupScopeApplied"] then
-					VUHDO_applyAuraGroupScopeFlags(tMixedResult[tMixedSlotCnt], aGroup);
+				for tSetupKey, tSetupValue in pairs(aAnchorButtonSetup) do
+					tButtonSetup[tSetupKey] = tSetupValue;
+				end
+
+				tButtonSetup["frameLevelOffset"] = tFrameLevelOffset;
+
+				tButtonSetup["iconColor"] = VUHDO_buildListBouquetIconColorFromItem(tItem);
+
+				if tItem["icon"] and tItem["icon"] ~= 1 and VUHDO_CUSTOM_ICONS[tItem["icon"]] then
+					tButtonSetup["staticIcon"] = VUHDO_CUSTOM_ICONS[tItem["icon"]][2];
+				end
+
+				if tPiece["branchIndex"] then
+					tSlotKey = format("%s:b%d", tSlotKey, tPiece["branchIndex"]);
+				end
+
+				tinsert(tResult, {
+					["key"] = tSlotKey,
+					["filterString"] = tPiece["filterString"],
+					["candidateFilters"] = tPiece["candidateFilters"],
+					["isHarmful"] = tPiece["isHarmful"] == true,
+					["friendlyOnly"] = tPiece["friendlyOnly"],
+					["hostileOnly"] = tPiece["hostileOnly"],
+					["mixedEntryIndex"] = aListEntryIndex,
+					["mixedItemIndex"] = tPiece["itemIndex"],
+					["auraGroupScopeApplied"] = tPiece["auraGroup"] ~= nil,
+					["templateName"] = aTemplateName,
+					["buttonSetup"] = tButtonSetup,
+					["x"] = aSlotX,
+					["y"] = aSlotY,
+					["width"] = aPixelWidth,
+					["height"] = aPixelHeight,
+				});
+
+				if tPiece["auraGroup"] then
+					VUHDO_applyAuraGroupScopeFlags(tResult[#tResult], tPiece["auraGroup"]);
 				end
 			end
 		end
 
-		return tMixedResult;
+		if aGroup then
+			for tSlotCnt = 1, #tResult do
+				if not tResult[tSlotCnt]["isStaticBouquetSlot"] and not tResult[tSlotCnt]["auraGroupScopeApplied"] then
+					VUHDO_applyAuraGroupScopeFlags(tResult[tSlotCnt], aGroup);
+				end
+			end
+		end
+
+		return tResult;
 
 	end
 end
