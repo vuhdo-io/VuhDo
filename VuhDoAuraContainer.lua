@@ -1917,15 +1917,13 @@ do
 			aAuraButton:SetMouseMotionEnabled(false);
 		elseif aButtonSetup["mouseMotion"] == false then
 			aAuraButton:SetMouseMotionEnabled(false);
+		elseif InCombatLockdown() then
+			aAuraButton:SetMouseMotionEnabled(false);
 		else
 			aAuraButton:EnableMouse(true);
 			aAuraButton:SetMouseMotionEnabled(true);
 			aAuraButton:SetPropagateMouseMotion(true);
-			aAuraButton:SetMouseClickEnabled(false);
-
-			if not InCombatLockdown() then
-				aAuraButton:SetPropagateMouseClicks(true);
-			end
+			aAuraButton:SetPropagateMouseClicks(true);
 		end
 
 		if aButtonSetup["glowIcon"] then
