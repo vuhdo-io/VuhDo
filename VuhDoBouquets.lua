@@ -5,6 +5,7 @@ local floor = floor;
 local select = select;
 local twipe = table.wipe;
 local tinsert = table.insert;
+local tremove = table.remove;
 local tsort = table.sort;
 local ipairs = ipairs;
 local pairs = pairs;
@@ -61,9 +62,11 @@ local VUHDO_AURA_LIST_BOUQUETS;
 local VUHDO_UNIT_AURA_LIST_SLOTS;
 local VUHDO_MAX_PANELS;
 local VUHDO_AURA_GROUP_TYPE_LIST;
+local VUHDO_AURA_GROUP_TYPE_FILTER;
 local VUHDO_AURA_LIST_ENTRY_BOUQUET;
 local VUHDO_AURA_LIST_ENTRY_SPELL;
 local VUHDO_BOUQUET_RESTRICTED_NON_AURA;
+local VUHDO_BOUQUET_RESTRICTED_UNSUPPORTED;
 local VUHDO_SECRET_TYPE_DISPEL;
 local VUHDO_SECRET_TYPE_DURATION;
 local VUHDO_BOUQUET_CUSTOM_TYPE_AURA_GROUP;
@@ -195,6 +198,12 @@ local sAuraConsumingSpecialNames = {
 local sRestrictedModeClassCache = { };
 local sHasAuraGroupItemCache = { };
 local sIsContainerGroupExpressibleCache = { };
+local sRestrictedModeClassInProgress = { };
+local sIsAuraGroupExpressibleCache = { };
+local sGroupFlagStack = { };
+local sKeyStack = { };
+local sVisitedBouquets = { };
+local sVisitedGroups = { };
 
 
 
@@ -253,6 +262,8 @@ function VUHDO_bouquetsInitLocalOverrides()
 	VUHDO_UNIT_AURA_LIST_SLOTS = _G["VUHDO_UNIT_AURA_LIST_SLOTS"];
 	VUHDO_MAX_PANELS = _G["VUHDO_MAX_PANELS"];
 	VUHDO_AURA_GROUP_TYPE_LIST = _G["VUHDO_AURA_GROUP_TYPE_LIST"];
+	VUHDO_AURA_GROUP_TYPE_FILTER = _G["VUHDO_AURA_GROUP_TYPE_FILTER"];
+	VUHDO_BOUQUET_RESTRICTED_UNSUPPORTED = _G["VUHDO_BOUQUET_RESTRICTED_UNSUPPORTED"];
 	VUHDO_AURA_LIST_ENTRY_BOUQUET = _G["VUHDO_AURA_LIST_ENTRY_BOUQUET"];
 	VUHDO_AURA_LIST_ENTRY_SPELL = _G["VUHDO_AURA_LIST_ENTRY_SPELL"];
 	VUHDO_BOUQUET_RESTRICTED_NON_AURA = _G["VUHDO_BOUQUET_RESTRICTED_NON_AURA"];
@@ -3967,6 +3978,7 @@ do
 	local tHasNonAuraItem;
 	local tAuraGroup;
 	local tAuraGroupId;
+	local tIsAuraGroupExpressible;
 	function VUHDO_classifyBouquetRestrictedMode(aBouquetName)
 
 		if not aBouquetName then
@@ -3979,14 +3991,48 @@ do
 			return tClass;
 		end
 
+		if sRestrictedModeClassInProgress[aBouquetName] then
+			return VUHDO_BOUQUET_RESTRICTED_UNSUPPORTED;
+		end
+
+		sRestrictedModeClassInProgress[aBouquetName] = true;
+
 		tBouquet = VUHDO_BOUQUETS["STORED"] and VUHDO_BOUQUETS["STORED"][aBouquetName];
 		tBouquet = VUHDO_decompressIfCompressed(tBouquet);
 
 		if type(tBouquet) ~= "table" then
+			sRestrictedModeClassInProgress[aBouquetName] = nil;
 			sRestrictedModeClassCache[aBouquetName] = VUHDO_BOUQUET_RESTRICTED_NON_AURA;
 
 			return VUHDO_BOUQUET_RESTRICTED_NON_AURA;
 		end
+
+		for tCnt = 1, #tBouquet do
+			tItem = tBouquet[tCnt];
+			tName = tItem["name"];
+			tSpecial = VUHDO_BOUQUET_BUFFS_SPECIAL[tName];
+
+			if tSpecial and tSpecial["custom_type"] == VUHDO_BOUQUET_CUSTOM_TYPE_AURA_GROUP then
+				tAuraGroupId = tItem["custom"] and tItem["custom"]["auraGroupId"];
+
+				if tAuraGroupId and sIsAuraGroupExpressibleCache[tAuraGroupId] == nil then
+					tAuraGroup = VUHDO_getAuraGroup(tAuraGroupId);
+					tIsAuraGroupExpressible = tAuraGroup and VUHDO_isAuraGroupContainerExpressible(tAuraGroup) or false;
+
+					tBouquet = VUHDO_BOUQUETS["STORED"] and VUHDO_BOUQUETS["STORED"][aBouquetName];
+					tBouquet = VUHDO_decompressIfCompressed(tBouquet);
+					tItem = tBouquet[tCnt];
+					tAuraGroupId = tItem["custom"] and tItem["custom"]["auraGroupId"];
+
+					if tAuraGroupId then
+						sIsAuraGroupExpressibleCache[tAuraGroupId] = tIsAuraGroupExpressible;
+					end
+				end
+			end
+		end
+
+		tBouquet = VUHDO_BOUQUETS["STORED"] and VUHDO_BOUQUETS["STORED"][aBouquetName];
+		tBouquet = VUHDO_decompressIfCompressed(tBouquet);
 
 		tHasAuraItem = false;
 		tAllHelpfulSpells = true;
@@ -4012,7 +4058,7 @@ do
 					tAuraGroupId = tItem["custom"] and tItem["custom"]["auraGroupId"];
 					tAuraGroup = VUHDO_getAuraGroup(tAuraGroupId);
 
-					if tAuraGroup and VUHDO_isAuraGroupContainerExpressible(tAuraGroup) then
+					if tAuraGroup and sIsAuraGroupExpressibleCache[tAuraGroupId] then
 						tHasOverlayAuraItem = true;
 					else
 						tHasUnsupportedAuraItem = true;
@@ -4078,6 +4124,7 @@ do
 			tClass = VUHDO_BOUQUET_RESTRICTED_UNSUPPORTED;
 		end
 
+		sRestrictedModeClassInProgress[aBouquetName] = nil;
 		sRestrictedModeClassCache[aBouquetName] = tClass;
 
 		return tClass;
@@ -4130,11 +4177,118 @@ do
 		twipe(sRestrictedModeClassCache);
 		twipe(sHasAuraGroupItemCache);
 		twipe(sIsContainerGroupExpressibleCache);
+		twipe(sRestrictedModeClassInProgress);
+		twipe(sIsAuraGroupExpressibleCache);
 
 		return;
 
 	end
 
+end
+
+
+
+do
+	--
+	local tIsGroup;
+	local tKey;
+	local tGroup;
+	local tBouquet;
+	local tItem;
+	local tSpecial;
+	local tAuraGroupId;
+	local tStackSize;
+	local function VUHDO_isReferenceReachable(anIsStartGroup, aStartKey, anIsTargetGroup, aTargetKey)
+
+		if not aStartKey or not aTargetKey then
+			return false;
+		end
+
+		twipe(sGroupFlagStack);
+		twipe(sKeyStack);
+		twipe(sVisitedBouquets);
+		twipe(sVisitedGroups);
+
+		tinsert(sGroupFlagStack, anIsStartGroup);
+		tinsert(sKeyStack, aStartKey);
+
+		while #sKeyStack > 0 do
+			tStackSize = #sKeyStack;
+			tIsGroup = sGroupFlagStack[tStackSize];
+			tKey = sKeyStack[tStackSize];
+			tremove(sGroupFlagStack);
+			tremove(sKeyStack);
+
+			if tIsGroup then
+				if tKey == aTargetKey and anIsTargetGroup then
+					return true;
+				end
+
+				if not sVisitedGroups[tKey] then
+					sVisitedGroups[tKey] = true;
+
+					tGroup = VUHDO_getAuraGroupRaw(tKey);
+
+					if tGroup and (tGroup["type"] or VUHDO_AURA_GROUP_TYPE_FILTER) == VUHDO_AURA_GROUP_TYPE_LIST then
+						for _, tEntry in ipairs(tGroup["entries"] or sEmpty) do
+							if tEntry["entryType"] == VUHDO_AURA_LIST_ENTRY_BOUQUET and tEntry["value"] then
+								tinsert(sGroupFlagStack, false);
+								tinsert(sKeyStack, tEntry["value"]);
+							end
+						end
+					end
+				end
+			else
+				if tKey == aTargetKey and not anIsTargetGroup then
+					return true;
+				end
+
+				if not sVisitedBouquets[tKey] then
+					sVisitedBouquets[tKey] = true;
+
+					tBouquet = VUHDO_BOUQUETS["STORED"] and VUHDO_BOUQUETS["STORED"][tKey];
+					tBouquet = VUHDO_decompressIfCompressed(tBouquet);
+
+					if type(tBouquet) == "table" then
+						for tCnt = 1, #tBouquet do
+							tItem = tBouquet[tCnt];
+							tSpecial = VUHDO_BOUQUET_BUFFS_SPECIAL[tItem["name"]];
+
+							if tSpecial and tSpecial["custom_type"] == VUHDO_BOUQUET_CUSTOM_TYPE_AURA_GROUP then
+								tAuraGroupId = tItem["custom"] and tItem["custom"]["auraGroupId"];
+
+								if tAuraGroupId then
+									tinsert(sGroupFlagStack, true);
+									tinsert(sKeyStack, tAuraGroupId);
+								end
+							end
+						end
+					end
+				end
+			end
+		end
+
+		return false;
+
+	end
+
+
+
+	--
+	function VUHDO_bouquetReachesAuraGroup(aBouquetName, aGroupId)
+
+		return VUHDO_isReferenceReachable(false, aBouquetName, true, aGroupId);
+
+	end
+
+
+
+	--
+	function VUHDO_auraGroupReachesBouquet(aGroupId, aBouquetName)
+
+		return VUHDO_isReferenceReachable(true, aGroupId, false, aBouquetName);
+
+	end
 end
 
 

@@ -3242,6 +3242,12 @@ function VUHDO_auraGroupsListAddBouquet()
 		return;
 	end
 
+	if VUHDO_bouquetReachesAuraGroup(tBouquetName, sSelectedGroupId) then
+		VUHDO_Msg(VUHDO_I18N_AURA_GROUP_BOUQUET_CYCLE, 1, 0.4, 0.4);
+
+		return;
+	end
+
 	if not tGroup["entries"] then
 		tGroup["entries"] = { };
 	end

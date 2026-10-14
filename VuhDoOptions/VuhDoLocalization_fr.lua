@@ -1810,3 +1810,4 @@ VUHDO_I18N_MATCH_BY_NAME = "Match by name";
 VUHDO_I18N_COLOR_ON_PANDEMIC = "Pandemic Color";
 VUHDO_I18N_FLASH_ON_PANDEMIC = "Pandemic Flash";
 VUHDO_I18N_PANDEMIC = "Pandemic";
+VUHDO_I18N_AURA_GROUP_BOUQUET_CYCLE = "This bouquet already refers to this aura group. Adding it would create a loop.";
