@@ -2425,6 +2425,27 @@ end
 
 
 
+VUHDO_DEFAULT_AURA_DEFAULTS = {
+	["iconSize"] = 40,
+	["iconSpacing"] = 2,
+	["barWidth"] = 100,
+	["barHeight"] = 30,
+	["showTimer"] = true,
+	["showStacks"] = true,
+	["showClock"] = false,
+	["fadeOnLow"] = false,
+	["fadeThreshold"] = 3,
+	["flashOnLow"] = false,
+	["flashThreshold"] = 2,
+	["dispelBorder"] = false,
+	["showTooltip"] = true,
+	["rangeFade"] = true,
+	["colorOnPandemic"] = false,
+	["flashOnPandemic"] = false,
+};
+
+
+
 local VUHDO_DEFAULT_PANEL_SETUP = {
 	["PRIVATE_AURA_SHOW_DISPEL_TYPE"] = true,
 
@@ -2664,24 +2685,7 @@ local VUHDO_DEFAULT_PANEL_SETUP = {
 		},
 	}, -- BAR_COLORS
 
-	["AURA_DEFAULTS"] = {
-		["iconSize"] = 40,
-		["iconSpacing"] = 2,
-		["barWidth"] = 100,
-		["barHeight"] = 30,
-		["showTimer"] = true,
-		["showStacks"] = true,
-		["showClock"] = false,
-		["fadeOnLow"] = false,
-		["fadeThreshold"] = 3,
-		["flashOnLow"] = false,
-		["flashThreshold"] = 2,
-		["dispelBorder"] = false,
-		["showTooltip"] = true,
-		["rangeFade"] = true,
-		["colorOnPandemic"] = false,
-		["flashOnPandemic"] = false,
-	},
+	["AURA_DEFAULTS"] = VUHDO_deepCopyTable(VUHDO_DEFAULT_AURA_DEFAULTS),
 };
 
 
