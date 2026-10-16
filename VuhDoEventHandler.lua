@@ -2669,6 +2669,7 @@ do
 				VUHDO_TIMERS["REGISTER_BOUQUETS"] = 0.3;
 			else
 				VUHDO_registerAllBouquets(false);
+				VUHDO_rebuildAuraAnchorsForBouquetListGroups();
 				VUHDO_initAllEventBouquets();
 			end
 		end

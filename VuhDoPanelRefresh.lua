@@ -427,10 +427,10 @@ function VUHDO_deferRefreshPanelDelegate(aPanelNum)
 		tGroupArray = VUHDO_getGroupMembersSorted(tModelId, tSortBy, aPanelNum, tModelIndex);
 
 		for tGroupIdx, tUnit in ipairs(tGroupArray) do
-			tButton = VUHDO_getOrCreateHealButton(tButtonIdx, aPanelNum);
+			tButton = VUHDO_getHealButton(tButtonIdx, aPanelNum);
 			tButtonIdx = tButtonIdx + 1;
 
-			if tButton["initRevision"] ~= VUHDO_getPanelButtonInitRev(aPanelNum) then
+			if not tButton or tButton["initRevision"] ~= VUHDO_getPanelButtonInitRev(aPanelNum) then
 				sStaleButtonIndices[#sStaleButtonIndices + 1] = tButtonIdx - 1;
 			end
 		end

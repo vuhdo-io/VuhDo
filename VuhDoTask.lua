@@ -1284,7 +1284,7 @@ do
 					tMetrics["totalTasksDeduped"] = tMetrics["totalTasksDeduped"] + 1;
 				end
 
-				return false;
+				return true;
 			else
 				VUHDO_heapInsert(VUHDO_TASK_PRIORITY_QUEUE, tNewTask, VUHDO_TASK_QUEUE_MAP);
 

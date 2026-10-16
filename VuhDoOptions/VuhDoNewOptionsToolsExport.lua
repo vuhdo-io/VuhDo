@@ -1014,6 +1014,7 @@ function VUHDO_syncApply(anIsReplace)
 		VUHDO_registerAllBouquets(false);
 		VUHDO_initAllEventBouquets();
 		VUHDO_bouqetsChanged();
+		VUHDO_rebuildAuraAnchorsForBouquetListGroups();
 		VUHDO_reloadUI(false);
 	end
 

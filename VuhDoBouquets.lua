@@ -5412,10 +5412,6 @@ do
 			VUHDO_deferSyncOverlaysForUnit(tUnit);
 		end
 
-		if not aDoCompress then
-			VUHDO_rebuildAuraAnchorsForBouquetListGroups();
-		end
-
 		return;
 
 	end

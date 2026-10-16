@@ -784,6 +784,10 @@ function VUHDO_rebuildAllBouquetItems(aParent, aCursorPos)
 	end
 
 	VUHDO_bouqetsChanged();
+	VUHDO_rebuildAuraAnchorsForBouquetListGroups();
+
+	return;
+
 end
 
 
