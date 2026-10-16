@@ -711,8 +711,7 @@ local function VUHDO_statusOtherPowersValidator(anInfo, _, aSecretContext)
 		return true, nil, anInfo["power"], -1, anInfo["powermax"], VUHDO_copyColor(VUHDO_POWER_TYPE_COLORS[tPowerType or 0]), UnitPowerMissing(anInfo["unit"], tPowerType), nil, nil, nil, nil, nil, tSecretColor;
 	end
 
-	return true, nil, anInfo["power"], -1,
-		anInfo["powermax"], VUHDO_copyColor(VUHDO_POWER_TYPE_COLORS[tPowerType or 0]);
+	return true, nil, anInfo["power"], -1, anInfo["powermax"], VUHDO_copyColor(VUHDO_POWER_TYPE_COLORS[tPowerType or 0]);
 
 end
 

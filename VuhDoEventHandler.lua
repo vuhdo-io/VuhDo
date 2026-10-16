@@ -1972,6 +1972,8 @@ do
 				VUHDO_setDeferredRedrawEnabled(true);
 			elseif tSubCommand == "off" then
 				VUHDO_setDeferredRedrawEnabled(false);
+			elseif tSubCommand == "state" then
+				VUHDO_printDeferredReloadState();
 			else
 				VUHDO_printDeferredRedrawStatus();
 			end
@@ -3378,6 +3380,48 @@ function VUHDO_printDeferredRedrawStatus()
 
 	return;
 
+end
+
+
+
+do
+	--
+	local tWaitingCount;
+	local tActiveCount;
+	function VUHDO_printDeferredReloadState()
+
+		VUHDO_Msg("|cffFFD100--- Deferred Reload State ---|r");
+
+		VUHDO_Msg("|cffFFA500** Status:|r");
+		VUHDO_Msg("  |cffB0E0E6Reloading:|r " .. (VUHDO_IS_RELOADING and "|cff00ff00yes|r" or "|cffff0000no|r"));
+		VUHDO_Msg(format("  |cffB0E0E6Reload Raid Timer:|r %.2f", VUHDO_TIMERS["RELOAD_RAID"] or 0));
+		VUHDO_Msg("  |cffB0E0E6Deferred Refresh Active:|r " .. (VUHDO_isDeferredRefreshActive() and "|cff00ff00yes|r" or "|cffff0000no|r"));
+		VUHDO_Msg("  |cffB0E0E6Deferred Redraw Active:|r " .. (VUHDO_isDeferredRedrawActive() and "|cff00ff00yes|r" or "|cffff0000no|r"));
+
+		VUHDO_Msg("|cffFFA500** Active Semaphores:|r");
+
+		tActiveCount = 0;
+
+		for tSemaphoreName, tSemaphore in pairs(VUHDO_getSemaphores()) do
+			tWaitingCount = #tSemaphore["waitingTasks"];
+
+			if tSemaphore["count"] > 0 or tWaitingCount > 0 then
+				tActiveCount = tActiveCount + 1;
+
+				VUHDO_Msg(format("  |cffB0E0E6%s:|r |cffB0E0E6Cur=|r%d |cffB0E0E6Wait=|r%d |cffB0E0E6Timeout=|r%dms",
+					tSemaphoreName, tSemaphore["count"], tWaitingCount, tSemaphore["timeoutMs"] or 0));
+			end
+		end
+
+		if tActiveCount == 0 then
+			VUHDO_Msg("  None");
+		end
+
+		VUHDO_Msg("|cffFFD100--- End of Deferred Reload State ---|r");
+
+		return;
+
+	end
 end
 
 

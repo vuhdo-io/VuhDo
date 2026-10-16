@@ -4,6 +4,7 @@ local GetTime = GetTime;
 local pairs = pairs;
 local string = string;
 local xpcall = xpcall;
+local unpack = unpack;
 local debugprofilestop = debugprofilestop;
 local MeasureCall = C_AddOnProfiler and C_AddOnProfiler.MeasureCall;
 local format = string.format;
@@ -1477,37 +1478,21 @@ do
 
 	--
 	local tStack;
-	local function VUHDO_deferredTaskErrorHandler(tError)
+	local function VUHDO_deferredTaskErrorHandler(anError)
 
-		-- tError is the original error string/object
-		-- debugstack([thread,] startLevel, numLevels, levelsToSkip)
-		-- we want to skip 3 levels:
-		-- 1. this error handler function itself
-		-- 2. the C/internal call for xpcall
-		-- 3. the function wrapper around the delegate
-		-- then start capturing from the next level (the actual delegate).
-		tStack = debugstack(1, 20, 3); -- capture up to 20 levels, after skipping 3
+		-- debugstack(start, count1, count2): count1 frames from the top, count2 from the bottom (WoW API; does not skip levels).
+		tStack = debugstack(1, 20, 3);
 
-		return tostring(tError) .. "\nStacktrace:\n" .. tStack;
+		return tostring(anError) .. "\nStacktrace:\n" .. tStack;
 
 	end
 
 
 
 	--
-	local sCurrentTaskForPcall;
-	local function VUHDO_pcallTaskDelegate()
+	local function VUHDO_xpcallTaskDelegate(aTask)
 
-		return sCurrentTaskForPcall["delegate"](unpack(sCurrentTaskForPcall["args"]));
-
-	end
-
-
-
-	--
-	local function VUHDO_pcallWrapper()
-
-		return xpcall(VUHDO_pcallTaskDelegate, VUHDO_deferredTaskErrorHandler);
+		return xpcall(aTask["delegate"], VUHDO_deferredTaskErrorHandler, unpack(aTask["args"]));
 
 	end
 
@@ -1532,13 +1517,11 @@ do
 			return false, "No delegate function", 0;
 		end
 
-		sCurrentTaskForPcall = tTask;
-
 		if VUHDO_DEFERRED_TASK_PROFILING_ENABLED then
 			tTaskDurationUs = 0;
 
 			if MeasureCall then
-				tProfilerResult, tDelegateSuccess, tDelegateResult = MeasureCall(VUHDO_pcallWrapper);
+				tProfilerResult, tDelegateSuccess, tDelegateResult = MeasureCall(VUHDO_xpcallTaskDelegate, tTask);
 
 				if tProfilerResult and tProfilerResult.elapsedMilliseconds then
 					tTaskDurationUs = tProfilerResult.elapsedMilliseconds * 1000;
@@ -1546,21 +1529,19 @@ do
 			else
 				tTaskStartTime = debugprofilestop();
 
-				tDelegateSuccess, tDelegateResult = VUHDO_pcallWrapper();
+				tDelegateSuccess, tDelegateResult = VUHDO_xpcallTaskDelegate(tTask);
 
 				tTaskDurationUs = (debugprofilestop() - tTaskStartTime) * 1000;
 			end
 		else
 			tTaskStartTime = debugprofilestop();
 
-			tDelegateSuccess, tDelegateResult = VUHDO_pcallWrapper();
+			tDelegateSuccess, tDelegateResult = VUHDO_xpcallTaskDelegate(tTask);
 
 			tTaskDurationUs = (debugprofilestop() - tTaskStartTime) * 1000;
 
 			VUHDO_recordTaskCostSample(tTaskType, tTaskDurationUs);
 		end
-
-		sCurrentTaskForPcall = nil;
 
 		if VUHDO_DEFERRED_TASK_PROFILING_ENABLED then
 			tQueueTimeUs = 0;
@@ -1813,7 +1794,6 @@ do
 	local tTaskConfig;
 	local tNumTasksProcessed;
 	local tChunkElapsedTime;
-	local tChunkDelegate;
 	local tProfilerResult;
 	local tChunkStartTime;
 	local tChunkTaskMetrics;
@@ -1836,10 +1816,8 @@ do
 
 		if #VUHDO_TASK_PRIORITY_QUEUE > 0 or #sCombatHeldTasks > 0 then
 			if VUHDO_DEFERRED_TASK_PROFILING_ENABLED then
-				tChunkDelegate = VUHDO_executeDeferredTaskChunk;
-
 				if MeasureCall then
-					tProfilerResult, tNumTasksProcessed, tChunkTaskMetrics = MeasureCall(tChunkDelegate);
+					tProfilerResult, tNumTasksProcessed, tChunkTaskMetrics = MeasureCall(VUHDO_executeDeferredTaskChunk);
 
 					if tProfilerResult and tProfilerResult.elapsedMilliseconds then
 						tChunkElapsedTime = tProfilerResult.elapsedMilliseconds * 1000;
@@ -1847,7 +1825,7 @@ do
 				else
 					tChunkStartTime = debugprofilestop();
 
-					tNumTasksProcessed, tChunkTaskMetrics = tChunkDelegate();
+					tNumTasksProcessed, tChunkTaskMetrics = VUHDO_executeDeferredTaskChunk();
 
 					tChunkElapsedTime = (debugprofilestop() - tChunkStartTime) * 1000;
 				end

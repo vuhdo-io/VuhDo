@@ -603,17 +603,6 @@ end
 
 do
 	--
-	local tCopy = { };
-	function VUHDO_copyColor(aColor)
-		tCopy["R"], tCopy["G"], tCopy["B"], tCopy["O"] = aColor["R"], aColor["G"], aColor["B"], aColor["O"];
-		tCopy["TR"], tCopy["TG"], tCopy["TB"], tCopy["TO"] = aColor["TR"], aColor["TG"], aColor["TB"], aColor["TO"];
-		tCopy["useBackground"], tCopy["useText"], tCopy["useOpacity"] = aColor["useBackground"], aColor["useText"], aColor["useOpacity"];
-		return tCopy;
-	end
-
-
-
-	--
 	function VUHDO_isUseSingleBuff(aSwatch)
 
 		if VUHDO_BUFF_TARGET_SINGLE ~= aSwatch:GetAttribute("buff")[2] then
@@ -1622,22 +1611,37 @@ end
 
 do
 	--
+	local function VUHDO_copySwatchColor(aColor)
+
+		return {
+			["R"] = aColor["R"], ["G"] = aColor["G"], ["B"] = aColor["B"], ["O"] = aColor["O"],
+			["TR"] = aColor["TR"], ["TG"] = aColor["TG"], ["TB"] = aColor["TB"], ["TO"] = aColor["TO"],
+			["useBackground"] = aColor["useBackground"], ["useText"] = aColor["useText"], ["useOpacity"] = aColor["useOpacity"],
+		};
+
+	end
+
+
+
+	--
+	local tColor;
+	local tName;
 	local function VUHDO_setBuffSwatchColor(aSwatch, aColorInfo, aColorType)
 
 		if VUHDO_LAST_COLORS[aSwatch:GetName()] == aColorType then
 			return;
 		end
 
-		local tColor = VUHDO_getDiffColor(VUHDO_copyColor(sConfig["SWATCH_BG_COLOR"]), aColorInfo);
+		tColor = VUHDO_getDiffColor(VUHDO_copySwatchColor(sConfig["SWATCH_BG_COLOR"]), aColorInfo);
 		aSwatch:SetBackdropColor(VUHDO_backColor(tColor));
 
-		local tName = aSwatch:GetName();
+		tName = aSwatch:GetName();
 
 		if tColor["useText"] then
 			_G[tName .. "MessageLabelLabel"]:SetTextColor(VUHDO_textColor(tColor));
 			_G[tName .. "TimerLabelLabel"]:SetTextColor(VUHDO_textColor(tColor));
 			_G[tName .. "CounterLabelLabel"]:SetTextColor(VUHDO_textColor(tColor));
-			tColor = VUHDO_brightenTextColor(VUHDO_copyColor(aColorInfo), 0.2);
+			tColor = VUHDO_brightenTextColor(VUHDO_copySwatchColor(aColorInfo), 0.2);
 			_G[tName .. "GroupLabelLabel"]:SetTextColor(VUHDO_textColor(tColor));
 		end
 
@@ -2094,7 +2098,7 @@ do
 
 			_G[tSwatchName .. "TimerLabelLabel"]:SetTextColor(1, 1, 1, 1);
 
-			tColor = VUHDO_brightenTextColor(VUHDO_copyColor(sConfig["SWATCH_COLOR_BUFF_OKAY"]), 0.2);
+			tColor = VUHDO_brightenTextColor(VUHDO_copySwatchColor(sConfig["SWATCH_COLOR_BUFF_OKAY"]), 0.2);
 
 			_G[tSwatchName .. "GroupLabelLabel"]:SetTextColor(VUHDO_textColor(tColor));
 		end
