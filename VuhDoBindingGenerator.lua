@@ -228,6 +228,14 @@ function VUHDO_generateSetupClicksCode()
 						tAttrPrefix, tAttrSuffix, VUHDO_escapeForLuaString(tTemplate)
 					));
 				end
+			else
+				tAttrPrefix = tWithMinus;
+				tAttrSuffix = tostring(tCnt);
+
+				tinsert(tLines, format(
+					'button:SetAttribute("%stype%s", nil)',
+					tAttrPrefix, tAttrSuffix
+				));
 			end
 		end
 	end

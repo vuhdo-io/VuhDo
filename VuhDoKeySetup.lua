@@ -724,7 +724,7 @@ function VUHDO_setupAllHealButtonAttributes(aButton, aUnit, anIsDisable, aForceT
 			end
 		end
 	else
-		if not InCombatLockdown() then
+		if not InCombatLockdown() and not tPreAction then
 			VUHDO_updateBindingCodeAttributes();
 
 			tRequiresPet, tRequiresName, tRequiresTarget = VUHDO_getBindingAttributeRequirements();
