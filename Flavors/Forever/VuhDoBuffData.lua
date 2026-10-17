@@ -155,6 +155,9 @@ VUHDO_CLASS_BUFFS = {
 			{ VUHDO_SPELL_ID.BUFF_FLAMETONGUE_WEAPON, VUHDO_BUFF_TARGET_ENCHANT_OFF },
 			{ VUHDO_SPELL_ID.BUFF_FROSTBRAND_WEAPON, VUHDO_BUFF_TARGET_ENCHANT_OFF },
 		},
+		[VUHDO_SPELL_ID.BUFF_EARTH_SHIELD] = {
+			{ VUHDO_SPELL_ID.BUFF_EARTH_SHIELD, VUHDO_BUFF_TARGET_UNIQUE },
+		},
 	},
 
 	-- Paladin
@@ -307,6 +310,7 @@ VUHDO_BUFF_WATCH_AURA_SPELL_IDS = {
 	[25782] = { 25782, 25916 }, -- Greater Blessing of Might
 	[13165] = { 13165, 14318, 14319, 14320, 14321, 14322 }, -- Aspect of the Hawk
 	[20043] = { 20043, 20190 }, -- Aspect of the Wild
+	[408514] = { 408514 }, -- Earth Shield
 };
 
 
@@ -314,8 +318,12 @@ VUHDO_BUFF_WATCH_AURA_SPELL_IDS = {
 VUHDO_AURA_SPELL_VARIANTS = {
 	[774] = { 774, 1058, 1430, 2090, 2091, 3627, 8910, 9839, 9840, 9841 }, -- Rejuvenation
 	[8936] = { 8936, 8938, 8939, 8940, 8941, 9750, 9856, 9857, 9858 }, -- Regrowth
+	[408120] = { 408120, 1238214, 1238215 }, -- Wild Growth
 	[139] = { 139, 6074, 6075, 6076, 6077, 6078, 10927, 10928, 10929, 25315 }, -- Renew
 	[17] = { 17, 592, 600, 3747, 6065, 6066, 10898, 10899, 10900, 10901 }, -- Power Word: Shield
+	[401859] = { 401859 }, -- Prayer of Mending
+	[408514] = { 408514 }, -- Earth Shield
+	[22419] = { 22419, 405168, 405194, 405321, 405324, 408521, 409954, 1239242, 1239243 }, -- Riptide
 	[1022] = { 1022, 5599, 10278 }, -- Blessing of Protection
 	[6940] = { 6940, 20729 }, -- Blessing of Sacrifice
 };
