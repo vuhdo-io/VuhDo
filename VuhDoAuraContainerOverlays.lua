@@ -36,6 +36,7 @@ local VUHDO_BOUQUET_CUSTOM_TYPE_AURA_GROUP;
 local VUHDO_BOUQUET_VALUE_TYPE_NONE;
 local VUHDO_BOUQUET_VALUE_TYPE_AURA;
 local VUHDO_BOUQUET_VALUE_TYPE_STATUS;
+local VUHDO_BOUQUET_VALUE_TYPE_FLAG;
 local VUHDO_BOUQUET_STATUS_TYPE_FULL;
 local VUHDO_AURA_GROUP_COLOR_OFF;
 local VUHDO_AURA_GROUP_COLOR_DISPEL;
@@ -126,6 +127,7 @@ local sPendingOverlayBuilds = { };
 local sPendingOverlaySlotPlans = { };
 local sOverlayContainerPlans = { };
 local sHasAnyOverlays = false;
+local sSwiftmendGateResyncedUnits = { };
 
 local sOverlayBuild = {
 	["fillEntries"] = { },
@@ -222,6 +224,7 @@ function VUHDO_auraContainerOverlaysInitLocalOverrides()
 	VUHDO_BOUQUET_VALUE_TYPE_NONE = _G["VUHDO_BOUQUET_VALUE_TYPE_NONE"];
 	VUHDO_BOUQUET_VALUE_TYPE_AURA = _G["VUHDO_BOUQUET_VALUE_TYPE_AURA"];
 	VUHDO_BOUQUET_VALUE_TYPE_STATUS = _G["VUHDO_BOUQUET_VALUE_TYPE_STATUS"];
+	VUHDO_BOUQUET_VALUE_TYPE_FLAG = _G["VUHDO_BOUQUET_VALUE_TYPE_FLAG"];
 	VUHDO_BOUQUET_STATUS_TYPE_FULL = _G["VUHDO_BOUQUET_STATUS_TYPE_FULL"];
 	VUHDO_AURA_GROUP_COLOR_OFF = _G["VUHDO_AURA_GROUP_COLOR_OFF"];
 	VUHDO_AURA_GROUP_COLOR_DISPEL = _G["VUHDO_AURA_GROUP_COLOR_DISPEL"];
@@ -513,10 +516,12 @@ do
 	local tHasCoverContributor;
 	local tGateValidators;
 	local tGateIdx;
+	local tItemShadowValueMode;
 	function VUHDO_resolveOverlayShadowValueMode(aBouquet, aItemIdx, anOverlayTarget)
 
 		tModeItem = aBouquet[aItemIdx];
 		tModeItemValueType = VUHDO_getBouquetItemValueType(tModeItem);
+		tItemShadowValueMode = tModeItemValueType == VUHDO_BOUQUET_VALUE_TYPE_FLAG and "cover" or "duration";
 
 		if anOverlayTarget and anOverlayTarget["barValue"] == "binary" then
 
@@ -533,7 +538,7 @@ do
 				return "mirror";
 			end
 
-			if tModeItemValueType == VUHDO_BOUQUET_VALUE_TYPE_AURA then
+			if tModeItemValueType == VUHDO_BOUQUET_VALUE_TYPE_AURA or tModeItemValueType == VUHDO_BOUQUET_VALUE_TYPE_FLAG then
 				tHasHigherStatusItem = false;
 				tHasCoverContributor = false;
 				tGateValidators = nil;
@@ -568,7 +573,7 @@ do
 				end
 
 				if not tHasHigherStatusItem then
-					return "duration";
+					return tItemShadowValueMode;
 				end
 
 				if tGateValidators then
@@ -576,7 +581,7 @@ do
 						return "cover", tGateValidators;
 					end
 
-					return "duration", tGateValidators;
+					return tItemShadowValueMode, tGateValidators;
 				end
 
 				if tHasCoverContributor then
@@ -2960,6 +2965,7 @@ do
 				["alwaysEnabled"] = tChainFillEntry["alwaysEnabled"],
 				["staticColor"] = tChainFillEntry["staticColor"],
 				["bouquetIdx"] = tChainFillEntry["bouquetIdx"],
+				["overlayGate"] = tChainFillEntry["overlayGate"],
 			};
 
 			VUHDO_applyOverlayGateFlags(tChainGroupMeta[#tChainGroupMeta]);
@@ -3117,6 +3123,8 @@ do
 			return;
 		end
 
+		aContainerData["hasOverlayGate"] = nil;
+
 		if aChainGroupMeta then
 			aContainerData["chainGroupMeta"] = aChainGroupMeta;
 			aContainerData["alwaysEnabled"] = nil;
@@ -3126,6 +3134,10 @@ do
 
 				if tStampChainGroupMetaEntry["alwaysEnabled"] then
 					aContainerData["alwaysEnabled"] = true;
+				end
+
+				if tStampChainGroupMetaEntry["overlayGate"] then
+					aContainerData["hasOverlayGate"] = true;
 				end
 
 				if aContainerData["groupKeys"] and aContainerData["groupKeys"][tStampChainGroupIdx] then
@@ -4367,12 +4379,24 @@ end
 
 
 
+--
+local function VUHDO_isOverlayGateOpen(anOverlayGate)
+
+	if "SWIFTMEND" == anOverlayGate then
+		return VUHDO_isSwiftmendReady() == true;
+	end
+
+	return true;
+
+end
+
+
+
 do
 	--
 	local tSlotEnabled;
 	local tShouldSuppress;
 	local tGateActive;
-	local tSwiftmendReady;
 	function VUHDO_evaluateOverlaySlotEnabled(aSlotHostData, aSlotKey, aSlotRecord, anIsAuraDataRestricted, anIsAuraModeContainers, aCanAttack, aGateInfo)
 
 		tSlotEnabled = aSlotHostData["plannedSlots"] and aSlotHostData["plannedSlots"][aSlotKey] and (aSlotRecord["alwaysEnabled"] or anIsAuraDataRestricted or anIsAuraModeContainers);
@@ -4405,12 +4429,8 @@ do
 			end
 		end
 
-		if tSlotEnabled and aSlotRecord["overlayGate"] == "SWIFTMEND" then
-			tSwiftmendReady = VUHDO_isSwiftmendReady();
-
-			if tSwiftmendReady ~= true then
-				tSlotEnabled = false;
-			end
+		if tSlotEnabled and not VUHDO_isOverlayGateOpen(aSlotRecord["overlayGate"]) then
+			tSlotEnabled = false;
 		end
 
 		return tSlotEnabled and true or false;
@@ -4655,6 +4675,10 @@ do
 										tGroupEnabled = false;
 									end
 
+									if tGroupEnabled and not VUHDO_isOverlayGateOpen(tChainGroupMetaEntry["overlayGate"]) then
+										tGroupEnabled = false;
+									end
+
 									if tGroupEnabled then
 										tIsEnabled = true;
 									end
@@ -4788,10 +4812,10 @@ do
 	local tSlotKey;
 	local tSlotRecord;
 	local tButton;
-	local sSwiftmendGateResyncUnits = { };
+	local tOwnerButton;
 	function VUHDO_syncSwiftmendOverlayGates()
 
-		twipe(sSwiftmendGateResyncUnits);
+		twipe(sSwiftmendGateResyncedUnits);
 
 		for _, tSlotHostData in pairs(VUHDO_OVERLAY_SLOT_HOSTS) do
 			if tSlotHostData["container"] and tSlotHostData["overlayGateKeys"] and #tSlotHostData["overlayGateKeys"] > 0 then
@@ -4800,10 +4824,27 @@ do
 				tButton = tSlotRecord and tSlotRecord["unitButton"];
 				tUnit = tButton and (tButton["raidid"] or tButton:GetAttribute("unit"));
 
-				if tUnit and not sSwiftmendGateResyncUnits[tUnit] then
-					sSwiftmendGateResyncUnits[tUnit] = true;
+				if tUnit and not sSwiftmendGateResyncedUnits[tUnit] then
+					sSwiftmendGateResyncedUnits[tUnit] = true;
 
 					VUHDO_deferSyncOverlaysForUnit(tUnit);
+				end
+			end
+		end
+
+		for _, tIndicatorEntries in pairs(VUHDO_OVERLAY_CONTAINERS) do
+			for _, tIndicatorEntry in pairs(tIndicatorEntries) do
+				for _, tContainerData in pairs(tIndicatorEntry) do
+					if tContainerData["hasOverlayGate"] then
+						tOwnerButton = tContainerData["ownerButton"];
+						tUnit = tOwnerButton and (tOwnerButton["raidid"] or tOwnerButton:GetAttribute("unit"));
+
+						if tUnit and not sSwiftmendGateResyncedUnits[tUnit] then
+							sSwiftmendGateResyncedUnits[tUnit] = true;
+
+							VUHDO_deferSyncOverlaysForUnit(tUnit);
+						end
+					end
 				end
 			end
 		end

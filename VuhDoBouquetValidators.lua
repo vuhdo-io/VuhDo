@@ -1881,6 +1881,7 @@ VUHDO_BOUQUET_BUFFS_SPECIAL = {
 		["updateCyclic"] = true,
 		["interests"] = { },
 		["secretType"] = VUHDO_SECRET_TYPE_NONE,
+		["valueType"] = VUHDO_BOUQUET_VALUE_TYPE_FLAG,
 		["hasValue"] = false,
 		["isGlobal"] = false,
 		["auraSpellIds"] = _G["VUHDO_SWIFTMEND_HOT_SPELL_IDS"],
