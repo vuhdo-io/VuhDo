@@ -26,6 +26,7 @@ local VUHDO_displayAurasAtAnchorFromCache;
 local VUHDO_isAuraDisplaySuspended;
 local VUHDO_getSlotData;
 local VUHDO_getAuraGroupRaw;
+local VUHDO_getAuraGroupDisplayName;
 local VUHDO_getAuraBarColorType;
 local VUHDO_getAuraTextColorType;
 local VUHDO_determineAura;
@@ -127,6 +128,7 @@ local sUnitBouquetActivePool;
 local sValidatorEntryPool;
 
 local sGroupsWithEnabledAnchorReusable = { };
+local sReportedListBouquetEntries = { };
 
 local sDispelTypeCurve;
 local sDispelTypeBorderCurve;
@@ -217,6 +219,7 @@ local function VUHDO_bouquetsInitLocalOverridesFunctions()
 	VUHDO_copyColorTo = _G["VUHDO_copyColorTo"];
 	VUHDO_isConfigDemoUsers = _G["VUHDO_isConfigDemoUsers"];
 	VUHDO_getAuraGroupRaw = _G["VUHDO_getAuraGroupRaw"];
+	VUHDO_getAuraGroupDisplayName = _G["VUHDO_getAuraGroupDisplayName"];
 	VUHDO_displayAurasAtAnchorFromCache = _G["VUHDO_displayAurasAtAnchorFromCache"];
 	VUHDO_isAuraDisplaySuspended = _G["VUHDO_isAuraDisplaySuspended"];
 	VUHDO_getSlotData = _G["VUHDO_getSlotData"];
@@ -5128,6 +5131,25 @@ end
 
 do
 	--
+	local function VUHDO_validateListGroupBouquetEntry(aGroupId, anEntry)
+
+		if VUHDO_BOUQUETS["STORED"][anEntry["value"]] then
+			return true;
+		end
+
+		if not sReportedListBouquetEntries[anEntry] then
+			sReportedListBouquetEntries[anEntry] = true;
+
+			VUHDO_Msg(format(VUHDO_I18N_ERROR_NO_LIST_GROUP_BOUQUET, VUHDO_getAuraGroupDisplayName(aGroupId), anEntry["value"]), 1, 0.4, 0.4);
+		end
+
+		return false;
+
+	end
+
+
+
+	--
 	local tAnchors;
 	local tGroup;
 	local tBouquetName;
@@ -5137,6 +5159,8 @@ do
 	function VUHDO_registerListGroupBouquetEntries(anAlreadyRegistered)
 
 		twipe(sGroupsWithEnabledAnchorReusable);
+		twipe(sReportedListBouquetEntries);
+
 		tGroupsWithEnabledAnchor = sGroupsWithEnabledAnchorReusable;
 
 		for tPanelNum = 1, VUHDO_MAX_PANELS do
@@ -5156,7 +5180,7 @@ do
 								if tEntry["entryType"] == VUHDO_AURA_LIST_ENTRY_BOUQUET then
 									tBouquetName = tEntry["value"];
 
-									if tBouquetName then
+									if tBouquetName and VUHDO_validateListGroupBouquetEntry(tVal["groupId"], tEntry) then
 										VUHDO_registerForBouquetUnique(
 											tBouquetName,
 											"ListAuraGroup",
@@ -5193,7 +5217,7 @@ do
 						if tEntry["entryType"] == VUHDO_AURA_LIST_ENTRY_BOUQUET then
 							tBouquetName = tEntry["value"];
 
-							if tBouquetName then
+							if tBouquetName and VUHDO_validateListGroupBouquetEntry(tGroupId, tEntry) then
 								VUHDO_registerForBouquetUnique(
 									tBouquetName,
 									"ListAuraGroupColorOnly",
@@ -5221,7 +5245,7 @@ do
 						if tEntry["entryType"] == VUHDO_AURA_LIST_ENTRY_BOUQUET then
 							tBouquetName = tEntry["value"];
 
-							if tBouquetName then
+							if tBouquetName and VUHDO_validateListGroupBouquetEntry(tGroupId, tEntry) then
 								VUHDO_registerForBouquetUnique(
 									tBouquetName,
 									"ListAuraGroupColorOnly",
