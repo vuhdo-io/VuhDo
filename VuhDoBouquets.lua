@@ -4760,9 +4760,9 @@ end
 
 do
 	--
-	local tListBouquetIconColor;
+	local tListBouquetColor;
 	local tSourceColor;
-	function VUHDO_buildListBouquetIconColorFromItem(aItem)
+	function VUHDO_buildListBouquetColorFromItem(aItem)
 
 		if not aItem or not aItem["color"] or not aItem["color"]["R"] or not aItem["color"]["useBackground"] then
 			return nil;
@@ -4770,14 +4770,14 @@ do
 
 		tSourceColor = aItem["color"];
 
-		tListBouquetIconColor = {
+		tListBouquetColor = {
 			["R"] = tSourceColor["R"],
 			["G"] = tSourceColor["G"],
 			["B"] = tSourceColor["B"],
 			["O"] = tSourceColor["useOpacity"] and (tSourceColor["O"] or 1) or 1,
 		};
 
-		return tListBouquetIconColor;
+		return tListBouquetColor;
 
 	end
 end
@@ -4870,7 +4870,7 @@ do
 
 			if tSpellId or sDispelSpecialToDispelName[tName] then
 				if tStaticColor == nil then
-					tStaticColor = VUHDO_buildListBouquetIconColorFromItem(tItem);
+					tStaticColor = VUHDO_buildListBouquetColorFromItem(tItem);
 				end
 
 				if tStaticIcon == nil and tItem["icon"] and tItem["icon"] ~= 1 and VUHDO_CUSTOM_ICONS[tItem["icon"]] then
@@ -4964,7 +4964,8 @@ do
 	local tPiece;
 	local tButtonSetup;
 	local tFrameLevelOffset;
-	function VUHDO_buildMixedBouquetListSlotTemplates(aBouquetName, aListEntryIndex, aSlotX, aSlotY, aPixelWidth, aPixelHeight, aTemplateName, aAnchorButtonSetup, aGroup)
+	local tItemColor;
+	function VUHDO_buildMixedBouquetListSlotTemplates(aBouquetName, aListEntryIndex, aSlotX, aSlotY, aPixelWidth, aPixelHeight, aTemplateName, aAnchorButtonSetup, aGroup, anIsBar)
 
 		tResult = { };
 
@@ -5022,10 +5023,27 @@ do
 
 				tButtonSetup["frameLevelOffset"] = tFrameLevelOffset;
 
-				tButtonSetup["iconColor"] = VUHDO_buildListBouquetIconColorFromItem(tItem);
-
 				if tItem["icon"] and tItem["icon"] ~= 1 and VUHDO_CUSTOM_ICONS[tItem["icon"]] then
 					tButtonSetup["staticIcon"] = VUHDO_CUSTOM_ICONS[tItem["icon"]][2];
+				end
+
+				tItemColor = VUHDO_buildListBouquetColorFromItem(tItem);
+
+				if tItemColor then
+					if anIsBar then
+						tButtonSetup["barColor"] = tItemColor;
+
+						if tButtonSetup["staticIcon"] then
+							tButtonSetup["staticColor"] = tItemColor;
+						elseif not tButtonSetup["hideIcon"] then
+							tButtonSetup["iconColor"] = tItemColor;
+						end
+					elseif tButtonSetup["staticIcon"] then
+						tButtonSetup["staticColor"] = tItemColor;
+						tButtonSetup["iconColor"] = nil;
+					else
+						tButtonSetup["iconColor"] = tItemColor;
+					end
 				end
 
 				if tPiece["branchIndex"] then

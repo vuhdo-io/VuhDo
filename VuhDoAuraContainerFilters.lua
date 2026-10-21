@@ -1971,7 +1971,7 @@ do
 			elseif tEntry["entryType"] == VUHDO_AURA_LIST_ENTRY_BOUQUET and VUHDO_classifyBouquetRestrictedMode(tEntry["value"]) == VUHDO_BOUQUET_RESTRICTED_AURA_CONTAINER
 				and not VUHDO_isBouquetContainerGroupExpressible(tEntry["value"]) then
 
-				tMixedSlotTemplates = VUHDO_buildMixedBouquetListSlotTemplates(tEntry["value"], tEntryIndex, 0, 0, aPixelWidth, aPixelHeight, aTemplateName, aAnchorButtonSetup, aGroup);
+				tMixedSlotTemplates = VUHDO_buildMixedBouquetListSlotTemplates(tEntry["value"], tEntryIndex, 0, 0, aPixelWidth, aPixelHeight, aTemplateName, aAnchorButtonSetup, aGroup, anIsBar);
 
 				tEntryLayoutIndex = tEntryIndex * VUHDO_AURA_LIST_LAYOUT_INDEX_STRIDE;
 				tEntryGroupCnt = 0;
@@ -2147,7 +2147,7 @@ do
 						tinsert(tSlots, tSlotTemplate);
 					end
 				elseif tEntry["entryType"] == VUHDO_AURA_LIST_ENTRY_BOUQUET and VUHDO_classifyBouquetRestrictedMode(tEntry["value"]) == VUHDO_BOUQUET_RESTRICTED_MIXED then
-					tMixedSlotTemplates = VUHDO_buildMixedBouquetListSlotTemplates(tEntry["value"], tEntryIndex, tSlotX, tSlotY, aPixelWidth, aPixelHeight, aTemplateName, aAnchorButtonSetup, aGroup);
+					tMixedSlotTemplates = VUHDO_buildMixedBouquetListSlotTemplates(tEntry["value"], tEntryIndex, tSlotX, tSlotY, aPixelWidth, aPixelHeight, aTemplateName, aAnchorButtonSetup, aGroup, anIsBar);
 
 					if anIsFixedLayout and tFixedSlotAnchor then
 						for tMixedSlotCnt = 1, #tMixedSlotTemplates do
@@ -2184,7 +2184,7 @@ do
 					tinsert(tSlots, tSlotTemplate);
 				elseif tEntry["entryType"] == VUHDO_AURA_LIST_ENTRY_BOUQUET and VUHDO_classifyBouquetRestrictedMode(tEntry["value"]) == VUHDO_BOUQUET_RESTRICTED_AURA_CONTAINER
 					and not VUHDO_isBouquetContainerGroupExpressible(tEntry["value"]) then
-					tMixedSlotTemplates = VUHDO_buildMixedBouquetListSlotTemplates(tEntry["value"], tEntryIndex, tSlotX, tSlotY, aPixelWidth, aPixelHeight, aTemplateName, aAnchorButtonSetup, aGroup);
+					tMixedSlotTemplates = VUHDO_buildMixedBouquetListSlotTemplates(tEntry["value"], tEntryIndex, tSlotX, tSlotY, aPixelWidth, aPixelHeight, aTemplateName, aAnchorButtonSetup, aGroup, anIsBar);
 
 					if anIsFixedLayout and tFixedSlotAnchor then
 						for tMixedSlotCnt = 1, #tMixedSlotTemplates do
