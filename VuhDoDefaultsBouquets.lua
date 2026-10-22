@@ -647,6 +647,31 @@ VUHDO_DEFAULT_BAR_MANA_TANK_ONLY = {
 
 
 --
+VUHDO_DEFAULT_BAR_POWER_HEALER_ONLY = {
+	[VUHDO_I18N_DEF_BOUQUET_BAR_POWER_HEALER_ONLY] = {
+		{
+			["name"] = "NO_RANGE",
+			["mine"] = true, ["icon"] = 2,
+			["color"] = {
+				["R"] = 0, ["G"] = 0, ["B"] = 0, ["O"] = 0.25,
+				["TR"] = 0, ["TG"] = 0, ["TB"] = 0, ["TO"] = 0.25,
+				["useText"] = false, ["useBackground"] = false, ["useOpacity"] = true,
+				["isManuallySet"] = true,
+			},
+			["custom"] = { [1] = 1, ["radio"] = 2, ["bright"] = 1.0 },
+		},
+		{
+			["name"] = "STATUS_POWER_HEALER_ONLY",
+			["mine"] = true, ["icon"] = 2,
+			["color"] = VUHDO_makeFullColorForBouquet(0, 0, 1, 1,   0, 0, 1, 1),
+			["custom"] = { [1] = 1, ["radio"] = 1, ["bright"] = 1.0	},
+		},
+	},
+}
+
+
+
+--
 VUHDO_DEFAULT_HEAL_ABSORB_COUNTER_BOUQUET = {
 	[VUHDO_I18N_DEF_COUNTER_HEAL_ABSORB] = {
 		{
@@ -1544,6 +1569,12 @@ function VUHDO_loadDefaultBouquets()
 
 		VUHDO_applyBouquetItemReplacements(VUHDO_BOUQUETS["STORED"], true);
 	end
+
+	if VUHDO_BOUQUETS["VERSION"] < 39 then
+		VUHDO_BOUQUETS["VERSION"] = 39;
+		VUHDO_addDefaultBouquet(VUHDO_DEFAULT_BAR_POWER_HEALER_ONLY);
+	end
+	VUHDO_DEFAULT_BAR_POWER_HEALER_ONLY = nil;
 
 	VUHDO_buildGenericHealthBarBouquet();
 	VUHDO_buildGenericTargetHealthBouquet();

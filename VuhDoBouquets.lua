@@ -2934,7 +2934,7 @@ do
 						tSecretColor:GetRGBA();
 					end
 
-					tResultSlot["value"] = UnitPowerPercent(aUnit, tSpecial["fixedPowerType"] or aInfo["powertype"]);
+					tResultSlot["value"] = UnitPowerPercent(aUnit, aInfo["powertype"]);
 					tResultSlot["timer"] = tTimer or 0;
 					tResultSlot["duration"] = tDuration or 0;
 					tResultSlot["timer2"] = tTimer2 or 0;

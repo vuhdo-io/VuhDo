@@ -2,7 +2,6 @@ local _;
 
 local UnitPower = UnitPower;
 local UnitPowerMax = UnitPowerMax;
-local issecretvalue = issecretvalue;
 local GetRuneCooldown = GetRuneCooldown;
 local UnitGetTotalAbsorbs = UnitGetTotalAbsorbs;
 local UnitGetTotalHealAbsorbs = UnitGetTotalHealAbsorbs;
@@ -519,24 +518,17 @@ end
 
 
 --
-local tHealerMaxMana;
 local function VUHDO_statusManaHealerOnlyGate(anInfo)
 
-	if not anInfo or not anInfo["unit"] or anInfo["role"] ~= VUHDO_ID_RANGED_HEAL then
+	if not anInfo then
 		return false;
 	end
 
-	if anInfo["powertype"] == 0 then
-		return VUHDO_statusManaGate(anInfo);
+	if anInfo["powertype"] ~= 0 or anInfo["role"] ~= VUHDO_ID_RANGED_HEAL then
+		return false;
 	end
 
-	tHealerMaxMana = UnitPowerMax(anInfo["unit"], 0);
-
-	if sSecretsEnabled and issecretvalue(tHealerMaxMana) then
-		return true;
-	end
-
-	return (tHealerMaxMana or 0) > 0;
+	return anInfo["hasSecretPower"] or (anInfo["powermax"] or 0) > 0;
 
 end
 
@@ -554,6 +546,19 @@ local function VUHDO_statusPowerTankOnlyGate(anInfo)
 	end
 
 	return true;
+
+end
+
+
+
+--
+local function VUHDO_statusPowerHealerOnlyGate(anInfo)
+
+	if not anInfo or anInfo["role"] ~= VUHDO_ID_RANGED_HEAL then
+		return false;
+	end
+
+	return anInfo["hasSecretPower"] or (anInfo["powermax"] or 0) > 0;
 
 end
 
@@ -631,25 +636,19 @@ end
 
 
 --
-local tHealerMana;
-local tHealerMaxMana;
 local function VUHDO_statusManaHealerOnlyValidator(anInfo, _, aSecretContext)
 
-	if not anInfo["unit"] or anInfo["role"] ~= VUHDO_ID_RANGED_HEAL then
+	if anInfo["powertype"] ~= 0 or anInfo["role"] ~= VUHDO_ID_RANGED_HEAL then
 		return false, nil, -1, -1, -1;
 	end
 
-	if anInfo["powertype"] == 0 then
-		return VUHDO_statusManaValidator(anInfo, nil, aSecretContext);
-	end
-
-	tHealerMaxMana = UnitPowerMax(anInfo["unit"], 0);
-
-	if (not sSecretsEnabled or not issecretvalue(tHealerMaxMana)) and (tHealerMaxMana or 0) <= 0 then
+	if not anInfo["hasSecretPower"] and (anInfo["powermax"] or 0) <= 0 then
 		return false, nil, -1, -1, -1;
 	end
 
-	tHealerMana = UnitPower(anInfo["unit"], 0);
+	if not anInfo["unit"] then
+		return false, nil, -1, -1, -1;
+	end
 
 	if aSecretContext then
 		tPowerCurve = aSecretContext["powerCurves"] and aSecretContext["powerCurves"][0];
@@ -659,11 +658,11 @@ local function VUHDO_statusManaHealerOnlyValidator(anInfo, _, aSecretContext)
 			tSecretColor = UnitPowerPercent(anInfo["unit"], 0, false, tPowerCurve);
 		end
 
-		return true, nil, tHealerMana, -1, tHealerMaxMana, VUHDO_copyColor(VUHDO_POWER_TYPE_COLORS[0]), UnitPowerMissing(anInfo["unit"], 0), nil, nil, nil, nil, nil, tSecretColor;
+		return true, nil, anInfo["power"], -1, anInfo["powermax"], VUHDO_copyColor(VUHDO_POWER_TYPE_COLORS[0]), UnitPowerMissing(anInfo["unit"], 0), nil, nil, nil, nil, nil, tSecretColor;
 	end
 
-	return true, nil, tHealerMana, -1,
-		tHealerMaxMana, VUHDO_copyColor(VUHDO_POWER_TYPE_COLORS[0]);
+	return true, nil, anInfo["power"], -1,
+		anInfo["powermax"], VUHDO_copyColor(VUHDO_POWER_TYPE_COLORS[0]);
 
 end
 
@@ -696,6 +695,37 @@ local function VUHDO_statusPowerTankOnlyValidator(anInfo, _, aSecretContext)
 
 	return true, nil, anInfo["power"], -1,
 		anInfo["powermax"], VUHDO_copyColor(VUHDO_POWER_TYPE_COLORS[tPowerType or 0]);
+
+end
+
+
+
+--
+local tPowerType;
+local function VUHDO_statusPowerHealerOnlyValidator(anInfo, _, aSecretContext)
+
+	if not anInfo["unit"] or anInfo["role"] ~= VUHDO_ID_RANGED_HEAL then
+		return false, nil, -1, -1, -1;
+	end
+
+	if not anInfo["hasSecretPower"] and (anInfo["powermax"] or 0) <= 0 then
+		return false, nil, -1, -1, -1;
+	end
+
+	tPowerType = anInfo["powertype"] or 0;
+
+	if aSecretContext then
+		tPowerCurve = aSecretContext["powerCurves"] and aSecretContext["powerCurves"][tPowerType];
+		tSecretColor = nil;
+
+		if tPowerCurve then
+			tSecretColor = UnitPowerPercent(anInfo["unit"], tPowerType, false, tPowerCurve);
+		end
+
+		return true, nil, anInfo["power"], -1, anInfo["powermax"], VUHDO_copyColor(VUHDO_POWER_TYPE_COLORS[tPowerType]), UnitPowerMissing(anInfo["unit"], tPowerType), nil, nil, nil, nil, nil, tSecretColor;
+	end
+
+	return true, nil, anInfo["power"], -1, anInfo["powermax"], VUHDO_copyColor(VUHDO_POWER_TYPE_COLORS[tPowerType]);
 
 end
 
@@ -1287,9 +1317,8 @@ local VUHDO_BOUQUET_BUFFS_SPECIAL_STATUS = {
 		["validator"] = VUHDO_statusManaHealerOnlyValidator,
 		["custom_type"] = VUHDO_BOUQUET_CUSTOM_TYPE_STATUSBAR,
 		["no_color"] = true,
-		["interests"] = { VUHDO_UPDATE_MANA, VUHDO_UPDATE_OTHER_POWERS, VUHDO_UPDATE_DC },
+		["interests"] = { VUHDO_UPDATE_MANA, VUHDO_UPDATE_DC },
 		["secretType"] = VUHDO_SECRET_TYPE_POWER_PERCENT,
-		["fixedPowerType"] = 0,
 		["valueType"] = VUHDO_BOUQUET_VALUE_TYPE_STATUS,
 		["statusType"] = VUHDO_BOUQUET_STATUS_TYPE_MANA,
 		["gateValidator"] = VUHDO_statusManaHealerOnlyGate,
@@ -1306,6 +1335,19 @@ local VUHDO_BOUQUET_BUFFS_SPECIAL_STATUS = {
 		["valueType"] = VUHDO_BOUQUET_VALUE_TYPE_STATUS,
 		["statusType"] = VUHDO_BOUQUET_STATUS_TYPE_POWER,
 		["gateValidator"] = VUHDO_statusPowerTankOnlyGate,
+		["isGlobal"] = false,
+	},
+
+	["STATUS_POWER_HEALER_ONLY"] = {
+		["displayName"] = VUHDO_I18N_BOUQUET_STATUS_POWER_HEALER_ONLY,
+		["validator"] = VUHDO_statusPowerHealerOnlyValidator,
+		["custom_type"] = VUHDO_BOUQUET_CUSTOM_TYPE_STATUSBAR,
+		["no_color"] = true,
+		["interests"] = { VUHDO_UPDATE_MANA, VUHDO_UPDATE_OTHER_POWERS, VUHDO_UPDATE_DC },
+		["secretType"] = VUHDO_SECRET_TYPE_POWER_PERCENT,
+		["valueType"] = VUHDO_BOUQUET_VALUE_TYPE_STATUS,
+		["statusType"] = VUHDO_BOUQUET_STATUS_TYPE_POWER,
+		["gateValidator"] = VUHDO_statusPowerHealerOnlyGate,
 		["isGlobal"] = false,
 	},
 

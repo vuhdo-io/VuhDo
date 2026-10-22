@@ -26,7 +26,8 @@ Improvements:
 -- Added Shaman 'Water Shield' to Buff Watch (Forever)
 -- Added new default aura group 'Priest Weakened Soul' (Forever)  
 -- Added aura icon flash and color change during pandemic window  
--- Added shapeshifted Druid mana to bouquet validator 'Statusbar: Mana % (Healer Only)'  
+-- Added bouquet validator 'Statusbar: Power % (Healer Only)'  
+-- Added default bouquet 'Manabars: Power (Healer Only)'  
   
   
 --------------------------------------------------------------  

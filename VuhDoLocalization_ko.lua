@@ -657,3 +657,6 @@ VUHDO_I18N_AURA_GROUP_PRIEST_WEAKENED_SOUL = "Priest Weakened Soul";
 VUHDO_I18N_BW_MAIN_HAND = "Main Hand";
 VUHDO_I18N_BW_OFF_HAND = "Off Hand";
 VUHDO_I18N_ERROR_NO_LIST_GROUP_BOUQUET = "Aura group \"%s\" contains bouquet \"%s\" which doesn't exist!";
+
+VUHDO_I18N_BOUQUET_STATUS_POWER_HEALER_ONLY = "Statusbar: Power % (Healer Only)";
+VUHDO_I18N_DEF_BOUQUET_BAR_POWER_HEALER_ONLY = "Manabars: Power (Healer Only)";
