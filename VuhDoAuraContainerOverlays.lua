@@ -1804,6 +1804,8 @@ do
 	local tOverlayEntries;
 	local tOverlayEntry;
 	local tAuraSpellIds;
+	local tIsDotShape;
+	local tHasBackgroundColor;
 	function VUHDO_buildOverlayEntryPrototypes(aPanelNum, anIndicatorKey, aBouquetName)
 
 		if not aBouquetName or aBouquetName == "" then
@@ -1821,6 +1823,8 @@ do
 		if not tOverlayTarget then
 			return nil;
 		end
+
+		tIsDotShape = tOverlayTarget["shape"] == "dot";
 
 		tBouquet = VUHDO_BOUQUETS["STORED"][aBouquetName];
 
@@ -1907,14 +1911,14 @@ do
 					end
 
 					tColor = tItem["color"];
+					tHasBackgroundColor = tColor and tColor["useBackground"];
 
-					if next(tIncludeSpellIds) and tColor and tColor["useBackground"] then
+					if next(tIncludeSpellIds) and (tIsDotShape or tHasBackgroundColor) then
 						tOverlayEntry = {
 							["filterString"] = tSpecial["auraFilterString"] or "HELPFUL|PLAYER",
 							["candidateFilters"] = {
 								["includeSpellIDs"] = tIncludeSpellIds,
 							},
-							["staticColor"] = VUHDO_applyOverlayStaticColorBright(tColor, tItem, tBaseOpacityProduct),
 							["shape"] = tOverlayTarget["shape"],
 							["bouquetIdx"] = tCnt,
 							["shadowValueMode"] = tShadowValueMode,
@@ -1922,6 +1926,10 @@ do
 							["overlayGate"] = tSpecial["overlayGate"],
 							["entryKey"] = tCnt .. ":special:" .. tItem["name"] .. ":friendly",
 						};
+
+						if tHasBackgroundColor then
+							tOverlayEntry["staticColor"] = VUHDO_applyOverlayStaticColorBright(tColor, tItem, tBaseOpacityProduct);
+						end
 
 						if tOverlayTarget["shape"] == "bar" then
 							VUHDO_applyOverlayShapePrototypeFields(tOverlayEntry, tOverlayTarget);
@@ -1935,7 +1943,7 @@ do
 					if tSpecial["debuffType"] then
 						tDispelName = sDebuffTypeDispelName[tSpecial["debuffType"]];
 
-						if tDispelName and VUHDO_getBackgroundDispelTypeNames()[tDispelName] then
+						if tDispelName and (tIsDotShape or VUHDO_getBackgroundDispelTypeNames()[tDispelName]) then
 							tOverlayEntry = {
 								["filterString"] = VUHDO_isDispelNameHostile(tDispelName) and "HELPFUL" or "HARMFUL",
 								["candidateFilters"] = {
@@ -1975,8 +1983,9 @@ do
 
 				VUHDO_addResolvedAuraContainerSpellIds(tIncludeSpellIds, tItem["name"]);
 				tColor = tItem["color"];
+				tHasBackgroundColor = tColor and tColor["useBackground"];
 
-				if next(tIncludeSpellIds) and tColor and tColor["useBackground"] then
+				if next(tIncludeSpellIds) and (tIsDotShape or tHasBackgroundColor) then
 					tSpellId = VUHDO_resolveAuraContainerSpellId(tItem["name"]);
 
 					tOverlayEntry = {
@@ -1984,13 +1993,16 @@ do
 						["candidateFilters"] = {
 							["includeSpellIDs"] = tIncludeSpellIds,
 						},
-						["staticColor"] = VUHDO_applyOverlayStaticColorBright(tColor, tItem, tBaseOpacityProduct),
 						["shape"] = tOverlayTarget["shape"],
 						["bouquetIdx"] = tCnt,
 						["shadowValueMode"] = tShadowValueMode,
 						["friendlyOnly"] = true,
 						["entryKey"] = tCnt .. ":spell:" .. tostring(tSpellId or tItem["name"]) .. ":friendly",
 					};
+
+					if tHasBackgroundColor then
+						tOverlayEntry["staticColor"] = VUHDO_applyOverlayStaticColorBright(tColor, tItem, tBaseOpacityProduct);
+					end
 
 					if tOverlayTarget["shape"] == "bar" then
 						VUHDO_applyOverlayShapePrototypeFields(tOverlayEntry, tOverlayTarget);

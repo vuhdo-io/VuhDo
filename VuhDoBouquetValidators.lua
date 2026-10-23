@@ -468,6 +468,10 @@ local tDebuffInfo;
 local tAuraInstanceId;
 local function VUHDO_debuffMagicValidator(anInfo, _, aSecretContext)
 
+	if VUHDO_isAuraModeContainers() then
+		return false, nil, -1, -1, -1;
+	end
+
 	if VUHDO_isAuraDataRestricted() then
 		return false, nil, -1, -1, -1;
 	end
@@ -504,6 +508,10 @@ end
 local tDebuffInfo;
 local tAuraInstanceId;
 local function VUHDO_debuffDiseaseValidator(anInfo, _, aSecretContext)
+
+	if VUHDO_isAuraModeContainers() then
+		return false, nil, -1, -1, -1;
+	end
 
 	if VUHDO_isAuraDataRestricted() then
 		return false, nil, -1, -1, -1;
@@ -542,6 +550,10 @@ local tDebuffInfo;
 local tAuraInstanceId;
 local function VUHDO_debuffPoisonValidator(anInfo, _, aSecretContext)
 
+	if VUHDO_isAuraModeContainers() then
+		return false, nil, -1, -1, -1;
+	end
+
 	if VUHDO_isAuraDataRestricted() then
 		return false, nil, -1, -1, -1;
 	end
@@ -578,6 +590,10 @@ end
 local tDebuffInfo;
 local tAuraInstanceId;
 local function VUHDO_debuffCurseValidator(anInfo, _, aSecretContext)
+
+	if VUHDO_isAuraModeContainers() then
+		return false, nil, -1, -1, -1;
+	end
 
 	if VUHDO_isAuraDataRestricted() then
 		return false, nil, -1, -1, -1;
@@ -616,6 +632,10 @@ local tDebuffInfo;
 local tAuraInstanceId;
 local function VUHDO_debuffBleedValidator(anInfo, _, aSecretContext)
 
+	if VUHDO_isAuraModeContainers() then
+		return false, nil, -1, -1, -1;
+	end
+
 	if VUHDO_isAuraDataRestricted() then
 		return false, nil, -1, -1, -1;
 	end
@@ -652,6 +672,10 @@ end
 local tDebuffInfo;
 local tAuraInstanceId;
 local function VUHDO_debuffEnrageValidator(anInfo, _, aSecretContext)
+
+	if VUHDO_isAuraModeContainers() then
+		return false, nil, -1, -1, -1;
+	end
 
 	if VUHDO_isAuraDataRestricted() then
 		return false, nil, -1, -1, -1;
@@ -706,6 +730,10 @@ local function VUHDO_debuffBarColorValidator(anInfo, _, aSecretContext)
 		if not anInfo["hasSecretCharmed"] and anInfo["charmed"] then
 			return true, nil, -1, -1, -1, VUHDO_PANEL_SETUP["BAR_COLORS"]["CHARMED"];
 		elseif anInfo["debuff"] then
+			if VUHDO_isAuraModeContainers() then
+				return false, nil, -1, -1, -1;
+			end
+
 			if VUHDO_isConfigDemoUsers() then
 				tBarColor = VUHDO_PANEL_SETUP["BAR_COLORS"]["DEBUFF" .. anInfo["debuff"]];
 
@@ -773,6 +801,10 @@ local function VUHDO_debuffBarColorValidator(anInfo, _, aSecretContext)
 		if not anInfo["hasSecretCharmed"] and anInfo["charmed"] then
 			return true, nil, -1, -1, -1, VUHDO_PANEL_SETUP["BAR_COLORS"]["CHARMED"];
 		elseif anInfo["debuff"] then
+			if VUHDO_isAuraModeContainers() then
+				return false, nil, -1, -1, -1;
+			end
+
 			return true, nil, -1, -1, -1, nil, nil, nil, nil, nil, nil, anInfo["debuff"];
 		else
 			return false, nil, -1, -1, -1;
@@ -782,6 +814,10 @@ local function VUHDO_debuffBarColorValidator(anInfo, _, aSecretContext)
 	if not anInfo["hasSecretCharmed"] and anInfo["charmed"] then
 		return true, nil, -1, -1, -1, VUHDO_PANEL_SETUP["BAR_COLORS"]["CHARMED"];
 	elseif anInfo["debuff"] then
+		if VUHDO_isAuraModeContainers() then
+			return false, nil, -1, -1, -1;
+		end
+
 		tCurve = aSecretContext["dispelCurve"];
 
 		tCanColorBar = not VUHDO_isAuraModeContainers() and VUHDO_getAuraCanColorBar(anInfo["unit"]);
@@ -864,6 +900,10 @@ local function VUHDO_auraGroupActiveValidator(anInfo, aItem)
 	end
 
 	if not anInfo["unit"] then
+		return false, nil, -1, -1, -1;
+	end
+
+	if VUHDO_isAuraModeContainers() then
 		return false, nil, -1, -1, -1;
 	end
 

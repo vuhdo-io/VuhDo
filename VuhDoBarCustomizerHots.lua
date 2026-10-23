@@ -120,6 +120,7 @@ local VUHDO_textColor;
 local VUHDO_copyColorTo;
 local VUHDO_setStatusBarVuhDoColor;
 local VUHDO_applyAllLayersToTexture;
+local VUHDO_applyOverlayBouquetGating;
 local VUHDO_clearBooleanOverlays;
 local VUHDO_clearUnitAuraFrames;
 local VUHDO_updateGlobalToggles;
@@ -168,6 +169,7 @@ function VUHDO_customHotsInitLocalOverrides()
 	VUHDO_copyColorTo = _G["VUHDO_copyColorTo"];
 	VUHDO_setStatusBarVuhDoColor = _G["VUHDO_setStatusBarVuhDoColor"];
 	VUHDO_applyAllLayersToTexture = _G["VUHDO_applyAllLayersToTexture"];
+	VUHDO_applyOverlayBouquetGating = _G["VUHDO_applyOverlayBouquetGating"];
 	VUHDO_clearBooleanOverlays = _G["VUHDO_clearBooleanOverlays"];
 	VUHDO_clearUnitAuraFrames = _G["VUHDO_clearUnitAuraFrames"];
 	VUHDO_updateGlobalToggles = _G["VUHDO_updateGlobalToggles"];
@@ -1574,7 +1576,7 @@ function VUHDO_swiftmendIndicatorBouquetCallback(aUnit, anIsActive, anIcon, aTim
 				VUHDO_PixelUtil.ApplySettings(tIcon);
 
 				if aLayerTemplate then
-					VUHDO_applyAllLayersToTexture(tButton, tIcon, aLayerTemplate);
+					VUHDO_applyAllLayersToTexture(tButton, tIcon, aLayerTemplate, "SWIFTMEND_INDICATOR", aBouquetName);
 				elseif aColor then
 					tIcon:SetVertexColor(VUHDO_backColorWithFallback(aColor));
 				end
@@ -1667,6 +1669,10 @@ function VUHDO_swiftmendIndicatorBouquetCallback(aUnit, anIsActive, anIcon, aTim
 				tIcon = VUHDO_getBarRoleIcon(tButton, 51);
 				VUHDO_LibCustomGlow.PixelGlow_Stop(tIcon, VUHDO_CUSTOM_GLOW_SWIFTMEND_ICON_KEY);
 				tIcon:Hide();
+
+				if aLayerTemplate then
+					VUHDO_applyOverlayBouquetGating(tButton, "SWIFTMEND_INDICATOR", aBouquetName, aLayerTemplate, nil);
+				end
 			end
 		end
 	end
