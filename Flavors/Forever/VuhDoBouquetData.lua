@@ -53,6 +53,25 @@ VUHDO_DEFAULT_PVP_FLAGS_SPELLS = {
 
 
 
+VUHDO_DEFAULT_PW_S_WEAKENED_SOUL_ICONS_BOUQUET = {
+	[VUHDO_I18N_DEF_BOUQUET_PW_S_WEAKENED_SOUL_ICONS] = {
+		{
+			["name"] = GetSpellName(17), -- Power Word: Shield
+			["mine"] = true, ["icon"] = 1,
+			["color"] = VUHDO_makeFullColorForBouquet(1, 1, 1, 1,   1, 1, 1, 1),
+			["custom"] = { [1] = 1, ["radio"] = 1, ["bright"] = 1.0 },
+		},
+		{
+			["name"] = "AURA_GROUP_ACTIVE",
+			["mine"] = true, ["others"] = true, ["icon"] = 1,
+			["color"] = VUHDO_makeFullColorForBouquet(1, 1, 1, 1,   1, 1, 1, 1),
+			["custom"] = { [1] = 1, ["radio"] = 1, ["bright"] = 1.0, ["auraGroupId"] = "PRIEST_WEAKENED_SOUL" },
+		},
+	},
+};
+
+
+
 VUHDO_DEFAULT_BOUQUET_ITEM_REPLACEMENTS = {
 	[VUHDO_I18N_DEF_BOUQUET_PW_S_WEAKENED_SOUL] = {
 		{

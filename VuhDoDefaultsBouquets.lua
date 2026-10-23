@@ -1576,6 +1576,12 @@ function VUHDO_loadDefaultBouquets()
 	end
 	VUHDO_DEFAULT_BAR_POWER_HEALER_ONLY = nil;
 
+	if VUHDO_BOUQUETS["VERSION"] < 40 then
+		VUHDO_BOUQUETS["VERSION"] = 40;
+		VUHDO_addDefaultBouquet(VUHDO_DEFAULT_PW_S_WEAKENED_SOUL_ICONS_BOUQUET);
+	end
+	VUHDO_DEFAULT_PW_S_WEAKENED_SOUL_ICONS_BOUQUET = nil;
+
 	VUHDO_buildGenericHealthBarBouquet();
 	VUHDO_buildGenericTargetHealthBouquet();
 
