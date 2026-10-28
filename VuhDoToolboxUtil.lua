@@ -818,13 +818,18 @@ function VUHDO_createSemaphore(aSemaphoreName, aInitialCount, aMaxCount, aTimeou
 	local tMetrics;
 	local tTask;
 	local tTimedOutCount;
-	local tTimedOutTasks;
+	local tTimedOutTasks = { };
 	function tSemaphore:checkTimeouts()
+
+		if #self["waitingTasks"] == 0 then
+			return;
+		end
 
 		tCurrentTime = GetTime() * 1000;
 		tIsProfile = VUHDO_SEMAPHORE_PROFILING_ENABLED;
 		tTimedOutCount = 0;
-		tTimedOutTasks = { };
+
+		twipe(tTimedOutTasks);
 
 		if tIsProfile then
 			tMetrics = self["metrics"];
@@ -836,14 +841,13 @@ function VUHDO_createSemaphore(aSemaphoreName, aInitialCount, aMaxCount, aTimeou
 			if tCurrentTime >= tTask["timeoutTime"] then
 				tTimedOutCount = tTimedOutCount + 1;
 
-				if VUHDO_SEMAPHORE_PROFILING_ENABLED then
-					tMetrics = self["metrics"];
+				if tIsProfile then
 					tMetrics["timeouts"] = tMetrics["timeouts"] + 1;
 				end
 
 				tinsert(tTimedOutTasks, tTask);
 
-				table.remove(self["waitingTasks"], tIndex);
+				tremove(self["waitingTasks"], tIndex);
 			end
 		end
 
@@ -855,6 +859,8 @@ function VUHDO_createSemaphore(aSemaphoreName, aInitialCount, aMaxCount, aTimeou
 
 				VUHDO_deferTask(tTask["type"], tTask["priority"], unpack(tTask["args"]));
 			end
+
+			twipe(tTimedOutTasks);
 		end
 
 		return;

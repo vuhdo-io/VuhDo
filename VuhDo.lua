@@ -98,6 +98,7 @@ local VUHDO_getUnitNo;
 local VUHDO_isInRange;
 local VUHDO_isUnitRangeCheckable;
 local VUHDO_isUnitRangeEventDriven;
+local VUHDO_getBlizzardClassColorMixin;
 local VUHDO_determineAura;
 local VUHDO_getUnitGroup;
 local VUHDO_tableUniqueAdd;
@@ -188,6 +189,7 @@ function VUHDO_vuhdoInitLocalOverrides()
 	VUHDO_isInRange = _G["VUHDO_isInRange"];
 	VUHDO_isUnitRangeCheckable = _G["VUHDO_isUnitRangeCheckable"];
 	VUHDO_isUnitRangeEventDriven = _G["VUHDO_isUnitRangeEventDriven"];
+	VUHDO_getBlizzardClassColorMixin = _G["VUHDO_getBlizzardClassColorMixin"];
 	VUHDO_determineAura = _G["VUHDO_determineAura"];
 	VUHDO_getUnitGroup = _G["VUHDO_getUnitGroup"];
 	VUHDO_updateHealthBarsFor = _G["VUHDO_updateHealthBarsFor"];
@@ -466,14 +468,17 @@ function VUHDO_setHealth(aUnit, aMode)
 				end
 
 				tInfo["hasSecretClass"] = false;
+				tInfo["blizzardClassColor"] = nil;
 			elseif sSecretsEnabled and issecretvalue(tClassName) then
 				tClassId = nil;
 
 				tInfo["hasSecretClass"] = true;
+				tInfo["blizzardClassColor"] = VUHDO_getBlizzardClassColorMixin(tClassName);
 			else
 				tClassId = VUHDO_CLASS_IDS[tClassName];
 
 				tInfo["hasSecretClass"] = false;
+				tInfo["blizzardClassColor"] = nil;
 			end
 
 			tName, tRealm = UnitName(aUnit);

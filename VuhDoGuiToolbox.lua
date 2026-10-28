@@ -303,7 +303,7 @@ function VUHDO_getClassColor(anInfo)
 	if VUHDO_USER_CLASS_COLORS and VUHDO_USER_CLASS_COLORS[anInfo["classId"]] then
 		return VUHDO_USER_CLASS_COLORS[anInfo["classId"]];
 	elseif anInfo["hasSecretClass"] then
-		return VUHDO_getBlizzardClassColorMixin(anInfo["class"]);
+		return anInfo["blizzardClassColor"];
 	else
 		return nil;
 	end
