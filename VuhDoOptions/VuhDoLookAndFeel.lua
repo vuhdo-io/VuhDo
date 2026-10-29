@@ -11,6 +11,8 @@ local pairs = pairs;
 local ipairs = ipairs;
 local tinsert = table.insert;
 local twipe = table.wipe;
+local debugprofilestop = debugprofilestop;
+local InCombatLockdown = InCombatLockdown;
 local max = math.max;
 local min = math.min;
 local format = string.format;
@@ -2158,7 +2160,12 @@ local VUHDO_SEARCH_INDEX = {
 	--	},
 	},
 };
+local VUHDO_SEARCH_INDEX_START_DELAY_SEC = 2;
+local VUHDO_SEARCH_INDEX_SLICE_BUDGET_MS = 2;
 local VUHDO_SEARCH_INDEX_STATUS = false;
+local sPendingSearchFrames = VUHDO_createStack(256);
+local sIsPendingSearchFramesSeeded = false;
+local sSearchIndexListenerFrame;
 local sMatchedComponents = {
 	["name"] = {
 	--	[<frame name>] = true,
@@ -2345,6 +2352,10 @@ do
 	local tTabFrame;
 	function VUHDO_lnfUpdateTabSearchVisibility()
 
+		if not VUHDO_strempty(VUHDO_COMPONENT_SEARCH) then
+			VUHDO_lnfEnsureSearchIndexBuilt();
+		end
+
 		table.wipe(VUHDO_SEARCH_VISIBILITY_PANEL);
 		table.wipe(VUHDO_SEARCH_VISIBILITY_SUBPANEL);
 
@@ -2452,15 +2463,14 @@ do
 	local tIndexString;
 	local tIndex;
 	local tText;
-	local tChild;
-	function VUHDO_lnfCreateSearchIndex(aParentFrame)
+	local function VUHDO_lnfIndexSearchFrame(aFrame)
 
-		if not aParentFrame then
+		if not aFrame then
 			return;
 		end
 
-		if aParentFrame.GetName then
-			tName = aParentFrame:GetName() or "";
+		if aFrame.GetName then
+			tName = aFrame:GetName() or "";
 
 			if not VUHDO_strempty(tName) then
 				-- remove the common prefix to avoid index entries matching the entire frame set
@@ -2475,8 +2485,8 @@ do
 					VUHDO_SEARCH_INDEX["name"][tGram][tName] = true;
 				end
 
-				if aParentFrame.GetText then
-					tText = aParentFrame:GetText() or "";
+				if aFrame.GetText then
+					tText = aFrame:GetText() or "";
 
 					if not VUHDO_strempty(tText) then
 						tIndexString = strlower(tText);
@@ -2496,27 +2506,117 @@ do
 			end
 		end
 
-		if aParentFrame.GetChildren then
-			for tCnt = 1, select("#", aParentFrame:GetChildren()) do
-				tChild = select(tCnt, aParentFrame:GetChildren());
-
-				VUHDO_lnfCreateSearchIndex(tChild);
-			end
+		if aFrame.GetChildren then
+			sPendingSearchFrames:pushAll(aFrame:GetChildren());
 		end
+
+		return;
 
 	end
 
-	function VUHDO_lnfInitSearchIndex()
+	local tStartTime;
+	local tFrame;
+	local function VUHDO_lnfProcessPendingSearchFrames(aBudgetMs)
+
+		if aBudgetMs then
+			tStartTime = debugprofilestop();
+		end
+
+		while not sPendingSearchFrames:isEmpty() do
+			tFrame = sPendingSearchFrames:pop();
+
+			VUHDO_lnfIndexSearchFrame(tFrame);
+
+			if aBudgetMs and (debugprofilestop() - tStartTime) >= aBudgetMs then
+				return;
+			end
+		end
+
+		VUHDO_SEARCH_INDEX_STATUS = true;
+
+		return;
+
+	end
+
+	local function VUHDO_lnfSeedPendingSearchFrames()
+
+		if sIsPendingSearchFramesSeeded then
+			return;
+		end
+
+		for tContentPanel, _ in pairs(tContentPanels) do
+			sPendingSearchFrames:push(_G[tContentPanel]);
+		end
+
+		sIsPendingSearchFramesSeeded = true;
+
+		return;
+
+	end
+
+	local function VUHDO_lnfBuildNextSearchIndexChunk()
 
 		if VUHDO_SEARCH_INDEX_STATUS then
 			return;
 		end
 
-		for tContentPanel, _ in pairs(tContentPanels) do
-			VUHDO_lnfCreateSearchIndex(_G[tContentPanel]);
+		if InCombatLockdown() then
+			sSearchIndexListenerFrame:RegisterEvent("PLAYER_REGEN_ENABLED");
+
+			return;
 		end
 
-		VUHDO_SEARCH_INDEX_STATUS = true;
+		VUHDO_lnfSeedPendingSearchFrames();
+		VUHDO_lnfProcessPendingSearchFrames(VUHDO_SEARCH_INDEX_SLICE_BUDGET_MS);
+
+		if not VUHDO_SEARCH_INDEX_STATUS then
+			C_Timer.After(0, VUHDO_lnfBuildNextSearchIndexChunk);
+		end
+
+		return;
+
+	end
+
+	local function VUHDO_lnfSearchIndexListenerOnEvent(aFrame, anEvent)
+
+		aFrame:UnregisterEvent(anEvent);
+
+		VUHDO_lnfBuildNextSearchIndexChunk();
+
+		return;
+
+	end
+
+	function VUHDO_lnfEnsureSearchIndexBuilt()
+
+		if VUHDO_SEARCH_INDEX_STATUS then
+			return;
+		end
+
+		VUHDO_lnfSeedPendingSearchFrames();
+		VUHDO_lnfProcessPendingSearchFrames(nil);
+
+		return;
+
+	end
+
+	function VUHDO_lnfStartSearchIndexBuild()
+
+		if VUHDO_SEARCH_INDEX_STATUS then
+			return;
+		end
+
+		VUHDO_lnfSeedPendingSearchFrames();
+
+		if not sSearchIndexListenerFrame then
+			sSearchIndexListenerFrame = CreateFrame("Frame");
+
+			sSearchIndexListenerFrame:SetScript("OnEvent", VUHDO_lnfSearchIndexListenerOnEvent);
+		end
+
+		C_Timer.After(VUHDO_SEARCH_INDEX_START_DELAY_SEC, VUHDO_lnfBuildNextSearchIndexChunk);
+
+		return;
 
 	end
 
