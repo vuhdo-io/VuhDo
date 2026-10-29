@@ -7,6 +7,8 @@ local tconcat = table.concat;
 local tsort = table.sort;
 local twipe = table.wipe;
 local format = string.format;
+local strfind = string.find;
+local strsub = string.sub;
 local max = math.max;
 
 local CreateFrame = CreateFrame;
@@ -3904,7 +3906,7 @@ do
 	local tContainerData;
 	local tOverlayTargetBar;
 	local tContainerParent;
-	function VUHDO_acquireAuraContainer(aButton, aContainerTemplate)
+	function VUHDO_acquireAuraContainer(aButton, aContainerTemplate, aBuildReason)
 
 		if not aButton or not aContainerTemplate then
 			return nil;
@@ -3932,7 +3934,7 @@ do
 		aContainerTemplate["parent"] = tContainerParent;
 
 		VUHDO_AURA_CONTAINER_METRICS["builds"]["container"] = (VUHDO_AURA_CONTAINER_METRICS["builds"]["container"] or 0) + 1;
-
+		VUHDO_AURA_CONTAINER_METRICS["builds"][aBuildReason] = (VUHDO_AURA_CONTAINER_METRICS["builds"][aBuildReason] or 0) + 1;
 
 		tContainerData = VUHDO_buildManagedAuraContainer(aContainerTemplate);
 
@@ -4275,24 +4277,115 @@ end
 
 
 
---
-function VUHDO_printAuraContainerMetrics()
+do
+	--
+	local tTokenIndex;
+	local tOldStart;
+	local tNewStart;
+	local tOldEnd;
+	local tNewEnd;
+	local tOldToken;
+	local tNewToken;
+	local function VUHDO_findSignatureTokenMismatch(anOldSignature, aNewSignature)
 
-	VUHDO_Msg("|cffFFD100--- Aura Container Metrics ---|r");
+		if not anOldSignature or not aNewSignature then
+			return nil, nil, nil;
+		end
 
-	VUHDO_Msg(format("|cffFFA500** Containers:|r |cff98FB98Builds=|r%d |cff98FB98Releases=|r%d",
-		VUHDO_AURA_CONTAINER_METRICS["builds"]["container"] or 0,
-		VUHDO_AURA_CONTAINER_METRICS["releases"]["container"] or 0));
-	VUHDO_Msg(format("|cffFFA500** Overlay Slots:|r |cff98FB98SlotHosts=|r%d |cff98FB98Slots=|r%d |cff98FB98Suppressed=|r%d |cff98FB98MaxHostSuppressed=|r%d",
-		VUHDO_AURA_CONTAINER_METRICS["builds"]["slotHost"] or 0,
-		VUHDO_AURA_CONTAINER_METRICS["builds"]["overlaySlot"] or 0,
-		VUHDO_AURA_CONTAINER_METRICS["runtime"]["suppressedOverlaySlots"] or 0,
-		VUHDO_AURA_CONTAINER_METRICS["runtime"]["maxHostSuppressedOverlaySlots"] or 0));
+		if anOldSignature == aNewSignature then
+			return nil, nil, nil;
+		end
 
-	VUHDO_Msg("|cffFFD100--- End of Metrics ---|r");
+		tTokenIndex = 0;
+		tOldStart = 1;
+		tNewStart = 1;
 
-	return;
+		while true do
+			tTokenIndex = tTokenIndex + 1;
 
+			tOldEnd = strfind(anOldSignature, "|", tOldStart, true);
+			tNewEnd = strfind(aNewSignature, "|", tNewStart, true);
+
+			if tOldEnd then
+				tOldToken = strsub(anOldSignature, tOldStart, tOldEnd - 1);
+			else
+				tOldToken = strsub(anOldSignature, tOldStart);
+			end
+
+			if tNewEnd then
+				tNewToken = strsub(aNewSignature, tNewStart, tNewEnd - 1);
+			else
+				tNewToken = strsub(aNewSignature, tNewStart);
+			end
+
+			if tOldToken ~= tNewToken then
+				return tTokenIndex, tOldToken, tNewToken;
+			end
+
+			if not tOldEnd and not tNewEnd then
+				return nil, nil, nil;
+			end
+
+			if not tOldEnd or not tNewEnd then
+				return tTokenIndex, tOldToken, tNewToken;
+			end
+
+			tOldStart = tOldEnd + 1;
+			tNewStart = tNewEnd + 1;
+		end
+
+		return nil, nil, nil;
+
+	end
+
+
+
+	--
+	local tBuildMetrics;
+	local tRuntimeMetrics;
+	local tMismatchIndex;
+	local tOldMismatchToken;
+	local tNewMismatchToken;
+	function VUHDO_printAuraContainerMetrics()
+
+		tBuildMetrics = VUHDO_AURA_CONTAINER_METRICS["builds"];
+		tRuntimeMetrics = VUHDO_AURA_CONTAINER_METRICS["runtime"];
+
+		VUHDO_Msg("|cffFFD100--- Aura Container Metrics ---|r");
+
+		VUHDO_Msg(format("|cffFFA500** Containers:|r |cff98FB98Builds=|r%d |cff98FB98Releases=|r%d",
+			tBuildMetrics["container"] or 0,
+			VUHDO_AURA_CONTAINER_METRICS["releases"]["container"] or 0));
+		VUHDO_Msg(format("|cffFFA500** Build reasons:|r |cff98FB98anchorNew=|r%d |cff98FB98anchorSignature=|r%d |cff98FB98anchorPanel=|r%d |cff98FB98anchorVolatile=|r%d |cff98FB98anchorDirect=|r%d |cff98FB98overlayNew=|r%d |cff98FB98overlayVolatile=|r%d |cff98FB98buffWatchNew=|r%d |cff98FB98buffWatchSignature=|r%d",
+			tBuildMetrics["anchorNew"] or 0,
+			tBuildMetrics["anchorSignature"] or 0,
+			tBuildMetrics["anchorPanel"] or 0,
+			tBuildMetrics["anchorVolatile"] or 0,
+			tBuildMetrics["anchorDirect"] or 0,
+			tBuildMetrics["overlayNew"] or 0,
+			tBuildMetrics["overlayVolatile"] or 0,
+			tBuildMetrics["buffWatchNew"] or 0,
+			tBuildMetrics["buffWatchSignature"] or 0));
+		VUHDO_Msg(format("|cffFFA500** Overlay Slots:|r |cff98FB98SlotHosts=|r%d |cff98FB98Slots=|r%d |cff98FB98Suppressed=|r%d |cff98FB98MaxHostSuppressed=|r%d",
+			tBuildMetrics["slotHost"] or 0,
+			tBuildMetrics["overlaySlot"] or 0,
+			tRuntimeMetrics["suppressedOverlaySlots"] or 0,
+			tRuntimeMetrics["maxHostSuppressedOverlaySlots"] or 0));
+
+		if tRuntimeMetrics["lastRebuildOldSignature"] and tRuntimeMetrics["lastRebuildNewSignature"] then
+			tMismatchIndex, tOldMismatchToken, tNewMismatchToken = VUHDO_findSignatureTokenMismatch(tRuntimeMetrics["lastRebuildOldSignature"], tRuntimeMetrics["lastRebuildNewSignature"]);
+
+			if tMismatchIndex then
+				VUHDO_Msg(format("|cffFFA500** Last signature mismatch:|r token %d |cff98FB98old=|r%s |cff98FB98new=|r%s",
+					tMismatchIndex, tOldMismatchToken or "", tNewMismatchToken or ""));
+			end
+		end
+
+		VUHDO_Msg("|cffFFD100--- End of Metrics ---|r");
+
+		return;
+
+	end
 end
 
 
@@ -4917,7 +5010,7 @@ function VUHDO_createAuraContainer(aButton, anAnchorIndex, anAnchorConfig)
 		return nil;
 	end
 
-	return VUHDO_acquireAuraContainer(aButton, tContainerTemplate);
+	return VUHDO_acquireAuraContainer(aButton, tContainerTemplate, "anchorDirect");
 
 end
 
@@ -5016,6 +5109,7 @@ local tFilterSignature;
 local tFilterContainer;
 local tContainerTemplate;
 local tVolatileAction;
+local tBuildReason;
 function VUHDO_initAuraContainersForButton(aButton, aPanelNum)
 
 	if not aButton or not aPanelNum then
@@ -5089,7 +5183,7 @@ function VUHDO_initAuraContainersForButton(aButton, aPanelNum)
 					if VUHDO_AURA_VOLATILE_PASS_REBUILD == tVolatileAction then
 						VUHDO_retireAuraContainer(aButton, tContainerData);
 
-						tContainerData = VUHDO_acquireAuraContainer(aButton, tContainerTemplate);
+						tContainerData = VUHDO_acquireAuraContainer(aButton, tContainerTemplate, "anchorVolatile");
 
 						if tContainerData then
 							VUHDO_AURA_CONTAINERS[tButtonName][tAnchorIndex] = tContainerData;
@@ -5100,11 +5194,21 @@ function VUHDO_initAuraContainersForButton(aButton, aPanelNum)
 						VUHDO_deferVolatilePassForButton(aButton);
 					end
 				else
+					if not tContainerData then
+						tBuildReason = "anchorNew";
+					elseif tContainerData["buildSignature"] ~= tBuildSignature then
+						tBuildReason = "anchorSignature";
+						VUHDO_AURA_CONTAINER_METRICS["runtime"]["lastRebuildOldSignature"] = tContainerData["buildSignature"];
+						VUHDO_AURA_CONTAINER_METRICS["runtime"]["lastRebuildNewSignature"] = tBuildSignature;
+					else
+						tBuildReason = "anchorPanel";
+					end
+
 					if tContainerData then
 						VUHDO_retireAuraContainer(aButton, tContainerData);
 					end
 
-					tContainerData = VUHDO_acquireAuraContainer(aButton, tContainerTemplate);
+					tContainerData = VUHDO_acquireAuraContainer(aButton, tContainerTemplate, tBuildReason);
 
 					if tContainerData then
 						VUHDO_AURA_CONTAINERS[tButtonName][tAnchorIndex] = tContainerData;

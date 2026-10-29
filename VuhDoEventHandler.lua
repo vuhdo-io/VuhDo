@@ -2694,15 +2694,42 @@ do
 
 
 	--
+	local function VUHDO_loadChangedAutoProfile()
+
+		if InCombatLockdown() or VUHDO_IS_CONFIG then
+			return false;
+		end
+
+		sAutoProfile, sTrigger = VUHDO_getAutoProfile();
+
+		if not sAutoProfile then
+			return false;
+		end
+
+		VUHDO_Msg(VUHDO_I18N_AUTO_ARRANG_1 .. sTrigger .. VUHDO_I18N_AUTO_ARRANG_2 .. "|cffffffff" .. sAutoProfile .. "|r\"");
+
+		VUHDO_loadProfile(sAutoProfile);
+
+		sAutoProfile = nil;
+		VUHDO_TIMERS["RELOAD_RAID"] = 0;
+		VUHDO_IS_RELOAD_BUFFS = false;
+
+		return true;
+
+	end
+
+
+
+	--
 	local function VUHDO_handleSegment2C(aTimeDelta)
 
 		-- Reload raid roster?
-		if VUHDO_checkTimer("RELOAD_RAID") then
+		if VUHDO_checkTimer("RELOAD_RAID") and not VUHDO_loadChangedAutoProfile() then
 			VUHDO_doReloadRoster(false);
 		end
 
 		-- Quick update after raid roster change?
-		if VUHDO_checkTimer("RELOAD_ROSTER") then
+		if VUHDO_checkTimer("RELOAD_ROSTER") and not VUHDO_loadChangedAutoProfile() then
 			VUHDO_doReloadRoster(true);
 		end
 

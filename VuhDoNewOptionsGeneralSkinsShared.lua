@@ -2910,7 +2910,7 @@ function VUHDO_loadProfile(aName)
 		VUHDO_spellTraceUpdateEditBox(VuhDoNewOptionsGeneralSpellTraceStorePanelEditBox);
 	end
 
-	collectgarbage("collect");
+	return;
 
 end
 
