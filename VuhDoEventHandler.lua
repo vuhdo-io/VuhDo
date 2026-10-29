@@ -896,12 +896,8 @@ end
 local function VUHDO_initOptions()
 
 	if VuhDoNewOptionsTabbedFrame then
-		VUHDO_initHotComboModels();
-		VUHDO_initHotBarComboModels();
-		VUHDO_initDebuffIgnoreComboModel();
 		VUHDO_initBouquetComboModel();
 		VUHDO_initBouquetSlotsComboModel();
-		VUHDO_bouquetsUpdateDefaultColors();
 	end
 
 	return;
