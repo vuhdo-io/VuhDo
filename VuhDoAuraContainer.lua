@@ -282,17 +282,24 @@ local sBorderColorR;
 local sBorderColorG;
 local sBorderColorB;
 local sBorderColorO;
-local sBorderWidth;
-local sBorderFile;
 
 local sBorderCoordStart = 0.0625;
 local sBorderCoordEnd = 1 - sBorderCoordStart;
+
+local sSolidBorderFile = "Interface\\AddOns\\VuhDo\\Images\\white_square_16_16";
 
 local sBorderPieceKeys = {
 	"BorderCornerTopLeft",
 	"BorderCornerTopRight",
 	"BorderCornerBottomLeft",
 	"BorderCornerBottomRight",
+	"BorderEdgeTop",
+	"BorderEdgeBottom",
+	"BorderEdgeLeft",
+	"BorderEdgeRight",
+};
+
+local sSolidBorderPieceKeys = {
 	"BorderEdgeTop",
 	"BorderEdgeBottom",
 	"BorderEdgeLeft",
@@ -1044,10 +1051,20 @@ do
 
 
 	--
-	local function VUHDO_addAuraButtonBorderDispelTextures(aAuraButton, aBorderOptions)
+	local tBorderPieceKeys;
+	local tBorderFile;
+	local function VUHDO_addAuraButtonBorderDispelTextures(aAuraButton, aBorderOptions, aButtonSetup)
 
-		for tCnt = 1, #sBorderPieceKeys do
-			tBorderPiece = aAuraButton[sBorderPieceKeys[tCnt]];
+		tBorderFile = (aButtonSetup and aButtonSetup["borderFile"]) or sSolidBorderFile;
+
+		if tBorderFile == sSolidBorderFile then
+			tBorderPieceKeys = sSolidBorderPieceKeys;
+		else
+			tBorderPieceKeys = sBorderPieceKeys;
+		end
+
+		for tCnt = 1, #tBorderPieceKeys do
+			tBorderPiece = aAuraButton[tBorderPieceKeys[tCnt]];
 
 			if tBorderPiece then
 				aAuraButton:AddDispelTypeTexture(tBorderPiece, aBorderOptions);
@@ -1061,6 +1078,7 @@ do
 
 
 	--
+	local tBorderWidth;
 	local function VUHDO_anchorAuraButtonBorderEdges(aAuraButton, aButtonSetup, aAnchorFrame)
 
 		for tCnt = 1, #sBorderPieceKeys do
@@ -1071,38 +1089,88 @@ do
 
 		tAnchorFrame = aAnchorFrame or aAuraButton;
 
-		sBorderWidth = (aButtonSetup and aButtonSetup["borderWidth"]) or 1;
-		sBorderFile = (aButtonSetup and aButtonSetup["borderFile"]) or "Interface\\AddOns\\VuhDo\\Images\\white_square_16_16";
-		tBorderEdgeSize = aButtonSetup["borderEdgeSize"] or VUHDO_PixelUtil.RoundToPixel(sBorderWidth, 1);
+		tBorderWidth = (aButtonSetup and aButtonSetup["borderWidth"]) or 1;
+		tBorderFile = (aButtonSetup and aButtonSetup["borderFile"]) or sSolidBorderFile;
+		tBorderEdgeSize = aButtonSetup["borderEdgeSize"] or VUHDO_PixelUtil.RoundToPixel(tBorderWidth, 1);
 		tBorderRepeatX = aButtonSetup["borderRepeatX"] or 1;
 		tBorderRepeatY = aButtonSetup["borderRepeatY"] or 1;
+
+		if tBorderFile == sSolidBorderFile then
+			tBorderPiece = aAuraButton["BorderCornerTopLeft"];
+			tBorderPiece:Hide();
+
+			tBorderPiece = aAuraButton["BorderCornerTopRight"];
+			tBorderPiece:Hide();
+
+			tBorderPiece = aAuraButton["BorderCornerBottomLeft"];
+			tBorderPiece:Hide();
+
+			tBorderPiece = aAuraButton["BorderCornerBottomRight"];
+			tBorderPiece:Hide();
+
+			tBorderPiece = aAuraButton["BorderEdgeTop"];
+			tBorderPiece:ClearAllPoints();
+			VUHDO_PixelUtil.SetPoint(tBorderPiece, "TOPLEFT", tAnchorFrame, "TOPLEFT", 0, 0);
+			VUHDO_PixelUtil.SetPoint(tBorderPiece, "TOPRIGHT", tAnchorFrame, "TOPRIGHT", 0, 0);
+			VUHDO_PixelUtil.SetHeight(tBorderPiece, tBorderEdgeSize, 1);
+			tBorderPiece:SetTexture(tBorderFile, true, true);
+
+			tBorderPiece = aAuraButton["BorderEdgeBottom"];
+			tBorderPiece:ClearAllPoints();
+			VUHDO_PixelUtil.SetPoint(tBorderPiece, "BOTTOMLEFT", tAnchorFrame, "BOTTOMLEFT", 0, 0);
+			VUHDO_PixelUtil.SetPoint(tBorderPiece, "BOTTOMRIGHT", tAnchorFrame, "BOTTOMRIGHT", 0, 0);
+			VUHDO_PixelUtil.SetHeight(tBorderPiece, tBorderEdgeSize, 1);
+			tBorderPiece:SetTexture(tBorderFile, true, true);
+
+			tBorderPiece = aAuraButton["BorderEdgeLeft"];
+			tBorderPiece:ClearAllPoints();
+			VUHDO_PixelUtil.SetPoint(tBorderPiece, "TOPLEFT", tAnchorFrame, "TOPLEFT", 0, -tBorderEdgeSize);
+			VUHDO_PixelUtil.SetPoint(tBorderPiece, "BOTTOMLEFT", tAnchorFrame, "BOTTOMLEFT", 0, tBorderEdgeSize);
+			VUHDO_PixelUtil.SetWidth(tBorderPiece, tBorderEdgeSize, 1);
+			tBorderPiece:SetTexture(tBorderFile, true, true);
+
+			tBorderPiece = aAuraButton["BorderEdgeRight"];
+			tBorderPiece:ClearAllPoints();
+			VUHDO_PixelUtil.SetPoint(tBorderPiece, "TOPRIGHT", tAnchorFrame, "TOPRIGHT", 0, -tBorderEdgeSize);
+			VUHDO_PixelUtil.SetPoint(tBorderPiece, "BOTTOMRIGHT", tAnchorFrame, "BOTTOMRIGHT", 0, tBorderEdgeSize);
+			VUHDO_PixelUtil.SetWidth(tBorderPiece, tBorderEdgeSize, 1);
+			tBorderPiece:SetTexture(tBorderFile, true, true);
+
+			for tCnt = 1, #sSolidBorderPieceKeys do
+				tBorderPiece = aAuraButton[sSolidBorderPieceKeys[tCnt]];
+				tBorderPiece:SetDrawLayer("OVERLAY", 7);
+				tBorderPiece:Show();
+			end
+
+			return true;
+		end
 
 		tBorderPiece = aAuraButton["BorderCornerTopLeft"];
 		tBorderPiece:ClearAllPoints();
 		VUHDO_PixelUtil.SetPoint(tBorderPiece, "TOPLEFT", tAnchorFrame, "TOPLEFT", 0, 0);
 		VUHDO_PixelUtil.SetSize(tBorderPiece, tBorderEdgeSize, tBorderEdgeSize);
-		tBorderPiece:SetTexture(sBorderFile, true, true);
+		tBorderPiece:SetTexture(tBorderFile, true, true);
 		VUHDO_applyAuraButtonBorderTexCoord(tBorderPiece, sBorderPieceCoords["BorderCornerTopLeft"], tBorderRepeatX, tBorderRepeatY);
 
 		tBorderPiece = aAuraButton["BorderCornerTopRight"];
 		tBorderPiece:ClearAllPoints();
 		VUHDO_PixelUtil.SetPoint(tBorderPiece, "TOPRIGHT", tAnchorFrame, "TOPRIGHT", 0, 0);
 		VUHDO_PixelUtil.SetSize(tBorderPiece, tBorderEdgeSize, tBorderEdgeSize);
-		tBorderPiece:SetTexture(sBorderFile, true, true);
+		tBorderPiece:SetTexture(tBorderFile, true, true);
 		VUHDO_applyAuraButtonBorderTexCoord(tBorderPiece, sBorderPieceCoords["BorderCornerTopRight"], tBorderRepeatX, tBorderRepeatY);
 
 		tBorderPiece = aAuraButton["BorderCornerBottomLeft"];
 		tBorderPiece:ClearAllPoints();
 		VUHDO_PixelUtil.SetPoint(tBorderPiece, "BOTTOMLEFT", tAnchorFrame, "BOTTOMLEFT", 0, 0);
 		VUHDO_PixelUtil.SetSize(tBorderPiece, tBorderEdgeSize, tBorderEdgeSize);
-		tBorderPiece:SetTexture(sBorderFile, true, true);
+		tBorderPiece:SetTexture(tBorderFile, true, true);
 		VUHDO_applyAuraButtonBorderTexCoord(tBorderPiece, sBorderPieceCoords["BorderCornerBottomLeft"], tBorderRepeatX, tBorderRepeatY);
 
 		tBorderPiece = aAuraButton["BorderCornerBottomRight"];
 		tBorderPiece:ClearAllPoints();
 		VUHDO_PixelUtil.SetPoint(tBorderPiece, "BOTTOMRIGHT", tAnchorFrame, "BOTTOMRIGHT", 0, 0);
 		VUHDO_PixelUtil.SetSize(tBorderPiece, tBorderEdgeSize, tBorderEdgeSize);
-		tBorderPiece:SetTexture(sBorderFile, true, true);
+		tBorderPiece:SetTexture(tBorderFile, true, true);
 		VUHDO_applyAuraButtonBorderTexCoord(tBorderPiece, sBorderPieceCoords["BorderCornerBottomRight"], tBorderRepeatX, tBorderRepeatY);
 
 		tBorderPiece = aAuraButton["BorderEdgeTop"];
@@ -1110,7 +1178,7 @@ do
 		VUHDO_PixelUtil.SetPoint(tBorderPiece, "TOPLEFT", tAnchorFrame, "TOPLEFT", tBorderEdgeSize, 0);
 		VUHDO_PixelUtil.SetPoint(tBorderPiece, "TOPRIGHT", tAnchorFrame, "TOPRIGHT", -tBorderEdgeSize, 0);
 		VUHDO_PixelUtil.SetHeight(tBorderPiece, tBorderEdgeSize, 1);
-		tBorderPiece:SetTexture(sBorderFile, true, true);
+		tBorderPiece:SetTexture(tBorderFile, true, true);
 		VUHDO_applyAuraButtonBorderTexCoord(tBorderPiece, sBorderPieceCoords["BorderEdgeTop"], tBorderRepeatX, tBorderRepeatY);
 
 		tBorderPiece = aAuraButton["BorderEdgeBottom"];
@@ -1118,7 +1186,7 @@ do
 		VUHDO_PixelUtil.SetPoint(tBorderPiece, "BOTTOMLEFT", tAnchorFrame, "BOTTOMLEFT", tBorderEdgeSize, 0);
 		VUHDO_PixelUtil.SetPoint(tBorderPiece, "BOTTOMRIGHT", tAnchorFrame, "BOTTOMRIGHT", -tBorderEdgeSize, 0);
 		VUHDO_PixelUtil.SetHeight(tBorderPiece, tBorderEdgeSize, 1);
-		tBorderPiece:SetTexture(sBorderFile, true, true);
+		tBorderPiece:SetTexture(tBorderFile, true, true);
 		VUHDO_applyAuraButtonBorderTexCoord(tBorderPiece, sBorderPieceCoords["BorderEdgeBottom"], tBorderRepeatX, tBorderRepeatY);
 
 		tBorderPiece = aAuraButton["BorderEdgeLeft"];
@@ -1126,7 +1194,7 @@ do
 		VUHDO_PixelUtil.SetPoint(tBorderPiece, "TOPLEFT", tAnchorFrame, "TOPLEFT", 0, -tBorderEdgeSize);
 		VUHDO_PixelUtil.SetPoint(tBorderPiece, "BOTTOMLEFT", tAnchorFrame, "BOTTOMLEFT", 0, tBorderEdgeSize);
 		VUHDO_PixelUtil.SetWidth(tBorderPiece, tBorderEdgeSize, 1);
-		tBorderPiece:SetTexture(sBorderFile, true, true);
+		tBorderPiece:SetTexture(tBorderFile, true, true);
 		VUHDO_applyAuraButtonBorderTexCoord(tBorderPiece, sBorderPieceCoords["BorderEdgeLeft"], tBorderRepeatX, tBorderRepeatY);
 
 		tBorderPiece = aAuraButton["BorderEdgeRight"];
@@ -1134,7 +1202,7 @@ do
 		VUHDO_PixelUtil.SetPoint(tBorderPiece, "TOPRIGHT", tAnchorFrame, "TOPRIGHT", 0, -tBorderEdgeSize);
 		VUHDO_PixelUtil.SetPoint(tBorderPiece, "BOTTOMRIGHT", tAnchorFrame, "BOTTOMRIGHT", 0, tBorderEdgeSize);
 		VUHDO_PixelUtil.SetWidth(tBorderPiece, tBorderEdgeSize, 1);
-		tBorderPiece:SetTexture(sBorderFile, true, true);
+		tBorderPiece:SetTexture(tBorderFile, true, true);
 		VUHDO_applyAuraButtonBorderTexCoord(tBorderPiece, sBorderPieceCoords["BorderEdgeRight"], tBorderRepeatX, tBorderRepeatY);
 
 		for tCnt = 1, #sBorderPieceKeys do
@@ -1198,7 +1266,7 @@ do
 		sAuraBorderOptions["customDispelColorCurve"] = nil;
 		sAuraBorderOptions["customDispelColorMap"] = VUHDO_getDispelTypeColorMap(aButtonSetup["dispelBright"], aButtonSetup["dispelOpacity"]);
 
-		VUHDO_addAuraButtonBorderDispelTextures(aAuraButton, sAuraBorderOptions);
+		VUHDO_addAuraButtonBorderDispelTextures(aAuraButton, sAuraBorderOptions, aButtonSetup);
 
 		if aButtonSetup["targetFrameLevel"] then
 			VUHDO_PixelUtil.SetFrameLevel(aAuraButton, aButtonSetup["targetFrameLevel"]);
@@ -1314,7 +1382,7 @@ do
 
 		aAuraButton:ClearDispelTypeTextures();
 
-		VUHDO_addAuraButtonBorderDispelTextures(aAuraButton, sAuraIconDispelBorderOptionsBind);
+		VUHDO_addAuraButtonBorderDispelTextures(aAuraButton, sAuraIconDispelBorderOptionsBind, aButtonSetup);
 
 		return;
 
