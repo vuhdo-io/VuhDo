@@ -10,6 +10,7 @@ local format = string.format;
 local strfind = string.find;
 local strsub = string.sub;
 local max = math.max;
+local floor = math.floor;
 
 local CreateFrame = CreateFrame;
 local InCombatLockdown = InCombatLockdown;
@@ -38,6 +39,7 @@ local VUHDO_OVERLAY_SLOT_HOSTS = VUHDO_OVERLAY_SLOT_HOSTS;
 VUHDO_MISSING_BUFF_CONTAINERS = VUHDO_MISSING_BUFF_CONTAINERS or { };
 local VUHDO_MISSING_BUFF_CONTAINERS = VUHDO_MISSING_BUFF_CONTAINERS;
 
+local VUHDO_AURA_FRAME_CREATION_BATCH_SIZE = 10;
 local VUHDO_AURA_CONTAINER_TEMPLATE = "VuhDoAuraContainerTemplate";
 local VUHDO_FILL_CHAIN_CONTAINER_TEMPLATE = "VuhDoFillChainAuraContainerTemplate";
 VUHDO_AURA_BUTTON_ICON_TEMPLATE = "VuhDoAuraButtonIconTemplate";
@@ -2017,9 +2019,30 @@ do
 
 	--
 	local tButtonSetup;
+	local tMaxFrameCount;
+	local tLastBatchStart;
+	local tCreatedFrameCount;
 	function VUHDO_buildAuraButtonInitializer(aTemplateRef, aContainer)
 
+		tMaxFrameCount = aTemplateRef["template"]["maxFrameCount"] or 5;
+		tLastBatchStart = floor((tMaxFrameCount - 1) / VUHDO_AURA_FRAME_CREATION_BATCH_SIZE) * VUHDO_AURA_FRAME_CREATION_BATCH_SIZE;
+
+		aTemplateRef["lastBatchStart"] = tLastBatchStart;
+		aTemplateRef["surplusFrameCount"] = VUHDO_AURA_FRAME_CREATION_BATCH_SIZE - (tMaxFrameCount - tLastBatchStart);
+		aTemplateRef["createdFrameCount"] = 0;
+
 		return function(aAuraButton)
+
+			tCreatedFrameCount = aTemplateRef["createdFrameCount"] + 1;
+			aTemplateRef["createdFrameCount"] = tCreatedFrameCount;
+
+			if tCreatedFrameCount > aTemplateRef["lastBatchStart"] and tCreatedFrameCount - aTemplateRef["lastBatchStart"] <= aTemplateRef["surplusFrameCount"] then
+				aAuraButton["vuhdoIsSurplusFrame"] = true;
+
+				VUHDO_AURA_CONTAINER_METRICS["runtime"]["surplusFrames"] = (VUHDO_AURA_CONTAINER_METRICS["runtime"]["surplusFrames"] or 0) + 1;
+
+				return;
+			end
 
 			tButtonSetup = aTemplateRef["template"]["buttonSetup"];
 
@@ -3513,7 +3536,7 @@ do
 					for tGroupFrameCnt = 1, tGroupFrameCount do
 						tAuraFrame = aContainer:GetAuraGroupFrame(tRecordedKey, tGroupFrameCnt);
 
-						if tAuraFrame and not tAuraFrame:CanBeAccessedInContext() then
+						if tAuraFrame and not tAuraFrame["vuhdoIsSurplusFrame"] and not tAuraFrame:CanBeAccessedInContext() then
 							return false;
 						end
 					end
@@ -3746,22 +3769,24 @@ do
 					for tGroupFrameCnt = 1, tGroupFrameCount do
 						tAuraFrame = aContainer:GetAuraGroupFrame(tRecordedKey, tGroupFrameCnt);
 
-						if tAuraFrame and tAuraFrame:CanBeAccessedInContext() then
-							VUHDO_applyAuraButtonVolatileSetup(tButtonSetup, tAuraFrame);
+						if tAuraFrame and not tAuraFrame["vuhdoIsSurplusFrame"] then
+							if tAuraFrame:CanBeAccessedInContext() then
+								VUHDO_applyAuraButtonVolatileSetup(tButtonSetup, tAuraFrame);
 
-							if tButtonSetup["auraGroupBarGlow"] then
-								VUHDO_applyAuraGroupBarGlowFromAuraButton(tAuraFrame, tButtonSetup);
-							end
+								if tButtonSetup["auraGroupBarGlow"] then
+									VUHDO_applyAuraGroupBarGlowFromAuraButton(tAuraFrame, tButtonSetup);
+								end
 
-							if tButtonSetup["glowIcon"] then
-								VUHDO_startAuraButtonGlow(tAuraFrame, tButtonSetup);
-							end
+								if tButtonSetup["glowIcon"] then
+									VUHDO_startAuraButtonGlow(tAuraFrame, tButtonSetup);
+								end
 
-							if "class" == tButtonSetup["barColorMode"] and tAuraFrame["DurationBar"] then
-								VUHDO_reregisterContainerClassColorBar(aContainer, tAuraFrame["DurationBar"]);
+								if "class" == tButtonSetup["barColorMode"] and tAuraFrame["DurationBar"] then
+									VUHDO_reregisterContainerClassColorBar(aContainer, tAuraFrame["DurationBar"]);
+								end
+							else
+								tSkippedCount = tSkippedCount + 1;
 							end
-						elseif tAuraFrame then
-							tSkippedCount = tSkippedCount + 1;
 						end
 					end
 				end
@@ -4353,9 +4378,10 @@ do
 
 		VUHDO_Msg("|cffFFD100--- Aura Container Metrics ---|r");
 
-		VUHDO_Msg(format("|cffFFA500** Containers:|r |cff98FB98Builds=|r%d |cff98FB98Releases=|r%d",
+		VUHDO_Msg(format("|cffFFA500** Containers:|r |cff98FB98Builds=|r%d |cff98FB98Releases=|r%d |cff98FB98SurplusFrames=|r%d",
 			tBuildMetrics["container"] or 0,
-			VUHDO_AURA_CONTAINER_METRICS["releases"]["container"] or 0));
+			VUHDO_AURA_CONTAINER_METRICS["releases"]["container"] or 0,
+			tRuntimeMetrics["surplusFrames"] or 0));
 		VUHDO_Msg(format("|cffFFA500** Build reasons:|r |cff98FB98anchorNew=|r%d |cff98FB98anchorSignature=|r%d |cff98FB98anchorPanel=|r%d |cff98FB98anchorVolatile=|r%d |cff98FB98anchorDirect=|r%d |cff98FB98overlayNew=|r%d |cff98FB98overlayVolatile=|r%d |cff98FB98buffWatchNew=|r%d |cff98FB98buffWatchSignature=|r%d",
 			tBuildMetrics["anchorNew"] or 0,
 			tBuildMetrics["anchorSignature"] or 0,
