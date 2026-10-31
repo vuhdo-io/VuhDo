@@ -2246,7 +2246,7 @@ end
 
 
 --
-function VUHDO_loadVariables()
+function VUHDO_loadVariables(anIsProfileSwitch)
 
 	_, VUHDO_PLAYER_CLASS = UnitClass("player");
 	VUHDO_PLAYER_NAME, tSecond = UnitName("player");
@@ -2262,12 +2262,14 @@ function VUHDO_loadVariables()
 	end
 
 	VUHDO_initBuffSettings();
-	VUHDO_loadDefaultBouquets();
+	VUHDO_loadDefaultBouquets(anIsProfileSwitch);
 	VUHDO_panelRedrawInitLocalOverrides();
 	VUHDO_initClassColors();
 	VUHDO_initTextProviderConfig();
 
 	VUHDO_lnfPatchFont(VuhDoOptionsTooltipText, "Text");
+
+	VUHDO_clearSaneValueCache();
 
 	return;
 
