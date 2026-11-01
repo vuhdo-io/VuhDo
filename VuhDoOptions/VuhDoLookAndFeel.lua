@@ -670,7 +670,7 @@ do
 	local tIndex;
 	local tLastIndex;
 	local tEnd;
-	function VUHDO_lnfUpdateVar(aModel, aValue, aPanelNum)
+	function VUHDO_lnfUpdateVar(aModel, aValue, aPanelNum, anIsForceUpdate)
 		tPanelNum = nil;
 
 		if not aPanelNum then aPanelNum = DESIGN_MISC_PANEL_NUM; end
@@ -714,7 +714,7 @@ do
 			end
 
 			if "table" == type(tLastField) then
-				if tLastField[tLastIndex] == aValue then
+				if not anIsForceUpdate and tLastField[tLastIndex] == aValue then
 					return;
 				end
 
@@ -819,11 +819,11 @@ do
 	end
 
 	local tModel, tFunction;
-	function VUHDO_lnfUpdateVarFromModel(aComponent, aValue, aPanelNum)
+	function VUHDO_lnfUpdateVarFromModel(aComponent, aValue, aPanelNum, anIsForceUpdate)
 		tModel = aComponent:GetAttribute("model");
 		if not tModel then return; end
 
-		VUHDO_lnfUpdateVar(tModel, aValue, aPanelNum);
+		VUHDO_lnfUpdateVar(tModel, aValue, aPanelNum, anIsForceUpdate);
 		VUHDO_lnfUpdateAllModelControls(aComponent, aValue);
 		VUHDO_lnfUpdateComponentsByConstraints(aComponent);
 
@@ -1832,7 +1832,7 @@ do
 		end
 
 		if tArrayModel then
-			VUHDO_lnfUpdateVarFromModel(aComboBox, tArrayModel, nil);
+			VUHDO_lnfUpdateVarFromModel(aComboBox, tArrayModel, nil, aValue ~= nil);
 		else
 			VUHDO_lnfUpdateVarFromModel(aComboBox, aValue, nil);
 		end
