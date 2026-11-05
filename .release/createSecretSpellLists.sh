@@ -50,12 +50,11 @@ usage() {
 
 	ENVIRONMENT:
 	  FOREVER_WAGO_BRANCH   Wago Tools product used for the forever/camelot alias.
-	                        Default: wow_cn_beta (the product that carries the 1.6x Forever builds).
+	                        Default: wowf (live WoW Forever builds).
 	EOF
 }
 
-# Wago Tools has no dedicated Forever product yet; the 1.6x (16xxx interface) builds are listed under wow_cn_beta.
-FOREVER_WAGO_BRANCH="${FOREVER_WAGO_BRANCH:-wow_cn_beta}"
+FOREVER_WAGO_BRANCH="${FOREVER_WAGO_BRANCH:-wowf}"
 OUTPUT_FILE=""
 
 resolve_branch_alias() {
