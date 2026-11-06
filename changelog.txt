@@ -17,6 +17,10 @@ Bugfixes:
   
   
 Improvements:  
+-- Added option to show the realm name (Retail) or surname (Forever)  
+--   See 'VuhDo Options > Panels > Text > Show Text > Realm/Surname'  
+-- Added option to show the realm name or surname only for players with the same name  
+--   See 'VuhDo Options > Panels > Text > Show Text > Only Duplicates'
   
   
 --------------------------------------------------------------  

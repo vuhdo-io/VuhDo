@@ -745,6 +745,7 @@ local tCharacterNameSeparatorConsts = Constants and Constants.CharacterNameSepar
 
 VUHDO_SURNAME_SEPARATOR = tCharacterNameSeparatorConsts and tCharacterNameSeparatorConsts["CHARACTERNAME_SURNAME_SEPARATOR"];
 VUHDO_SURNAME_CAPABILITY = VUHDO_SURNAME_SEPARATOR ~= nil;
+VUHDO_NAME_SUFFIX_SEPARATOR = VUHDO_SURNAME_SEPARATOR or "-";
 
 VUHDO_AURA_ANCHOR_PLAYER_ICONS = 999;
 

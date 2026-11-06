@@ -41,6 +41,9 @@ local VUHDO_RAID_NAMES = VUHDO_RAID_NAMES;
 VUHDO_RAID_FULL_NAMES = { };
 local VUHDO_RAID_FULL_NAMES = VUHDO_RAID_FULL_NAMES;
 
+VUHDO_RAID_NAME_COUNTS = { };
+local VUHDO_RAID_NAME_COUNTS = VUHDO_RAID_NAME_COUNTS;
+
 VUHDO_GROUPS = { };
 local VUHDO_GROUPS = VUHDO_GROUPS;
 
@@ -241,10 +244,12 @@ local VUHDO_UNIT_AFK_DC = { };
 
 
 --
+local tNameCount;
 local function VUHDO_updateAllRaidNames()
 
 	twipe(VUHDO_RAID_NAMES);
 	twipe(VUHDO_RAID_FULL_NAMES);
+	twipe(VUHDO_RAID_NAME_COUNTS);
 
 	for tUnit, tInfo in pairs(VUHDO_RAID) do
 		if not VUHDO_isSpecialUnit(tUnit) and not tInfo["hasSecretIdentity"] then
@@ -256,8 +261,16 @@ local function VUHDO_updateAllRaidNames()
 			if tInfo["fullName"] and (not VUHDO_RAID_FULL_NAMES[tInfo["fullName"]] or not tInfo["isPet"]) then
 				VUHDO_RAID_FULL_NAMES[tInfo["fullName"]] = tUnit;
 			end
+
+			if not tInfo["isPet"] and tInfo["name"] then
+				tNameCount = VUHDO_RAID_NAME_COUNTS[tInfo["name"]] or 0;
+
+				VUHDO_RAID_NAME_COUNTS[tInfo["name"]] = tNameCount + 1;
+			end
 		end
 	end
+
+	VUHDO_resetNameTextCache();
 
 	return;
 
@@ -507,6 +520,14 @@ function VUHDO_setHealth(aUnit, aMode)
 				tInfo["fullName"] = nil;
 			else
 				tInfo["fullName"] = VUHDO_buildUnitFullName(tName, tRealm);
+			end
+
+			if sSecretsEnabled and issecretvalue(tRealm) then
+				tInfo["nameSuffix"] = tRealm;
+			elseif tRealm and tRealm ~= "" then
+				tInfo["nameSuffix"] = tRealm;
+			else
+				tInfo["nameSuffix"] = nil;
 			end
 
 			tInfo["number"] = VUHDO_getUnitNo(aUnit);

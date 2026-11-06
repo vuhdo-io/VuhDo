@@ -39,6 +39,8 @@ local VUHDO_BAR_COLOR;
 local VUHDO_THREAT_CFG;
 local VUHDO_KILO_OPTIONS;
 local VUHDO_NAME_TEXTS;
+local VUHDO_RAID_NAME_COUNTS;
+local VUHDO_NAME_SUFFIX_SEPARATOR;
 
 local sSecretsEnabled = VUHDO_SECRETS_ENABLED;
 local sIsOverhealText;
@@ -154,6 +156,8 @@ function VUHDO_customHealthTextInitLocalOverrides()
 	VUHDO_THREAT_CFG = VUHDO_CONFIG["THREAT"];
 	VUHDO_KILO_OPTIONS = _G["VUHDO_KILO_OPTIONS"];
 	VUHDO_NAME_TEXTS = _G["VUHDO_NAME_TEXTS"];
+	VUHDO_RAID_NAME_COUNTS = _G["VUHDO_RAID_NAME_COUNTS"];
+	VUHDO_NAME_SUFFIX_SEPARATOR = _G["VUHDO_NAME_SUFFIX_SEPARATOR"];
 
 	VUHDO_getHealthBar = _G["VUHDO_getHealthBar"];
 	VUHDO_getBarText = _G["VUHDO_getBarText"];
@@ -255,32 +259,59 @@ end
 --
 local tOwnerInfo;
 local tNickname;
+local tDisplayName;
 local tMaxChars;
 local tIndex;
 local tNameText;
+local tIdTextConfig;
+local tIsShowNickname;
+local tIsShowNameSuffix;
+local tNameCount;
 local function VUHDO_buildNameText(aUnit, anInfo, aSetup, aPanelNum, anIsTarget)
 
 	tOwnerInfo = VUHDO_RAID[anInfo["ownerUnit"]];
 	tIndex = (VUHDO_getUnitIdentityKey(anInfo) or anInfo["name"] or "") .. (anInfo["ownerUnit"] or "") .. aPanelNum;
+	tIdTextConfig = aSetup["ID_TEXT"];
 
-	if not sSecretsEnabled and VUHDO_LibNickTag and aSetup["ID_TEXT"]["showNickname"] then
+	tIsShowNickname = not sSecretsEnabled and VUHDO_LibNickTag and tIdTextConfig["showNickname"];
+
+	if tIsShowNickname then
 		tNickname = VUHDO_LibNickTag:GetNickname(anInfo["name"]) or anInfo["name"];
 	else
 		tNickname = anInfo["name"];
 	end
 
-	if anInfo["hasSecretName"] or not VUHDO_NAME_TEXTS[tIndex] or anInfo["name"] ~= tNickname then
-		if aSetup["ID_TEXT"]["showName"] then
-			tNameText = (aSetup["ID_TEXT"]["showClass"] and not anInfo["isPet"] and anInfo["className"]) 
-				and anInfo["className"] .. ": " or "";
+	tDisplayName = tNickname;
 
-			tNameText = tNameText .. ((not tOwnerInfo or not aSetup["ID_TEXT"]["showPetOwners"])
-				and tNickname or tOwnerInfo["name"] .. ": " .. tNickname);
+	if tIdTextConfig["showName"] and tIdTextConfig["showNameSuffix"] and anInfo["nameSuffix"] and not anInfo["isPet"] and not tIsShowNickname
+		and not (tOwnerInfo and tIdTextConfig["showPetOwners"]) then
+
+		tIsShowNameSuffix = true;
+
+		if tIdTextConfig["showNameSuffixOnlyDuplicates"] then
+			if anInfo["hasSecretIdentity"] then
+				tIsShowNameSuffix = false;
+			else
+				tNameCount = VUHDO_RAID_NAME_COUNTS[anInfo["name"]] or 0;
+
+				tIsShowNameSuffix = tNameCount > 1;
+			end
+		end
+
+		if tIsShowNameSuffix then
+			tDisplayName = format("%s%s%s", tNickname, VUHDO_NAME_SUFFIX_SEPARATOR, anInfo["nameSuffix"]);
+		end
+	end
+
+	if anInfo["hasSecretName"] or anInfo["hasSecretIdentity"] or not VUHDO_NAME_TEXTS[tIndex] or anInfo["name"] ~= tNickname then
+		if tIdTextConfig["showName"] then
+			tNameText = (tIdTextConfig["showClass"] and not anInfo["isPet"] and anInfo["className"]) and anInfo["className"] .. ": " or "";
+
+			tNameText = tNameText .. ((not tOwnerInfo or not tIdTextConfig["showPetOwners"]) and tDisplayName or tOwnerInfo["name"] .. ": " .. tNickname);
 		else
-			tNameText = (aSetup["ID_TEXT"]["showClass"] and not anInfo["isPet"]) 
-				and anInfo["className"] or "";
+			tNameText = (tIdTextConfig["showClass"] and not anInfo["isPet"]) and anInfo["className"] or "";
 
-			if tOwnerInfo and aSetup["ID_TEXT"]["showPetOwners"] then
+			if tOwnerInfo and tIdTextConfig["showPetOwners"] then
 				tNameText = tNameText .. tOwnerInfo["name"];
 			end
 		end
@@ -288,14 +319,14 @@ local function VUHDO_buildNameText(aUnit, anInfo, aSetup, aPanelNum, anIsTarget)
 		tMaxChars = aSetup["PANEL_COLOR"]["TEXT"]["maxChars"];
 
 		if tMaxChars > 0 then
-			if anInfo["hasSecretName"] then
+			if anInfo["hasSecretName"] or anInfo["hasSecretIdentity"] then
 				tNameText = format("%." .. tMaxChars .. "s", tNameText);
 			elseif #tNameText > tMaxChars then
 				tNameText = VUHDO_utf8Cut(tNameText, tMaxChars);
 			end
 		end
 
-		if not anInfo["hasSecretName"] then
+		if not anInfo["hasSecretName"] and not anInfo["hasSecretIdentity"] then
 			VUHDO_NAME_TEXTS[tIndex] = tNameText;
 		end
 	else
