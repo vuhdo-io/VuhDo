@@ -7,11 +7,11 @@ local UnitHealthMax = UnitHealthMax;
 local UnitHealthMissing = UnitHealthMissing;
 local UnitHealthPercent = UnitHealthPercent;
 local AbbreviateNumbers = AbbreviateNumbers;
-local CurveConstants = CurveConstants;
 local CreateColorCurve =C_CurveUtil and C_CurveUtil.CreateColorCurve;
 local CreateCurve = C_CurveUtil and C_CurveUtil.CreateCurve;
 local CreateColor = CreateColor;
 local TruncateWhenZero = C_StringUtil and C_StringUtil.TruncateWhenZero;
+local WrapString = C_StringUtil and C_StringUtil.WrapString;
 local UnitGetDetailedHealPrediction = UnitGetDetailedHealPrediction;
 local CreateUnitHealPredictionCalculator = CreateUnitHealPredictionCalculator;
 local UnitIsGhost = UnitIsGhost;
@@ -48,7 +48,6 @@ local sIsAggroText;
 local sLifeColor;
 local sIsNoRangeFade;
 local sHealthTextCalculator;
-local sHealthTextEffectiveCalculator;
 local sHideIrrelevantCurve;
 local sHideMissingZeroCurve;
 local sShowWhenFullCurve;
@@ -180,7 +179,6 @@ function VUHDO_customHealthTextInitLocalOverrides()
 	sIsNoRangeFade = VUHDO_CONFIG["CUSTOM_DEBUFF"]["isNoRangeFade"];
 
 	sHealthTextCalculator = nil;
-	sHealthTextEffectiveCalculator = nil;
 
 	if sSecretsEnabled then
 		sHealthTextCalculator = CreateUnitHealPredictionCalculator();
@@ -192,17 +190,6 @@ function VUHDO_customHealthTextInitLocalOverrides()
 			sHealthTextCalculator:SetHealAbsorbMode(Enum.UnitHealAbsorbMode.Total);
 			sHealthTextCalculator:SetIncomingHealOverflowPercent(1.0);
 			sHealthTextCalculator:SetMaximumHealthMode(Enum.UnitMaximumHealthMode.Default);
-		end
-
-		sHealthTextEffectiveCalculator = CreateUnitHealPredictionCalculator();
-
-		if sHealthTextEffectiveCalculator then
-			sHealthTextEffectiveCalculator:SetDamageAbsorbClampMode(Enum.UnitDamageAbsorbClampMode.MaximumHealth);
-			sHealthTextEffectiveCalculator:SetHealAbsorbClampMode(Enum.UnitHealAbsorbClampMode.MaximumHealth);
-			sHealthTextEffectiveCalculator:SetIncomingHealClampMode(Enum.UnitIncomingHealClampMode.MaximumHealth);
-			sHealthTextEffectiveCalculator:SetHealAbsorbMode(Enum.UnitHealAbsorbMode.Total);
-			sHealthTextEffectiveCalculator:SetIncomingHealOverflowPercent(1.0);
-			sHealthTextEffectiveCalculator:SetMaximumHealthMode(Enum.UnitMaximumHealthMode.WithAbsorbs);
 		end
 
 		sScaleTo100CeilCurve = CreateCurve and CreateCurve();
@@ -350,59 +337,63 @@ end
 
 
 --
+local function VUHDO_getKiloTextSecret(aNumber, anIsVerbose)
+
+	return anIsVerbose and format("%d", aNumber) or AbbreviateNumbers(aNumber, VUHDO_KILO_OPTIONS);
+
+end
+
+
+
+--
+local function VUHDO_getMissingHealthTextSecret(aMissingHealth, anIsVerbose, aSuffix)
+
+	return anIsVerbose and WrapString(TruncateWhenZero(aMissingHealth), "-", aSuffix) or "-" .. AbbreviateNumbers(aMissingHealth, VUHDO_KILO_OPTIONS) .. (aSuffix or "");
+
+end
+
+
+
+--
 local tHealth;
 local tHealthMax;
 local tMissingHealth;
 local tLifeStr;
-local tCalculator;
+local tIsVerbose;
 local function VUHDO_buildLifeTextSecret(aUnit, aLifeConfig, anIsTarget)
 
-	if not sHealthTextCalculator or not sHealthTextEffectiveCalculator then
-		if 1 == aLifeConfig["mode"] or anIsTarget then
-			return format("%d%%", UnitHealthPercent(aUnit, true, sScaleTo100CeilCurve)), true;
-		elseif 3 == aLifeConfig["mode"] then
-			tLifeStr = TruncateWhenZero(UnitHealthMissing(aUnit));
-
-			if aLifeConfig["showTotalHp"] then
-				tLifeStr = tLifeStr .. " / " .. AbbreviateNumbers(UnitHealthMax(aUnit), VUHDO_KILO_OPTIONS);
-			end
-
-			return tLifeStr, true;
-		else
-			tLifeStr = AbbreviateNumbers(UnitHealth(aUnit), VUHDO_KILO_OPTIONS);
-
-			if aLifeConfig["showTotalHp"] then
-				tLifeStr = tLifeStr .. " / " .. AbbreviateNumbers(UnitHealthMax(aUnit), VUHDO_KILO_OPTIONS);
-			end
-
-			return tLifeStr, true;
-		end
-	end
-
-	tCalculator = aLifeConfig["showEffectiveHp"] and sHealthTextEffectiveCalculator or sHealthTextCalculator;
-
-	tCalculator:ResetPredictedValues();
-	UnitGetDetailedHealPrediction(aUnit, "player", tCalculator);
-
-	tHealth = tCalculator:GetCurrentHealth();
-	tHealthMax = tCalculator:GetMaximumHealth();
-	tMissingHealth = tCalculator:GetMissingHealth();
+	tIsVerbose = aLifeConfig["verbose"];
 
 	if 1 == aLifeConfig["mode"] or anIsTarget then
 		return format("%d%%", UnitHealthPercent(aUnit, true, sScaleTo100CeilCurve)), true;
-	elseif 3 == aLifeConfig["mode"] then
-		tLifeStr = AbbreviateNumbers(tMissingHealth, VUHDO_KILO_OPTIONS);
+	end
+
+	if sHealthTextCalculator then
+		sHealthTextCalculator:ResetPredictedValues();
+		UnitGetDetailedHealPrediction(aUnit, "player", sHealthTextCalculator);
+
+		tHealth = sHealthTextCalculator:GetCurrentHealth();
+		tHealthMax = sHealthTextCalculator:GetMaximumHealth();
+		tMissingHealth = sHealthTextCalculator:GetMissingHealth();
+	else
+		tHealth = UnitHealth(aUnit);
+		tHealthMax = UnitHealthMax(aUnit);
+		tMissingHealth = UnitHealthMissing(aUnit);
+	end
+
+	if 3 == aLifeConfig["mode"] then
+		tLifeStr = VUHDO_getMissingHealthTextSecret(tMissingHealth, tIsVerbose, aLifeConfig["showTotalHp"] and " / " or nil);
 
 		if aLifeConfig["showTotalHp"] then
-			tLifeStr = tLifeStr .. " / " .. AbbreviateNumbers(tHealthMax, VUHDO_KILO_OPTIONS);
+			tLifeStr = tLifeStr .. VUHDO_getKiloTextSecret(tHealthMax, tIsVerbose);
 		end
 
 		return tLifeStr, true;
 	else
-		tLifeStr = AbbreviateNumbers(tHealth, VUHDO_KILO_OPTIONS);
+		tLifeStr = VUHDO_getKiloTextSecret(tHealth, tIsVerbose);
 
 		if aLifeConfig["showTotalHp"] then
-			tLifeStr = tLifeStr .. " / " .. AbbreviateNumbers(tHealthMax, VUHDO_KILO_OPTIONS);
+			tLifeStr = tLifeStr .. " / " .. VUHDO_getKiloTextSecret(tHealthMax, tIsVerbose);
 		end
 
 		return tLifeStr, true;
@@ -496,7 +487,7 @@ local tAlphaColor;
 local tSoloAlphaColor;
 local function VUHDO_applyLifeTextAlpha(aHealthBar, aUnit, aInfo, aLifeConfig)
 
-	if not sSecretsEnabled or not aInfo["hasSecretHealth"] then
+	if not sSecretsEnabled then
 		VUHDO_setLifeTextAlpha(VUHDO_getLifeText(aHealthBar), 1);
 		VUHDO_setLifeTextAlpha(VUHDO_getBarText(aHealthBar), 1);
 		VUHDO_setLifeTextAlpha(VUHDO_getBarTextSolo(aHealthBar), 0);
@@ -507,10 +498,10 @@ local function VUHDO_applyLifeTextAlpha(aHealthBar, aUnit, aInfo, aLifeConfig)
 	tAlphaColor = nil;
 	tSoloAlphaColor = nil;
 
-	if aLifeConfig["hideIrrelevant"] and sHideIrrelevantCurve then
+	if aLifeConfig["hideIrrelevant"] and aInfo["hasSecretHealth"] and sHideIrrelevantCurve then
 		tAlphaColor = UnitHealthPercent(aUnit, true, sHideIrrelevantCurve);
 		tSoloAlphaColor = sShowWhenIrrelevantCurve and UnitHealthPercent(aUnit, true, sShowWhenIrrelevantCurve);
-	elseif 3 == aLifeConfig["mode"] and sHideMissingZeroCurve then
+	elseif 3 == aLifeConfig["mode"] and not aLifeConfig["verbose"] and sHideMissingZeroCurve then
 		tAlphaColor = UnitHealthPercent(aUnit, true, sHideMissingZeroCurve);
 		tSoloAlphaColor = sShowWhenFullCurve and UnitHealthPercent(aUnit, true, sShowWhenFullCurve);
 	end
@@ -595,6 +586,7 @@ function VUHDO_customizeText(aButton, aMode, anIsTarget)
 			or (tUnit and "target" == tUnit) and VUHDO_I18N_NO_TARGET
 			or (tUnit and VUHDO_isBossUnit(tUnit)) and VUHDO_I18N_NO_BOSS
 			or VUHDO_I18N_NOT_AVAILABLE;
+
 		VUHDO_getBarText(tHealthBar):SetText("");
 		VUHDO_setLifeTextAlpha(VUHDO_getBarText(tHealthBar), 0);
 		VUHDO_getBarTextSolo(tHealthBar):SetText(tTextString);
@@ -625,10 +617,7 @@ function VUHDO_customizeText(aButton, aMode, anIsTarget)
 
 	tIsLifeInName = tLifeConfig["show"] and tIsLifeLeftOrRight;
 
-	tIsLifeTextAlpha = sSecretsEnabled
-		and tInfo["hasSecretHealth"]
-		and (tLifeConfig["hideIrrelevant"] or 3 == tLifeConfig["mode"]);
-
+	tIsLifeTextAlpha = sSecretsEnabled and ((tInfo["hasSecretHealth"] and tLifeConfig["hideIrrelevant"]) or (3 == tLifeConfig["mode"] and not tLifeConfig["verbose"]));
 	tIsLifeTextSeparate = not tIsLifeLeftOrRight or tIsLifeTextAlpha;
 
 	tIsName = aMode ~= 2 or tIsLifeInName;
