@@ -60,6 +60,8 @@ Known issues:
   
   
 Bugfixes:  
+-- Fixed Life Text 'Verbose' option showing abbreviated hitpoints  
+-- Fixed Life Text 'Missing' mode not showing the minus sign  
   
   
 Improvements:  
