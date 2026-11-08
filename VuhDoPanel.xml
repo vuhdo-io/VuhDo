@@ -697,6 +697,16 @@
 						</Frames>
 					</Frame>
 
+					<StatusBar name="$parentManaOffsBar" alpha="0" inherits="VuhDoStatusBar">
+						<Scripts>
+							<OnLoad>
+								self:SetMinMaxValues(0, 1);
+								self:SetValue(0);
+								self.addLevel = 0;
+							</OnLoad>
+						</Scripts>
+					</StatusBar>
+
 					<StatusBar name="$parentOvsOffsBar" alpha="0" inherits="VuhDoStatusBar">
 						<Scripts>
 							<OnLoad>

@@ -119,6 +119,7 @@ local VUHDO_isDeferredRefreshActive;
 local VUHDO_isDeferredRedrawActive;
 local VUHDO_processPendingAuraContainerBuilds;
 local VUHDO_processPendingAuraHostUpdates;
+local VUHDO_processPendingManaBarLayouts;
 local VUHDO_processPendingNativeAuraSounds;
 local VUHDO_flushPendingOverlayRebuild;
 local VUHDO_flushPendingOverlayAcquires;
@@ -607,6 +608,7 @@ local function VUHDO_eventHandlerInitFunctionOverrides()
 	VUHDO_isDeferredRedrawActive = _G["VUHDO_isDeferredRedrawActive"];
 	VUHDO_processPendingAuraContainerBuilds = _G["VUHDO_processPendingAuraContainerBuilds"];
 	VUHDO_processPendingAuraHostUpdates = _G["VUHDO_processPendingAuraHostUpdates"];
+	VUHDO_processPendingManaBarLayouts = _G["VUHDO_processPendingManaBarLayouts"];
 	VUHDO_processPendingNativeAuraSounds = _G["VUHDO_processPendingNativeAuraSounds"];
 	VUHDO_flushPendingOverlayRebuild = _G["VUHDO_flushPendingOverlayRebuild"];
 	VUHDO_flushPendingOverlayAcquires = _G["VUHDO_flushPendingOverlayAcquires"];
@@ -1265,9 +1267,9 @@ do
 
 				VUHDO_processPendingAuraContainerBuilds();
 
-				VUHDO_processPendingManaBarLayouts();
-
 				VUHDO_processPendingAuraHostUpdates();
+
+				VUHDO_processPendingManaBarLayouts();
 
 				VUHDO_processPendingNativeAuraSounds();
 
