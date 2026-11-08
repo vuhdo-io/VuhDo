@@ -6,6 +6,7 @@ local select = select;
 local twipe = table.wipe;
 local tinsert = table.insert;
 local tremove = table.remove;
+local tconcat = table.concat;
 local tsort = table.sort;
 local ipairs = ipairs;
 local pairs = pairs;
@@ -145,6 +146,9 @@ local sDispelTypeBackgroundFillCurve;
 local sDispelTypeBackgroundBackingCurve;
 local sDispelTypeBackgroundFillCurveCache = { };
 local sDispelTypeBackgroundBackingCurveCache = { };
+
+local sDispelColorSignature = "";
+local sDispelColorSignatureParts = { };
 
 local sDispelNameColorKeyMap = {
 	["None"] = "DEBUFF0",
@@ -788,6 +792,15 @@ end
 
 
 --
+function VUHDO_getDispelColorSignature()
+
+	return sDispelColorSignature;
+
+end
+
+
+
+--
 function VUHDO_getDispelTypeTextCurve()
 
 	return sDispelTypeTextCurve;
@@ -1220,6 +1233,56 @@ end
 
 do
 	--
+	local tBarColors;
+	local tCurvePointEntry;
+	local tColorKey;
+	local tDispelColor;
+	local tPartCnt;
+	function VUHDO_rebuildDispelColorSignature()
+
+		twipe(sDispelColorSignatureParts);
+		tPartCnt = 0;
+
+		tBarColors = VUHDO_PANEL_SETUP and VUHDO_PANEL_SETUP["BAR_COLORS"];
+
+		if not tBarColors then
+			sDispelColorSignature = "";
+
+			return;
+		end
+
+		for tIdx = 1, #sDispelTypeCurvePointKeys do
+			tCurvePointEntry = sDispelTypeCurvePointKeys[tIdx];
+			tColorKey = tCurvePointEntry[2];
+			tDispelColor = tBarColors[tColorKey];
+
+			if tDispelColor then
+				tPartCnt = tPartCnt + 1;
+				sDispelColorSignatureParts[tPartCnt] = format(
+					"%s:%.3f:%.3f:%.3f:%.3f:%s:%s:%s",
+					tColorKey,
+					tDispelColor["R"] or 0,
+					tDispelColor["G"] or 0,
+					tDispelColor["B"] or 0,
+					tDispelColor["O"] or 1,
+					tDispelColor["useBorder"] and "1" or "0",
+					tDispelColor["useBackground"] and "1" or "0",
+					tDispelColor["useGlow"] and "1" or "0"
+				);
+			end
+		end
+
+		sDispelColorSignature = tconcat(sDispelColorSignatureParts, "|");
+
+		return;
+
+	end
+end
+
+
+
+do
+	--
 	local tColors;
 	local tDefaultColor;
 	local tTransparent;
@@ -1284,6 +1347,7 @@ do
 			VUHDO_populateDispelTypeBorderCurve(sDispelTypeBorderCurve);
 
 			VUHDO_rebuildDerivedDispelTypeNameMaps();
+			VUHDO_rebuildDispelColorSignature();
 
 			return;
 		end
@@ -1308,6 +1372,7 @@ do
 		VUHDO_populateDispelTypeBorderCurve(sDispelTypeBorderCurve);
 
 		VUHDO_rebuildDerivedDispelTypeNameMaps();
+		VUHDO_rebuildDispelColorSignature();
 
 		return;
 
