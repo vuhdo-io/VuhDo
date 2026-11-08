@@ -1553,6 +1553,7 @@ do
 			end
 
 		elseif "PLAYER_LOGOUT" == anEvent then
+			VUHDO_restoreTankAssignmentsAfterDemo();
 			VUHDO_compressAllBouquets();
 
 		elseif "PLAYER_EQUIPMENT_CHANGED" == anEvent then

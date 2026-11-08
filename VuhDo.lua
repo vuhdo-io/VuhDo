@@ -1,4 +1,6 @@
 local sIsRestoredAfterDc = false;
+local sPreDemoMainTankNames;
+local sPreDemoPlayerTargets;
 
 VUHDO_IN_COMBAT_RELOG = false;
 
@@ -1430,6 +1432,44 @@ end
 
 
 --
+function VUHDO_backupTankAssignmentsForDemo()
+
+	if sPreDemoMainTankNames ~= nil then
+		return;
+	end
+
+	sPreDemoMainTankNames = VUHDO_deepCopyTable(VUHDO_MAINTANK_NAMES);
+	sPreDemoPlayerTargets = VUHDO_deepCopyTable(VUHDO_PLAYER_TARGETS);
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_restoreTankAssignmentsAfterDemo()
+
+	if sPreDemoMainTankNames == nil then
+		return;
+	end
+
+	twipe(VUHDO_MAINTANK_NAMES);
+	VUHDO_tableAddAllKeys(VUHDO_MAINTANK_NAMES, sPreDemoMainTankNames);
+
+	twipe(VUHDO_PLAYER_TARGETS);
+	VUHDO_tableAddAllKeys(VUHDO_PLAYER_TARGETS, sPreDemoPlayerTargets);
+
+	sPreDemoMainTankNames = nil;
+	sPreDemoPlayerTargets = nil;
+
+	return;
+
+end
+
+
+
+--
 -- Reload all raid members into the raid array e.g. in case of raid roster change
 function VUHDO_reloadRaidMembers()
 
@@ -1450,11 +1490,13 @@ function VUHDO_reloadRaidMembers()
 		sIsRestoredAfterDc = true;
 
 	elseif VUHDO_isConfigDemoUsers() then
+		VUHDO_backupTankAssignmentsForDemo();
 		VUHDO_demoSetupResetUsers();
 		VUHDO_reloadRaidDemoUsers();
 		VUHDO_updateAllRaidNames();
 
 	else
+		VUHDO_restoreTankAssignmentsAfterDemo();
 		VUHDO_PLAYER_RAID_ID = VUHDO_getPlayerRaidUnit();
 		VUHDO_IN_COMBAT_RELOG = false;
 		sIsRestoredAfterDc = true;
