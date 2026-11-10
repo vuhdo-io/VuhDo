@@ -124,6 +124,11 @@ function VUHDO_updatePlayerTarget()
 
 	end
 
+	if VUHDO_INTERNAL_TOGGLES[22] and UnitExists("target") then -- VUHDO_UPDATE_UNIT_TARGET
+		VUHDO_updateTargetBars("target");
+		VUHDO_updateTargetBars("player");
+	end
+
 	return;
 
 end

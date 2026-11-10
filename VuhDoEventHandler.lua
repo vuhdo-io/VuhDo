@@ -84,7 +84,7 @@ local sAddonRestrictionEnableCvars = {
 local VUHDO_parseAddonMessage;
 local VUHDO_spellcastSent;
 local VUHDO_resolveUnitByName;
-local VUHDO_updateAllOutRaidTargetButtons;
+local VUHDO_refreshAllTargetBars;
 local VUHDO_updateAllRaidTargetIndices;
 local VUHDO_updateDirectionFrame;
 local VUHDO_updateHealth;
@@ -555,6 +555,7 @@ local sRangeFallbackSecs = 1;
 local sClusterRefreshSecs = 1.2;
 local sAoeRefreshSecs = 1.3;
 local sBuffsRefreshSecs;
+local sTargetsRefreshSecs = VUHDO_REFRESH_TARGETS_SECS;
 local sLastShapeshiftTime = 0;
 local sIsKeyboardMacroRebuildPending = false;
 local sSpellbookRefreshScheduled = false;
@@ -570,7 +571,7 @@ local function VUHDO_eventHandlerInitFunctionOverrides()
 
 	VUHDO_updateHealth = _G["VUHDO_updateHealth"];
 	VUHDO_updateAllRaidBars = _G["VUHDO_updateAllRaidBars"];
-	VUHDO_updateAllOutRaidTargetButtons = _G["VUHDO_updateAllOutRaidTargetButtons"];
+	VUHDO_refreshAllTargetBars = _G["VUHDO_refreshAllTargetBars"];
 	VUHDO_parseAddonMessage = _G["VUHDO_parseAddonMessage"];
 	VUHDO_spellcastSent = _G["VUHDO_spellcastSent"];
 	VUHDO_resolveUnitByName = _G["VUHDO_resolveUnitByName"];
@@ -742,7 +743,7 @@ VUHDO_TIMERS = {
 	["UPDATE_RANGE"] = 1,
 	["UPDATE_VISIBILITY_CHARM_RANGE"] = 1,
 	["UPDATE_HOTS"] = 0.25,
-	["REFRESH_TARGETS"] = 0.51,
+	["REFRESH_TARGETS"] = VUHDO_REFRESH_TARGETS_SECS,
 	["RELOAD_RAID"] = 0,
 	["RELOAD_ROSTER"] = 0,
 	["REFRESH_DRAG"] = 0.05,
@@ -2809,9 +2810,9 @@ do
 			VUHDO_NEXT_INSPECT_UNIT = nil;
 		end
 
-		-- Refresh targets not in raid
-		if VUHDO_checkResetTimer("REFRESH_TARGETS", 0.51) then
-			VUHDO_updateAllOutRaidTargetButtons();
+		-- Refresh target bars
+		if VUHDO_checkResetTimer("REFRESH_TARGETS", sTargetsRefreshSecs) then
+			VUHDO_refreshAllTargetBars();
 		end
 
 		return;
