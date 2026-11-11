@@ -31,6 +31,7 @@ local UnitInRange = UnitInRange;
 local UnitPlayerOrPetInParty = UnitPlayerOrPetInParty;
 local UnitPlayerOrPetInRaid = UnitPlayerOrPetInRaid;
 local UnitIsPlayer = UnitIsPlayer;
+local UnitFactionGroup = UnitFactionGroup;
 local UnitCanAttack = UnitCanAttack;
 local IsAltKeyDown = IsAltKeyDown;
 local IsControlKeyDown = IsControlKeyDown;
@@ -980,7 +981,7 @@ end
 
 
 --
-local tZone, tIndex, tMap, tMapId, tInfo;
+local tZone, tIndex, tMap, tMapId, tInfo, tNumLines, tFactionName;
 function VUHDO_getUnitZoneName(aUnit)
 
 	tInfo = VUHDO_RAID[aUnit];
@@ -1000,12 +1001,18 @@ function VUHDO_getUnitZoneName(aUnit)
 		VuhDoScanTooltip:ClearLines();
 		VuhDoScanTooltip:SetUnit(aUnit);
 
-		if VuhDoScanTooltip:NumLines() > 2 then
-			tZone = VuhDoScanTooltipTextLeft3:GetText();
-		end
+		tNumLines = VuhDoScanTooltip:NumLines();
 
-		if tZone and not issecretvalue(tZone) and tZone == "PvP" and VuhDoScanTooltip:NumLines() > 3 then
-			tZone = VuhDoScanTooltipTextLeft4:GetText();
+		if tNumLines > 2 then
+			tZone = _G["VuhDoScanTooltipTextLeft" .. tNumLines]:GetText();
+
+			if tZone and not issecretvalue(tZone) then
+				_, tFactionName = UnitFactionGroup(aUnit);
+
+				if tZone == PVP or (tFactionName and tZone == tFactionName) then
+					tZone = nil;
+				end
+			end
 		end
 	end
 
