@@ -659,3 +659,5 @@ VUHDO_I18N_ERROR_NO_LIST_GROUP_BOUQUET = "光环组 \"%s\" 包含不存在的组
 VUHDO_I18N_BOUQUET_STATUS_POWER_HEALER_ONLY = "状态条：能量 % (仅限治疗)";
 VUHDO_I18N_DEF_BOUQUET_BAR_POWER_HEALER_ONLY = "Manabars: Power (Healer Only)";
 VUHDO_I18N_DEF_BOUQUET_PW_S_WEAKENED_SOUL_ICONS = "PW:S & Weakened Soul (Icons)";
+
+VUHDO_I18N_CLICK_BINDING_CONFLICT = "WARNING: Blizzard Click Casting binds |cffffffff\"%s\"|r to |cffffffff%s|r and overrides VuhDo's binding for that click! Remove it under Game Menu > Options > Gameplay > Keybindings > Click Casting.";

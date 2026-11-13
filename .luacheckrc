@@ -2806,6 +2806,7 @@ globals = {
 	"GetStablePetInfo",
 	"GetStatistic",
 	"GetStatisticsCategoryList",
+	"GetStringFromModifiers",
 	"GetSturdiness",
 	"GetSubZoneText",
 	"GetSuggestedGroupNum",
