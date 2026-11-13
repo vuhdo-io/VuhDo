@@ -110,8 +110,6 @@ function VUHDO_updatePlayerTarget()
 				VUHDO_resetDebuffsFor("target");
 			end
 
-			VUHDO_updateTargetBars("target");
-
 			table.wipe(VUHDO_RAID["target"] or tEmptyInfo);
 
 			VUHDO_unregisterUnitForEvents("target");
@@ -124,7 +122,7 @@ function VUHDO_updatePlayerTarget()
 
 	end
 
-	if VUHDO_INTERNAL_TOGGLES[22] and UnitExists("target") then -- VUHDO_UPDATE_UNIT_TARGET
+	if VUHDO_INTERNAL_TOGGLES[22] then -- VUHDO_UPDATE_UNIT_TARGET
 		VUHDO_updateTargetBars("target");
 		VUHDO_updateTargetBars("player");
 	end

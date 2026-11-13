@@ -1,4 +1,4 @@
-local VUHDO_IN_RAID_TARGETS = { };
+local sTargetButtonIdentityKeys = { };
 VUHDO_IN_RAID_TARGET_BUTTONS = { };
 local VUHDO_IN_RAID_TARGET_BUTTONS = VUHDO_IN_RAID_TARGET_BUTTONS;
 local sTargetGuids = { };
@@ -331,7 +331,7 @@ local VUHDO_customizeTargetBar = VUHDO_customizeTargetBar;
 
 -- Wir merken uns die Target-Buttons, wenn das Ziel im Raid ist,
 -- die Target-Buttons sind also durch den Target-Namen indiziert.
-local tName;
+local tIdentityKey;
 local function VUHDO_rememberTargetButton(aTargetUnit, aButton)
 
 	if sSecretsEnabled and issecretvalue(UnitGUID(aTargetUnit)) then
@@ -344,35 +344,43 @@ local function VUHDO_rememberTargetButton(aTargetUnit, aButton)
 				break;
 			end
 
-			tName = VUHDO_getUnitIdentityKey(tInfo);
+			tIdentityKey = VUHDO_getUnitIdentityKey(tInfo);
 
-			if not tName then
+			if not tIdentityKey then
 				break;
 			end
 
-			if not VUHDO_IN_RAID_TARGET_BUTTONS[tName] then
-				VUHDO_IN_RAID_TARGET_BUTTONS[tName] = { };
+			if not VUHDO_IN_RAID_TARGET_BUTTONS[tIdentityKey] then
+				VUHDO_IN_RAID_TARGET_BUTTONS[tIdentityKey] = { };
 			end
 
-			VUHDO_IN_RAID_TARGET_BUTTONS[tName][aButton] = aButton;
-			VUHDO_IN_RAID_TARGETS[aTargetUnit] = tName;
+			VUHDO_IN_RAID_TARGET_BUTTONS[tIdentityKey][aButton] = aButton;
+			sTargetButtonIdentityKeys[aButton] = tIdentityKey;
 
 			break;
 		end
 	end
+
+	return;
+
 end
 
 
 
 -- L?sche alle Target-Buttons der Person, deren Ziel sich ge?ndert hat
--- Wobei die Buttons mit dem Namen des TARGETS indiziert sind, welchen
--- wir uns VUHDO_IN_RAID_TARGETS aber gemerkt haben
-local tName;
-local function VUHDO_forgetTargetButton(aTargetUnit, aButton)
-	tName = VUHDO_IN_RAID_TARGETS[aTargetUnit];
-	if tName and VUHDO_IN_RAID_TARGET_BUTTONS[tName] then
-		VUHDO_IN_RAID_TARGET_BUTTONS[tName][aButton] = nil;
+local tIdentityKey;
+local function VUHDO_forgetTargetButton(aButton)
+
+	tIdentityKey = sTargetButtonIdentityKeys[aButton];
+
+	if tIdentityKey and VUHDO_IN_RAID_TARGET_BUTTONS[tIdentityKey] then
+		VUHDO_IN_RAID_TARGET_BUTTONS[tIdentityKey][aButton] = nil;
 	end
+
+	sTargetButtonIdentityKeys[aButton] = nil;
+
+	return;
+
 end
 
 
@@ -420,12 +428,9 @@ function VUHDO_updateTargetBars(aUnit)
 	tTargetOfTarget = sUnitTotUnits[tTarget];
 
 	for _, tButton in pairs(tAllButtons) do
-		VUHDO_forgetTargetButton(tTarget, VUHDO_getTargetButton(tButton));
-		VUHDO_forgetTargetButton(tTargetOfTarget, VUHDO_getTotButton(tButton));
+		VUHDO_forgetTargetButton(VUHDO_getTargetButton(tButton));
+		VUHDO_forgetTargetButton(VUHDO_getTotButton(tButton));
 	end
-
-	VUHDO_IN_RAID_TARGETS[tTarget] = nil;
-	VUHDO_IN_RAID_TARGETS[tTargetOfTarget] = nil;
 
 	if not UnitExists(tTarget) then
 		sTargetGuids[aUnit] = nil;
@@ -500,7 +505,7 @@ local VUHDO_updateTargetBars = VUHDO_updateTargetBars;
 function VUHDO_rebuildTargets()
 	if not VUHDO_INTERNAL_TOGGLES[22] then return; end-- VUHDO_UPDATE_UNIT_TARGET
 
-	twipe(VUHDO_IN_RAID_TARGETS);
+	twipe(sTargetButtonIdentityKeys);
 	twipe(VUHDO_IN_RAID_TARGET_BUTTONS);
 	twipe(sTotGuids);
 	twipe(sTargetGuids);
@@ -520,7 +525,7 @@ do
 		tGuid = UnitGUID(aTargetUnit);
 
 		if sSecretsEnabled and issecretvalue(tGuid) then
-			aGuidCache[aSourceUnit] = nil;
+			aGuidCache[aSourceUnit] = true;
 
 			return true, true;
 		end
@@ -547,6 +552,8 @@ do
 	local tTotChanged;
 	local tIsTotSecret;
 	local tPanelNum;
+	local tTargetButton;
+	local tTotButton;
 	local function VUHDO_refreshTargetBars(aSourceUnit, aTargetUnit)
 
 		tAllButtons = VUHDO_getUnitButtons(aSourceUnit);
@@ -566,12 +573,9 @@ do
 
 		if tIsTargetSecret or tIsTotSecret then
 			for _, tButton in pairs(tAllButtons) do
-				VUHDO_forgetTargetButton(aTargetUnit, VUHDO_getTargetButton(tButton));
-				VUHDO_forgetTargetButton(tTotUnit, VUHDO_getTotButton(tButton));
+				VUHDO_forgetTargetButton(VUHDO_getTargetButton(tButton));
+				VUHDO_forgetTargetButton(VUHDO_getTotButton(tButton));
 			end
-
-			VUHDO_IN_RAID_TARGETS[aTargetUnit] = nil;
-			VUHDO_IN_RAID_TARGETS[tTotUnit] = nil;
 
 			if UnitExists(aTargetUnit) then
 				VUHDO_fillCustomInfo(aTargetUnit);
@@ -620,26 +624,28 @@ do
 			return;
 		end
 
-		if not VUHDO_IN_RAID_TARGETS[aTargetUnit] then
-			VUHDO_fillCustomInfo(aTargetUnit);
+		VUHDO_fillCustomInfo(aTargetUnit);
 
-			tCachedInfo = VUHDO_RAID[aTargetUnit];
-			tCachedRange = tCachedInfo and tCachedInfo["range"];
+		tCachedInfo = VUHDO_RAID[aTargetUnit];
+		tCachedRange = tCachedInfo and tCachedInfo["range"];
 
-			if tCachedRange == nil then
-				tCachedRange = VUHDO_isInRange(aTargetUnit);
-			end
+		if tCachedRange == nil then
+			tCachedRange = VUHDO_isInRange(aTargetUnit);
+		end
 
-			for _, tButton in pairs(tAllButtons) do
-				tPanelNum = VUHDO_BUTTON_CACHE[tButton];
+		for _, tButton in pairs(tAllButtons) do
+			tPanelNum = VUHDO_BUTTON_CACHE[tButton];
 
-				if VUHDO_PANEL_SETUP[tPanelNum]["SCALING"]["showTarget"] then
-					VUHDO_customizeTargetBar(VUHDO_getTargetButton(tButton), aTargetUnit, tCachedRange);
+			if VUHDO_PANEL_SETUP[tPanelNum]["SCALING"]["showTarget"] then
+				tTargetButton = VUHDO_getTargetButton(tButton);
+
+				if not sTargetButtonIdentityKeys[tTargetButton] then
+					VUHDO_customizeTargetBar(tTargetButton, aTargetUnit, tCachedRange);
 				end
 			end
 		end
 
-		if VUHDO_IN_RAID_TARGETS[tTotUnit] == nil and UnitExists(tTotUnit) then
+		if UnitExists(tTotUnit) then
 			VUHDO_fillCustomInfo(tTotUnit);
 
 			tCachedInfo = VUHDO_RAID[tTotUnit];
@@ -653,7 +659,11 @@ do
 				tPanelNum = VUHDO_BUTTON_CACHE[tButton];
 
 				if VUHDO_PANEL_SETUP[tPanelNum]["SCALING"]["showTot"] then
-					VUHDO_customizeTargetBar(VUHDO_getTotButton(tButton), tTotUnit, tCachedRange);
+					tTotButton = VUHDO_getTotButton(tButton);
+
+					if not sTargetButtonIdentityKeys[tTotButton] then
+						VUHDO_customizeTargetBar(tTotButton, tTotUnit, tCachedRange);
+					end
 				end
 			end
 		end
@@ -670,6 +680,8 @@ do
 		for tUnit, tInfo in pairs(VUHDO_RAID) do
 			if UnitExists(tInfo["targetUnit"]) then
 				VUHDO_refreshTargetBars(tUnit, tInfo["targetUnit"]);
+			elseif sTargetGuids[tUnit] then
+				VUHDO_updateTargetBars(tUnit);
 			end
 		end
 
