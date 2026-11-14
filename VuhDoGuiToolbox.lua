@@ -2081,8 +2081,8 @@ do
 
 		if tAuraHost then
 			VUHDO_PixelUtil.ClearAllPoints(tAuraHost);
-			VUHDO_PixelUtil.SetPoint(tAuraHost, "TOPLEFT", tAnchorBase, "TOPLEFT", 0, 0);
-			VUHDO_PixelUtil.SetPoint(tAuraHost, "BOTTOMRIGHT", tManaOffsetTexture, "TOPRIGHT", 0, 0);
+			VUHDO_PixelUtil.SetPoint(tAuraHost, "TOPLEFT", tAnchorBase, "TOPLEFT", tLeftInset, 0);
+			VUHDO_PixelUtil.SetPoint(tAuraHost, "BOTTOMRIGHT", tManaOffsetTexture, "TOPRIGHT", -tRightInset, 0);
 		end
 
 		aButton["healthBarGeometrySignature"] = tSignature;
