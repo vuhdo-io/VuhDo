@@ -1,0 +1,1 @@
+This wiki is generated from the [`wiki/` folder](https://github.com/vuhdo-io/VuhDo/tree/midnight/wiki) of the VuhDo repository. To fix or add a page, see [[Contributing to the Wiki|Contributing-to-the-Wiki]].

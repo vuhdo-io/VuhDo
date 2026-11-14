@@ -38,8 +38,7 @@ externals:
 
 ignore:
     - Libs/LibOrbitGlow-1.0/Textures
-	
+    - wiki
 	
 move-folders:
     VuhDo/VuhDoOptions: VuhDoOptions
-

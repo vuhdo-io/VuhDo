@@ -6,7 +6,11 @@ on:
       - '**'
     tags:
       - '**'
+    paths-ignore:
+      - 'wiki/**'
   pull_request:
+    paths-ignore:
+      - 'wiki/**'
   workflow_dispatch:
     inputs:
       args:
