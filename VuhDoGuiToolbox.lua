@@ -2007,10 +2007,6 @@ do
 			VUHDO_PixelUtil.Hide(tLossBar);
 		end
 
-		if tLossBar:GetFrameLevel() >= tHealthBar:GetFrameLevel() then
-			VUHDO_PixelUtil.SetFrameLevel(tLossBar, tHealthBar:GetFrameLevel() - 1);
-		end
-
 		tTurnAxisHealthLoss = VUHDO_INDICATOR_CONFIG[aPanelNum]["CUSTOM"]["HEALTH_BAR"]["turnAxisHealthLoss"];
 		tOrientation = VUHDO_getStatusbarOrientationString("HEALTH_BAR", aPanelNum);
 		tEffectiveOrientation = VUHDO_calculateDerivedOrientation(tOrientation, tTurnAxisHealthLoss);
