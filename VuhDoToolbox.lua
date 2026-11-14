@@ -437,6 +437,42 @@ end
 
 
 
+do
+	--
+	local tListedSpellIds;
+	local tVariantSpellIds;
+	local tVariantSpellId;
+	function VUHDO_expandSpellIdsWithVariants(aSpellIds, aSpellVariants)
+
+		tListedSpellIds = { };
+
+		for tCnt = 1, #aSpellIds do
+			tListedSpellIds[aSpellIds[tCnt]] = true;
+		end
+
+		for tCnt = 1, #aSpellIds do
+			tVariantSpellIds = aSpellVariants[aSpellIds[tCnt]];
+
+			if tVariantSpellIds then
+				for tVariantCnt = 1, #tVariantSpellIds do
+					tVariantSpellId = tVariantSpellIds[tVariantCnt];
+
+					if not tListedSpellIds[tVariantSpellId] then
+						tListedSpellIds[tVariantSpellId] = true;
+
+						tinsert(aSpellIds, tVariantSpellId);
+					end
+				end
+			end
+		end
+
+		return;
+
+	end
+end
+
+
+
 --
 function VUHDO_tableRemoveByKey(aTable, aKey)
 
