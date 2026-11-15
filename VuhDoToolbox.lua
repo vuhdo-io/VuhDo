@@ -1672,6 +1672,28 @@ end
 
 
 
+do
+	--
+	local tCleanString;
+	function VUHDO_decodeBase64(anEncodedString)
+
+		if "string" ~= type(anEncodedString) then
+			return nil;
+		end
+
+		tCleanString = gsub(anEncodedString, "[^%w%+/]", "");
+
+		if 1 == #tCleanString % 4 then
+			return nil;
+		end
+
+		return VUHDO_LibBase64.Decode(tCleanString);
+
+	end
+end
+
+
+
 --
 function VUHDO_decompressIfCompressed(aFile)
 	return "string" == type(aFile) and VUHDO_deserializeTable(VUHDO_decompressStringHuffman(aFile)) or aFile;

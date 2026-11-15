@@ -455,3 +455,33 @@ function VUHDO_showOptionsSkinPrompt()
 	return;
 
 end
+
+
+
+do
+	--
+	local function VUHDO_yesNoMessageDialogCallback(aDecision)
+
+		return;
+
+	end
+
+
+
+	--
+	function VUHDO_showMessageDialog(aTitle, aMessage)
+
+		VuhDoYesNoFrameRootPaneTitleLabelLabel:SetText(aTitle);
+		VuhDoYesNoFrameText:SetText(aMessage);
+		VuhDoYesNoFrameYesButton:SetText(VUHDO_I18N_OKAY);
+
+		VuhDoYesNoFrameNoButton:Hide();
+
+		VuhDoYesNoFrame:SetAttribute("callback", VUHDO_yesNoMessageDialogCallback);
+
+		VuhDoYesNoFrame:Show();
+
+		return;
+
+	end
+end
