@@ -318,4 +318,5 @@ VUHDO_AURA_SPELL_VARIANTS = {
 	[1022] = { 1022, 5599, 10278 }, -- Blessing of Protection
 	[6940] = { 6940, 20729 }, -- Blessing of Sacrifice
 	[14893] = { 14893, 14892 }, -- Inspiration
+	[1310909] = { 1310909, 1311593, 1311597 }, -- Light's Vigil
 };
