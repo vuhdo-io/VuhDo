@@ -10,6 +10,8 @@ Alternatively, set the health indicator bouquet on `VuhDo Options > Panels > Ind
 
 **2. I want to track a new helpful spell aura (e.g. a HoT). How do I add it?**
 
+**2a. Are you playing on Forever? If so, do the following:**
+
 Select the anchor being used to display HoTs from the dropdown menu under `VuhDo Options > Panels > Auras`. It's likely `Anchor 1` (the default). Then click the `Group` button to take you to the associated aura group's settings under `VuhDo Options > Auras > Groups`. Now click `Copy` to create a copy of that aura group which will allow you to edit it. Your new aura group will have the same name with a `(Copy)` suffix e.g. `My HoTs (Combat Auras) (Copy)`.
 
 Use the `Add Spell` dropdown menu to select the new aura you want to track from the predefined list or just type the spell name or ID in the edit box. Keep in mind the spell ID or name of the actual aura (HoT) that gets placed on the unit can differ from the spell ability name.
@@ -18,11 +20,21 @@ Now you'll see a new entry (row) in the list of auras. If you want to track all 
 
 Now click the `Back` button and assign your new group (e.g. `My HoTs (Combat Auras) (Copy)`) to `Anchor 1` under `VuhDo Options > Panels > Auras`.
 
+**2b. Are you playing on Retail? If so, do the following:**
+
+Go under `VuhDo Options > Auras > Groups` and select the group from the dropdown menu corresponding to your class and specialization e.g. `Holy Priest HoTs`. Now click `Copy` to create a copy of that aura group which will allow you to edit it. Your new aura group will have the same name with a `(Copy)` suffix e.g. `Holy Priest HoTs (Copy)`.
+
+Use the `Add Spell` dropdown menu to select the new aura you want to track from the predefined list or just type the spell name or ID in the edit box. Keep in mind the spell ID or name of the actual aura (HoT) that gets placed on the unit can differ from the spell ability name.
+
+Now you'll see a new entry (row) in the list of auras. If you want to track all auras with that same name, then be sure to click the `Spell` button on the new entry and enable the `Match by name` checkbox.
+
+Now go under `VuhDo Options > Panels > Auras` and assign your new group (e.g. `Holy Priest HoTs (Copy)`) to whichever anchor you are using to track your HoTs (by default this is `Anchor 1`).
+
 **3. How do I stop showing icons for debuffs on group members?**
 
 Select the anchor being used to display debuffs from the dropdown menu under `VuhDo Options > Panels > Auras`.  It's likely `Anchor 2` (the default).  Then deselect the `Enable` checkbox.
 
-**4. My debuff icons are way to big, how do I make them smaller?**
+**4. My debuff icons are way too big, how do I make them smaller?**
 
 Select the anchor being used to display debuffs from the dropdown menu under `VuhDo Options > Panels > Auras`.  It's likely `Anchor 2` (the default) and set to use the `Relevant Debuffs` aura group.  Adjust its `Size` slider.
 
