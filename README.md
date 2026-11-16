@@ -1,13 +1,13 @@
-[![latest retail](https://img.shields.io/badge/latest%20retail-v3.220-red?style=flat-square)](https://www.curseforge.com/wow/addons/vuhdo/download/9455799)
-[![latest forever](https://img.shields.io/badge/latest%20forever-v3.220-966F49?style=flat-square)](https://www.curseforge.com/wow/addons/vuhdo/download/9455799)
-[![latest mists](https://img.shields.io/badge/latest%20mists-v3.220--mopc-brightgreen?style=flat-square)](https://www.curseforge.com/wow/addons/vuhdo/download/9455820)
-[![latest cataclysm](https://img.shields.io/badge/latest%20cataclysm-v3.220--catac-orange?style=flat-square)](https://www.curseforge.com/wow/addons/vuhdo/download/9455818)
+[![latest retail](https://img.shields.io/badge/latest%20retail-v3.221-red?style=flat-square)](https://www.curseforge.com/wow/addons/vuhdo/download/9639592)
+[![latest forever](https://img.shields.io/badge/latest%20forever-v3.221-966F49?style=flat-square)](https://www.curseforge.com/wow/addons/vuhdo/download/9639592)
+[![latest mists](https://img.shields.io/badge/latest%20mists-v3.221--mopc-brightgreen?style=flat-square)](https://www.curseforge.com/wow/addons/vuhdo/download/9639603)
+[![latest cataclysm](https://img.shields.io/badge/latest%20cataclysm-v3.221--catac-orange?style=flat-square)](https://www.curseforge.com/wow/addons/vuhdo/download/9639600)
 [![latest wrath](https://img.shields.io/badge/latest%20wrath-v3.164--wotlkc-blue?style=flat-square)](https://www.curseforge.com/wow/addons/vuhdo/download/5305726)
-[![latest burning crusade](https://img.shields.io/badge/latest%20burning%20crusade-v3.220--tbcc-green?style=flat-square)](https://www.curseforge.com/wow/addons/vuhdo/download/9455794)
-[![latest classic](https://img.shields.io/badge/latest%20classic-v3.220--vanilla-lightgrey?style=flat-square)](https://www.curseforge.com/wow/addons/vuhdo/download/9455823)
+[![latest burning crusade](https://img.shields.io/badge/latest%20burning%20crusade-v3.221--tbcc-green?style=flat-square)](https://www.curseforge.com/wow/addons/vuhdo/download/9639594)
+[![latest classic](https://img.shields.io/badge/latest%20classic-v3.221--vanilla-lightgrey?style=flat-square)](https://www.curseforge.com/wow/addons/vuhdo/download/9639609)
 [![discord](https://img.shields.io/discord/632687773526130691?color=7289da&logo=discord&label=discord&style=flat-square)](https://discord.gg/57en44E)
 
-Get [VuhDo release v3.220](https://www.curseforge.com/wow/addons/vuhdo/download/9455799) now with support for Midnight patch 12.1.5 and WoW Forever patch 1.60.1!
+Get [VuhDo release v3.221](https://www.curseforge.com/wow/addons/vuhdo/download/9639592) now with support for Midnight patch 12.1.5 and WoW Forever patch 1.60.1!
 
 To get started read the updated [guide over at Icy-Veins](https://www.icy-veins.com/forums/topic/11805-vuhdo-a-comprehensive-guide/).
 
