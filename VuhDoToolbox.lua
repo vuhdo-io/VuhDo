@@ -204,6 +204,32 @@ end
 
 
 
+-- FIXME 12.1.5: remove when 12.1.7 is live
+do
+	--
+	local tHasEnchant;
+	local tTimeLeft;
+	local tCharges;
+	local tEnchantId;
+	local tWeaponEnchantInfo = { };
+	local tWeaponEnchantInfos = { tWeaponEnchantInfo };
+	function VUHDO_getWeaponEnchantInfo(aWeaponSlot)
+
+		tHasEnchant, tTimeLeft, tCharges, tEnchantId = select(aWeaponSlot * 4 + 1, GetWeaponEnchantInfo());
+
+		tWeaponEnchantInfo["hasEnchant"] = tHasEnchant or false;
+		tWeaponEnchantInfo["timeLeft"] = tTimeLeft or 0;
+		tWeaponEnchantInfo["charges"] = tCharges or 0;
+		tWeaponEnchantInfo["enchantID"] = tEnchantId or 0;
+		tWeaponEnchantInfo["enchantIconID"] = 0;
+
+		return tWeaponEnchantInfos;
+
+	end
+end
+
+
+
 --
 local tIconId;
 function VUHDO_getSpellBookItemTexture(aSpellId)
@@ -1070,25 +1096,6 @@ function VUHDO_getUnitZoneName(aUnit)
 
 	return tZone or (tMap and tMap["name"]) or VUHDO_I18N_UNKNOWN, tMap and tMap["name"] or nil;
 
-end
-
-
-
---
-local tName, tEnchant;
-function VUHDO_getWeaponEnchantName(aSlot)
-	VuhDoScanTooltip:SetOwner(VuhDo, "ANCHOR_NONE");
-	VuhDoScanTooltip:ClearLines();
-	VuhDoScanTooltip:SetInventoryItem("player", aSlot);
-	for tCnt = 1, VuhDoScanTooltip:NumLines() do
-		tName = strmatch(_G["VuhDoScanTooltipTextLeft" .. tCnt]:GetText(), "^.+ %(%d+%s+.+%)$");
-		if tName then
-			tEnchant = gsub(tName, " %(.+%)", "");
-			return tEnchant;
-		end
-	end
-
-	return "*";
 end
 
 

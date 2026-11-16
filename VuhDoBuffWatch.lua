@@ -83,7 +83,7 @@ local GetTime = GetTime;
 local GetSpellCooldown = GetSpellCooldown or VUHDO_getSpellCooldown;
 local GetSpellInfo = GetSpellInfo or VUHDO_getSpellInfo;
 local InCombatLockdown = InCombatLockdown;
-local GetWeaponEnchantInfo = GetWeaponEnchantInfo;
+local GetWeaponEnchantInfo = C_Item and C_Item.GetWeaponEnchantInfo or VUHDO_getWeaponEnchantInfo;
 local UnitOnTaxi = UnitOnTaxi;
 local GetShapeshiftFormInfo = GetShapeshiftFormInfo;
 local issecretvalue = issecretvalue;
@@ -100,6 +100,8 @@ local VUHDO_BUFF_TARGET_MODE_NAME;
 local VUHDO_BUFF_TARGET_MODE_ROLE;
 local VUHDO_BUFF_TARGET_MODE_TARGET;
 local VUHDO_BUFF_TARGET_MODE_FOCUS;
+
+local VUHDO_WEAPON_ENCHANT_IDS;
 
 local sTimeAbbrevData = {
 	["breakpointData"] = {
@@ -136,7 +138,6 @@ local format = format;
 local sConfig = { };
 local sRebuffSecs;
 local sRebuffPerc;
-local sGermanOrEnglish = GetLocale() == "deDE" or GetLocale() == "enGB" or GetLocale() == "enUS";
 
 -----------------------------------------------------------------------------
 function VUHDO_buffWatchInitLocalOverrides()
@@ -164,6 +165,8 @@ function VUHDO_buffWatchInitLocalOverrides()
 	VUHDO_BUFF_TARGET_MODE_ROLE = _G["VUHDO_BUFF_TARGET_MODE_ROLE"];
 	VUHDO_BUFF_TARGET_MODE_TARGET = _G["VUHDO_BUFF_TARGET_MODE_TARGET"];
 	VUHDO_BUFF_TARGET_MODE_FOCUS = _G["VUHDO_BUFF_TARGET_MODE_FOCUS"];
+
+	VUHDO_WEAPON_ENCHANT_IDS = _G["VUHDO_WEAPON_ENCHANT_IDS"];
 
 	sConfig = VUHDO_BUFF_SETTINGS["CONFIG"];
 	sRebuffSecs = sConfig["REBUFF_MIN_MINUTES"] * 60;
@@ -1240,10 +1243,36 @@ end
 
 do
 	--
+	local tEnchantIds;
+	function VUHDO_getWeaponEnchantTimeLeft(aWeaponSlot, aBuffName)
+
+		tEnchantIds = VUHDO_WEAPON_ENCHANT_IDS[aBuffName];
+
+		for _, tEnchantInfo in ipairs(GetWeaponEnchantInfo(aWeaponSlot)) do
+			if sSecretsEnabled
+				and (issecretvalue(tEnchantInfo["hasEnchant"])
+					or issecretvalue(tEnchantInfo["enchantID"])
+					or issecretvalue(tEnchantInfo["timeLeft"])) then
+				return 0;
+			end
+
+			if tEnchantInfo["hasEnchant"]
+				and (not tEnchantIds or tEnchantIds[tEnchantInfo["enchantID"]]) then
+				return tEnchantInfo["timeLeft"] * 0.001;
+			end
+		end
+
+		return;
+
+	end
+end
+
+
+
+do
+	--
 	local tDestGroup;
 	local tTargetType;
-	local tEnchantDuration;
-	local tHasEnchant;
 	local tCategName;
 	local tNameGroup = { };
 	local tIsActive;
@@ -1255,6 +1284,7 @@ do
 	local tHadSecretSlot;
 	local tHasPlayer;
 	local tSelfTargetUnit;
+	local tEnchantTimeLeft;
 	function VUHDO_getMissingBuffsForCode(aTargetMode, aTarget, aBuffInfo, aCategSpec, anSuppressMissBuff)
 
 		tSelfTargetUnit = nil;
@@ -1296,19 +1326,20 @@ do
 				return VUHDO_PLAYER_GROUP, sEmpty, "player", 0, "player", sEmpty, sEmpty, 0;
 
 			elseif VUHDO_BUFF_TARGET_ENCHANT == tTargetType then
-				tHasEnchant, tEnchantDuration = GetWeaponEnchantInfo();
-				if tHasEnchant and (not sGermanOrEnglish or strfind(aBuffInfo[1], VUHDO_getWeaponEnchantName(16), 1, true)) then
-					return sEmpty, sEmpty, "player", tEnchantDuration * 0.001, "player", VUHDO_PLAYER_GROUP, sEmpty, 0;
+				tEnchantTimeLeft = VUHDO_getWeaponEnchantTimeLeft(Enum.WeaponSlot.MainHand, aBuffInfo[1]);
+
+				if tEnchantTimeLeft then
+					return sEmpty, sEmpty, "player", tEnchantTimeLeft, "player", VUHDO_PLAYER_GROUP, sEmpty, 0;
 				end
 
 				VUHDO_setUnitMissBuff("player", aCategSpec, aBuffInfo, aCategSpec);
 				return VUHDO_PLAYER_GROUP, sEmpty, "player", 0, "player", sEmpty, sEmpty, 0;
 
 			elseif VUHDO_BUFF_TARGET_ENCHANT_OFF == tTargetType then
-				_, _, _, _, tHasEnchant, tEnchantDuration = GetWeaponEnchantInfo();
+				tEnchantTimeLeft = VUHDO_getWeaponEnchantTimeLeft(Enum.WeaponSlot.OffHand, aBuffInfo[1]);
 
-				if tHasEnchant and (not sGermanOrEnglish or strfind(aBuffInfo[1], VUHDO_getWeaponEnchantName(17), 1, true)) then
-					return sEmpty, sEmpty, "player", tEnchantDuration * 0.001, "player", VUHDO_PLAYER_GROUP, sEmpty, 0;
+				if tEnchantTimeLeft then
+					return sEmpty, sEmpty, "player", tEnchantTimeLeft, "player", VUHDO_PLAYER_GROUP, sEmpty, 0;
 				end
 
 				VUHDO_setUnitMissBuff("player", aCategSpec, aBuffInfo, aCategSpec);

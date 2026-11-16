@@ -306,6 +306,41 @@ VUHDO_BUFF_WATCH_AURA_SPELL_IDS = {
 
 
 
+VUHDO_WEAPON_ENCHANT_IDS = {
+	[VUHDO_SPELL_ID.BUFF_ROCKBITER_WEAPON] = {
+		[29] = true,
+		[6] = true,
+		[1] = true,
+		[503] = true,
+		[1663] = true,
+		[683] = true,
+		[1664] = true,
+	},
+	[VUHDO_SPELL_ID.BUFF_FLAMETONGUE_WEAPON] = {
+		[5] = true,
+		[4] = true,
+		[3] = true,
+		[523] = true,
+		[1665] = true,
+		[1666] = true,
+	},
+	[VUHDO_SPELL_ID.BUFF_FROSTBRAND_WEAPON] = {
+		[2] = true,
+		[12] = true,
+		[524] = true,
+		[1667] = true,
+		[1668] = true,
+	},
+	[VUHDO_SPELL_ID.BUFF_WINDFURY_WEAPON] = {
+		[283] = true,
+		[284] = true,
+		[525] = true,
+		[1669] = true,
+	},
+};
+
+
+
 VUHDO_AURA_SPELL_VARIANTS = {
 	[774] = { 774, 1058, 1430, 2090, 2091, 3627, 8910, 9839, 9840, 9841, 25299, 417057, 417058, 417059, 417060, 417061, 417062, 417063, 417064, 417065, 417066, 417068 }, -- Rejuvenation
 	[8936] = { 8936, 8938, 8939, 8940, 8941, 9750, 9856, 9857, 9858, 436937, 436938, 436939, 436940, 436942, 436943, 436944, 436945, 436946 }, -- Regrowth
