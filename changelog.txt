@@ -39,6 +39,7 @@ Known issues:
   
   
 Bugfixes:  
+-- Fixed Shaman weapon enchantments in Buff Watch (Forever)  
   
   
 Improvements:  
