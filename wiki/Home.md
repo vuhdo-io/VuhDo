@@ -1,4 +1,4 @@
-[VuhDo FAQ](http://vuhdoguide.blogspot.com/2011/08/frequently-asked-questions_18.html)  
+[VuhDo FAQ](https://github.com/vuhdo-io/VuhDo/wiki/VuhDo-FAQ)  
 [VuhDo Classic FAQ](https://github.com/vuhdo-io/VuhDo/wiki/VuhDo-Classic-FAQ)  
 [VuhDo Slash Commands](https://github.com/vuhdo-io/VuhDo/wiki/VuhDo-Slash-Commands)  
 [VuhDo Custom Flags](https://github.com/vuhdo-io/VuhDo/wiki/VuhDo-Custom-Flag-Bouquet-Validators)  

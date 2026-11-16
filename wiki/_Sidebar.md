@@ -1,6 +1,7 @@
 **[[Home]]**
 
 **General**
+* [[VuhDo FAQ|VuhDo-FAQ]]
 * [[VuhDo Classic FAQ|VuhDo-Classic-FAQ]]
 * [[VuhDo Slash Commands|VuhDo-Slash-Commands]]
 

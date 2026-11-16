@@ -18,7 +18,7 @@ Please [file VuhDo GitHub issues](https://github.com/vuhdo-io/VuhDo/issues/new/c
 
 Further reading:
 
-- [Frequently Asked Questions FAQ](http://vuhdoguide.blogspot.com/2011/08/frequently-asked-questions_18.html) (Thanks Zohar).
+- [Frequently Asked Questions FAQ](https://github.com/vuhdo-io/VuhDo/wiki/VuhDo-FAQ) (Midnight and Forever).
 - [Exhaustive VuhDo setup walkthrough](http://vuhdoguide.blogspot.com/2011/08/vuhdo-setup-walkthrough.html) (Thanks Zohar).
 
 What is VuhDo?
