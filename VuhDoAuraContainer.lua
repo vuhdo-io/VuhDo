@@ -233,7 +233,7 @@ VUHDO_AURA_CONTAINER_GATE_STATE = sGateState;
 
 local sPendingContainerBuilds = { };
 local sPendingClassColors = { };
-local sPendingClassColorRetry = { };
+local sClassColorsToApply = { };
 local sHasPendingBuilds = false;
 local sSeenAnchors = { };
 local sDirtyAnchorPanels = { };
@@ -2053,6 +2053,9 @@ do
 	local tClassColorBars;
 	local tClassColor;
 	local tClassColorBar;
+	local tClassColorR;
+	local tClassColorG;
+	local tClassColorB;
 	function VUHDO_applyContainerClassColorBars(aContainer, aUnit)
 
 		tClassColorBars = sContainerClassColorBars[aContainer];
@@ -2067,11 +2070,17 @@ do
 			return true;
 		end
 
+		if tClassColor.GetRGBA then
+			tClassColorR, tClassColorG, tClassColorB = tClassColor:GetRGBA();
+		else
+			tClassColorR, tClassColorG, tClassColorB = tClassColor["R"], tClassColor["G"], tClassColor["B"];
+		end
+
 		for tCnt = 1, #tClassColorBars do
 			tClassColorBar = tClassColorBars[tCnt];
 
 			if tClassColorBar:CanBeAccessedInContext() then
-				tClassColorBar:GetStatusBarTexture():SetVertexColor(tClassColor["R"], tClassColor["G"], tClassColor["B"], 1);
+				tClassColorBar:GetStatusBarTexture():SetVertexColor(tClassColorR, tClassColorG, tClassColorB, 1);
 			else
 				sPendingClassColors[aContainer] = aUnit;
 
@@ -4069,7 +4078,7 @@ do
 
 		sContainerClassColorBars[tContainer] = nil;
 		sPendingClassColors[tContainer] = nil;
-		sPendingClassColorRetry[tContainer] = nil;
+		sClassColorsToApply[tContainer] = nil;
 
 		tContainer:Hide();
 		tContainer:SetParent(nil);
@@ -6259,18 +6268,16 @@ function VUHDO_processPendingAuraContainerBuilds()
 	end
 
 	for tContainer, tUnit in pairs(sPendingClassColors) do
-		if not VUHDO_applyContainerClassColorBars(tContainer, tUnit) then
-			sPendingClassColorRetry[tContainer] = tUnit;
-		end
+		sClassColorsToApply[tContainer] = tUnit;
 	end
 
 	twipe(sPendingClassColors);
 
-	for tRetryContainer, tRetryUnit in pairs(sPendingClassColorRetry) do
-		sPendingClassColors[tRetryContainer] = tRetryUnit;
+	for tContainer, tUnit in pairs(sClassColorsToApply) do
+		VUHDO_applyContainerClassColorBars(tContainer, tUnit);
 	end
 
-	twipe(sPendingClassColorRetry);
+	twipe(sClassColorsToApply);
 
 	if not next(sPendingContainerBuilds) and not next(sPendingClassColors) then
 		sHasPendingBuilds = false;
