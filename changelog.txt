@@ -43,6 +43,7 @@ Bugfixes:
   
   
 Improvements:  
+-- Added Druid 'Nature's Grasp' to Buff Watch (Forever)  
   
   
 --------------------------------------------------------------  
