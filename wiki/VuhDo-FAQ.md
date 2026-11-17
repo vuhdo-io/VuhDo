@@ -56,7 +56,7 @@ Check these in order:
 
 **7. My spell bindings per spec keeps getting overwritten. What am I doing wrong?**
 
-Spell bindings are saved as a part of your `Key Layout` and not in your `Profile`.
+Spell bindings are saved as a part of your `Key Layout` and not in your `Profile`. Also, if the `Load Auras` checkbox is selected under `VuhDo Options > Tools > Key Layouts > Manage Key Layouts` then your aura anchors and aura groups will also be saved and loaded as a part of your `Key Layout` and not in your `Profile`.
 
 - **Spell bindings and Auras:** `VuhDo Options > Tools > Key Layouts`. Save a layout and tie it to the spec checkboxes on that page (`Spec 1` through `Spec 4` on Midnight; `Primary` and `Secondary` on Forever).
 - **Panel and bar appearance:** `VuhDo Options > Tools > Profiles`. Profiles can auto-load by spec and by group size.
