@@ -246,6 +246,9 @@ VUHDO_CLASS_BUFFS = {
 			{ VUHDO_SPELL_ID.BUFF_ASPECT_OF_THE_BEAST, VUHDO_BUFF_TARGET_SELF },
 			{ VUHDO_SPELL_ID.BUFF_ASPECT_OF_THE_WILD, VUHDO_BUFF_TARGET_SELF },
 		},
+		[VUHDO_SPELL_ID.BUFF_TRUESHOT_AURA] = {
+			{ VUHDO_SPELL_ID.BUFF_TRUESHOT_AURA, VUHDO_BUFF_TARGET_RAID },
+		},
 	},
 
 	-- Rogue
@@ -303,6 +306,7 @@ VUHDO_BUFF_WATCH_AURA_SPELL_IDS = {
 	[25782] = { 25782, 25916 }, -- Greater Blessing of Might
 	[13165] = { 13165, 14318, 14319, 14320, 14321, 14322 }, -- Aspect of the Hawk
 	[20043] = { 20043, 20190 }, -- Aspect of the Wild
+	[19506] = { 19506, 20905, 20906 }, -- Trueshot Aura
 	[324] = { 324, 325, 905, 945, 8134, 10431, 10432 }, -- Lightning Shield
 	[408514] = { 408514 }, -- Earth Shield
 };
