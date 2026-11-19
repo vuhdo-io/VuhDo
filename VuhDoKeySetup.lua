@@ -49,6 +49,70 @@ local issecretvalue = issecretvalue;
 
 local sIsCliqueCompat;
 
+local sHealButtonAttributeChangedSnippet = [[
+	if name == "vuhdo-unit-exists" and value == "false" and sHealButton then
+		local tX, tY = sHealButton:GetMousePosition();
+
+		local tXInBounds;
+		local tYInBounds;
+
+		if not tX or type(tX) ~= "number" then
+			tXInBounds = false;
+		else
+			tXInBounds = tX >= 0 and tX <= 1;
+		end
+
+		if not tY or type(tY) ~= "number" then
+			tYInBounds = false;
+		else
+			tYInBounds = tY >= 0 and tY <= 1;
+		end
+
+		if not sHealButton:IsVisible() or not tXInBounds or not tYInBounds then
+			sHealButton:ClearBindings();
+
+			sHealButton = nil;
+		end
+	end
+]];
+local sOnEnterSnippet = [[
+	if sHealButton then
+		sHealButton:ClearBindings();
+	end
+
+	sHealButton = self;
+]]
+local sOnLeaveSnippet = [[
+	self:ClearBindings();
+
+	sHealButton = nil;
+]]
+local sClearBindsSnippet = [[
+	self:ClearBindings();
+]]
+local sOnShowSnippetPrefix = [[
+	if sHealButton and sHealButton ~= self then
+		sHealButton:ClearBindings();
+	end
+
+	self:ClearBindings();
+
+	if self:IsUnderMouse() then
+		sHealButton = self;
+
+]]
+local sOnShowSnippetSuffix = [[
+	end
+]]
+local sOnHideSnippet = [[
+	self:ClearBindings();
+
+	sHealButton = nil;
+]]
+
+
+
+--
 function VUHDO_keySetupInitLocalOverrides()
 
 	VUHDO_RAID = _G["VUHDO_RAID"];
@@ -89,36 +153,6 @@ function VUHDO_keySetupInitLocalOverrides()
 	sIsCliqueCompat = VUHDO_CONFIG["IS_CLIQUE_COMPAT_MODE"];
 
 end
-
-
-
---
-local sHealButtonAttributeChangedSnippet = [[
-	if name == "vuhdo-unit-exists" and value == "false" and sHealButton then
-		local tX, tY = sHealButton:GetMousePosition();
-
-		local tXInBounds;
-		local tYInBounds;
-
-		if not tX or type(tX) ~= "number" then
-			tXInBounds = false;
-		else
-			tXInBounds = tX >= 0 and tX <= 1;
-		end
-
-		if not tY or type(tY) ~= "number" then
-			tYInBounds = false;
-		else
-			tYInBounds = tY >= 0 and tY <= 1;
-		end
-
-		if not sHealButton:IsVisible() or not tXInBounds or not tYInBounds then
-			sHealButton:ClearBindings();
-
-			sHealButton = nil;
-		end
-	end
-]];
 
 
 
@@ -561,64 +595,9 @@ end
 
 
 --
-local tPreAction;
-local tIsWheel;
-local tIsHostileButton;
-local tHostSpell;
-local tWheelDefString;
-local tBinding;
-local tHeaderFrame;
-local tRequiresPet;
-local tRequiresName;
-local tRequiresTarget;
-local tInfo;
-local tOnEnterSnippet = [[
-	if sHealButton then
-		sHealButton:ClearBindings();
-	end
-
-	sHealButton = self;
-]]
-local tOnLeaveSnippet = [[
-	self:ClearBindings();
-
-	sHealButton = nil;
-]]
-local tClearBindsSnippet = [[
-	self:ClearBindings();
-]]
-local tOnShowSnippet = [[
-	if sHealButton and sHealButton ~= self then
-		sHealButton:ClearBindings();
-	end
-
-	self:ClearBindings();
-
-	if self:IsUnderMouse() then
-		sHealButton = self;
-
-		local tBody = self:GetAttribute("vuhdo_onenter");
-
-		if tBody then
-			self:Run(tBody);
-		end
-	end
-]]
-local tOnHideSnippet = [[
-	self:ClearBindings();
-
-	sHealButton = nil;
-]]
-
-
-
---
-local tWheelDefString;
 function VUHDO_generateOnEnterCode()
 
-	tWheelDefString = tClearBindsSnippet .. VUHDO_getWheelDefString() .. VUHDO_getInternalKeyString();
-
-	return tWheelDefString;
+	return sClearBindsSnippet .. VUHDO_getWheelDefString() .. VUHDO_getInternalKeyString();
 
 end
 
@@ -627,7 +606,16 @@ end
 --
 function VUHDO_generateOnLeaveCode()
 
-	return tClearBindsSnippet;
+	return sClearBindsSnippet;
+
+end
+
+
+
+--
+local function VUHDO_generateOnShowCode(anOnEnterCode)
+
+	return sOnShowSnippetPrefix .. anOnEnterCode .. sOnShowSnippetSuffix;
 
 end
 
@@ -665,6 +653,17 @@ end
 
 --
 local tDebuffFrame;
+local tPreAction;
+local tIsWheel;
+local tIsHostileButton;
+local tHostSpell;
+local tOnEnterCode;
+local tBinding;
+local tHeaderFrame;
+local tRequiresPet;
+local tRequiresName;
+local tRequiresTarget;
+local tInfo;
 function VUHDO_setupAllHealButtonAttributes(aButton, aUnit, anIsDisable, aForceTarget, anIsTgButton, anIsIcButton)
 
 	if anIsTgButton then
@@ -793,28 +792,28 @@ function VUHDO_setupAllHealButtonAttributes(aButton, aUnit, anIsDisable, aForceT
 	end
 
 	if VUHDO_BUTTON_CACHE[aButton] or VUHDO_BUTTON_CACHE[VUHDO_findButtonFromChild(aButton)] then
-		tWheelDefString = tClearBindsSnippet;
+		tOnEnterCode = sClearBindsSnippet;
 
 		if tIsWheel then
-			tWheelDefString = tWheelDefString .. VUHDO_getWheelDefString();
+			tOnEnterCode = tOnEnterCode .. VUHDO_getWheelDefString();
 		end
 
-		tWheelDefString = tWheelDefString .. VUHDO_getInternalKeyString();
+		tOnEnterCode = tOnEnterCode .. VUHDO_getInternalKeyString();
 
-		VUHDO_safeSetAttribute(aButton, "_onenter", tWheelDefString);
-		VUHDO_safeSetAttribute(aButton, "_onleave", tClearBindsSnippet);
-		VUHDO_safeSetAttribute(aButton, "_onshow", tOnShowSnippet);
-		VUHDO_safeSetAttribute(aButton, "_onhide", tOnHideSnippet);
+		VUHDO_safeSetAttribute(aButton, "_onenter", tOnEnterCode);
+		VUHDO_safeSetAttribute(aButton, "_onleave", sClearBindsSnippet);
+		VUHDO_safeSetAttribute(aButton, "_onshow", VUHDO_generateOnShowCode(tOnEnterCode));
+		VUHDO_safeSetAttribute(aButton, "_onhide", sOnHideSnippet);
 
-		VUHDO_safeSetAttribute(aButton, "vuhdo_onenter", tWheelDefString);
-		VUHDO_safeSetAttribute(aButton, "vuhdo_onleave", tClearBindsSnippet);
+		VUHDO_safeSetAttribute(aButton, "vuhdo_onenter", tOnEnterCode);
+		VUHDO_safeSetAttribute(aButton, "vuhdo_onleave", sClearBindsSnippet);
 
 		tHeaderFrame = _G["VuhDoHealButtonSecureHeaderFrame"];
 
 		if tHeaderFrame then
 			if not aButton:GetAttribute("vuhdo_secureheader_wrap") then
-				VUHDO_safeWrapScript(tHeaderFrame, aButton, "OnEnter", tOnEnterSnippet);
-				VUHDO_safeWrapScript(tHeaderFrame, aButton, "OnLeave", tOnLeaveSnippet);
+				VUHDO_safeWrapScript(tHeaderFrame, aButton, "OnEnter", sOnEnterSnippet);
+				VUHDO_safeWrapScript(tHeaderFrame, aButton, "OnLeave", sOnLeaveSnippet);
 
 				VUHDO_safeSetAttribute(aButton, "vuhdo_secureheader_wrap", true);
 			end

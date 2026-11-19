@@ -529,6 +529,19 @@ end
 
 
 --
+function tPixelUtil.RoundToFramePixel(aFrame, aValue)
+
+	if not aFrame then
+		return aValue and VUHDO_roundToPixel(aValue, nil) or 0;
+	end
+
+	return aValue and VUHDO_roundToPixel(aValue, aFrame:GetEffectiveScale()) or 0;
+
+end
+
+
+
+--
 local tBaseValue;
 local tPercentage;
 local tCalculated;

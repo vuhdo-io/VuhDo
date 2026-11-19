@@ -3,6 +3,7 @@ local _;
 VUHDO_COMBO_MAX_ENTRIES = 10000;
 
 local floor = floor;
+local abs = math.abs;
 local max = math.max;
 local tonumber = tonumber;
 local strsub = strsub;
@@ -1295,14 +1296,21 @@ end
 
 
 --
-local tOldX, tOldY;
+local tCurrX, tCurrY;
+local tTargetX, tTargetY;
 function VUHDO_isDifferentButtonPoint(aRegion, aPointX, aPointY)
-	_, _, _, tOldX, tOldY	= aRegion:GetPoint();
-	if tOldX then
-		tOldX = floor(tOldX + 0.5);
-		tOldY = floor(tOldY + 0.5);
+
+	_, _, _, tCurrX, tCurrY = aRegion:GetPoint();
+
+	if not tCurrX then
+		return true;
 	end
-	return aPointX ~= tOldX or aPointY ~= tOldY;
+
+	tTargetX = VUHDO_PixelUtil.RoundToFramePixel(aRegion, aPointX);
+	tTargetY = VUHDO_PixelUtil.RoundToFramePixel(aRegion, aPointY);
+
+	return abs(tTargetX - tCurrX) > 0.01 or abs(tTargetY - tCurrY) > 0.01;
+
 end
 
 
