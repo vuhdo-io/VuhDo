@@ -467,7 +467,6 @@ end
 
 
 --
-local tTemplate;
 local tMacroId;
 local tMacroText;
 local tActionLow;
@@ -957,4 +956,3 @@ function VUHDO_setupSmartCast(aButton)
 
 	return false;
 end
-
