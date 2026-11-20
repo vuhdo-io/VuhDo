@@ -2056,6 +2056,19 @@ end
 
 
 --
+function VUHDO_lnfColorSwatchOnHide(aColorSwatch)
+
+	if VuhDoNewColorPicker:IsShown() and VuhDoNewColorPicker:GetAttribute("swatch") == aColorSwatch then
+		VuhDoNewColorPicker:Hide();
+	end
+
+	return;
+
+end
+
+
+
+--
 function VUHDO_lnfSetTooltip(aComponent, aText)
 	aComponent:SetAttribute("tooltip", aText);
 end

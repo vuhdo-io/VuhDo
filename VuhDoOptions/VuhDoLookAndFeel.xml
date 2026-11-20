@@ -279,6 +279,7 @@
 	</Frames>
 	<Scripts>
 		<OnShow>VUHDO_lnfPatchFont(self, "TitleString"); VUHDO_lnfColorSwatchInitFromModel(self)</OnShow>
+		<OnHide>VUHDO_lnfColorSwatchOnHide(self)</OnHide>
 		<OnMouseDown>VUHDO_lnfColorSwatchShowColorPicker(self, button)</OnMouseDown>
 		<OnEnter>VUHDO_lnfShowTooltip(self)</OnEnter>
 		<OnLeave>VUHDO_lnfHideTooltip(self)</OnLeave>
