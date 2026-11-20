@@ -15,8 +15,8 @@ end
 --
 function VUHDO_newOptionsMoveOnHide()
 	VUHDO_PixelUtil.SetHeight(VuhDoNewOptionsTabbedFrame, 455);
-	--VUHDO_IS_PANEL_CONFIG = false;
-	VUHDO_CONFIG_SHOW_RAID = true;
+	VUHDO_IS_PANEL_CONFIG = false;
+	VUHDO_CONFIG_SHOW_RAID = false;
 	VUHDO_clearUndefinedModelEntries();
 	VUHDO_newOptionsPanelFindDefaultPanel();
 	VUHDO_rewritePanelModels();

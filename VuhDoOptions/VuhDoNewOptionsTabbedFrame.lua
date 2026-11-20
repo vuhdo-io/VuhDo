@@ -3,8 +3,8 @@ VUHDO_MENU_RETURN_TARGET_MAIN = nil;
 VUHDO_MENU_RETURN_TARGET_SAVED = nil;
 VUHDO_MENU_RETURN_TARGET_MAIN_SAVED = nil;
 
-
 local _;
+
 local VUHDO_B_CONFIG = nil;
 local VUHDO_B_INDICATOR_CONFIG = nil;
 local VUHDO_B_PANEL_SETUP = nil;
@@ -19,9 +19,23 @@ local VUHDO_B_HOSTILE_SPELL_ASSIGNMENTS = nil;
 local VUHDO_B_USER_CLASS_COLORS = nil;
 local VUHDO_B_USER_CLASS_GRADIENT_COLORS = nil;
 local VUHDO_B_AURA_IGNORE_LIST = nil;
+
 VUHDO_OPTIONS_SETTINGS = nil;
 
 VUHDO_IS_CONFIG = false;
+
+local sMainTabs = {
+	{ "VuhDoNewOptionsGeneral", "General" },
+	{ "VuhDoNewOptionsSpell", "Spell" },
+	{ "VuhDoNewOptionsPanelPanel", "Panels" },
+	{ "VuhDoNewOptionsColors", "Colors" },
+	{ "VuhDoNewOptionsMove", "Move" },
+	{ "VuhDoNewOptionsBuffs", "Buffs" },
+	{ "VuhDoNewOptionsAura", "Auras" },
+	{ "VuhDoNewOptionsTools", "Tools" },
+};
+
+
 
 --
 function VUHDO_tabbedFrameOnMouseDown(aPanel)
@@ -151,33 +165,32 @@ end
 
 
 
-local tAllPanels = {
-	{ "VuhDoNewOptionsGeneral", "General" },
-	{ "VuhDoNewOptionsSpell", "Spell" },
-	{ "VuhDoNewOptionsPanelPanel", "Panels" },
-	{ "VuhDoNewOptionsColors", "Colors" },
-	{ "VuhDoNewOptionsMove", "Move" },
-	{ "VuhDoNewOptionsBuffs", "Buffs" },
-	{ "VuhDoNewOptionsAura", "Auras" },
-	{ "VuhDoNewOptionsTools", "Tools" },
-}
+do
+	--
+	local tRadioName;
+	local tSelectedTabName;
+	function VUHDO_newOptionsTabbedClickedClicked(aTabRadio)
 
+		tRadioName = aTabRadio:GetName();
+		tSelectedTabName = nil;
 
---
-function VUHDO_newOptionsTabbedClickedClicked(aTabRadio)
-
-	local tName = aTabRadio:GetName();
-
-	for _, tPanelInfo in pairs(tAllPanels) do
-		if strfind(tName, tPanelInfo[2]) then
-			_G[tPanelInfo[1]]:SetShown(true);
-
-			_G["VuhDoNewOptionsTabbedFrame"]["selectedTab"] = tPanelInfo[1];
-		else
-			_G[tPanelInfo[1]]:SetShown(false);
+		for _, tTabInfo in ipairs(sMainTabs) do
+			if strfind(tRadioName, tTabInfo[2]) then
+				tSelectedTabName = tTabInfo[1];
+			else
+				_G[tTabInfo[1]]:Hide();
+			end
 		end
-	end
 
+		if tSelectedTabName then
+			_G[tSelectedTabName]:Show();
+
+			_G["VuhDoNewOptionsTabbedFrame"]["selectedTab"] = tSelectedTabName;
+		end
+
+		return;
+
+	end
 end
 
 
