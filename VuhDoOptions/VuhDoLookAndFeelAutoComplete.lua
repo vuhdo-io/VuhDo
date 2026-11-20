@@ -298,6 +298,8 @@ do
 						tRank = VUHDO_lnfAutoCompleteParseRank(tSubName);
 
 						if tRank then
+							VUHDO_lnfAutoCompleteAddEntry(aSeenTexts, aKeyedEntries, tSpellBookItemInfo["name"], tSpellBookItemInfo["name"], tSpellBookItemInfo["name"], tSpellBookItemInfo["spellID"], tSpellBookItemInfo["name"], tSpellBookItemInfo["iconID"], strlower(tSpellBookItemInfo["name"]));
+
 							tDisplay = tSpellBookItemInfo["name"] .. "(" .. tSubName .. ")";
 						else
 							tDisplay = tSpellBookItemInfo["name"];
