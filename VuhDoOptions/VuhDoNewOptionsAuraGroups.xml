@@ -551,6 +551,8 @@
 
 												VUHDO_setComboModel(self, "VUHDO_AURA_GROUPS_ADD_SPELL_SELECTED", VUHDO_AURA_GROUPS_ADD_SPELL_COMBO_MODEL);
 												VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K692);
+
+												VUHDO_lnfAutoCompleteAttach(_G[self:GetName() .. "EditBox"], VUHDO_LF_AUTOCOMPLETE_AURAS);
 											</OnLoad>
 											<OnShow>
 												VUHDO_lnfPatchFont(self, "EditBox");
@@ -1300,6 +1302,8 @@
 
 										VUHDO_setComboModel(self, "VUHDO_AURA_GROUPS_IGNORE_SELECTED", VUHDO_AURA_GROUPS_IGNORE_COMBO_MODEL);
 										VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K699);
+
+										VUHDO_lnfAutoCompleteAttach(_G[self:GetName() .. "EditBox"], VUHDO_LF_AUTOCOMPLETE_AURAS, true);
 									</OnLoad>
 								</Scripts>
 							</Button>

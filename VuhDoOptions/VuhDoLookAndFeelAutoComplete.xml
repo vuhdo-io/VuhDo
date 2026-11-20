@@ -1,0 +1,76 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
+..\FrameXML\UI.xsd">
+
+	<Script file="VuhDoLookAndFeelAutoComplete.lua" />
+
+	<Button name="VuhDoAutoCompleteRowTemplate" virtual="true" inherits="BackdropTemplate" mixin="BackdropTemplateMixin">
+		<KeyValues>
+			<KeyValue key="backdropInfo" value="BACKDROP_VUHDO_WHITE_SQUARE_16_16_0000" type="global" />
+		</KeyValues>
+		<Size>
+			<AbsDimension x="210" y="20" />
+		</Size>
+		<Frames>
+			<Frame name="$parentIcon">
+				<Size>
+					<AbsDimension x="16" y="16" />
+				</Size>
+				<Anchors>
+					<Anchor point="RIGHT">
+						<Offset>
+							<AbsDimension x="-6" y="0" />
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Layers>
+					<Layer>
+						<Texture name="$parentTexture" setAllPoints="true">
+							<TexCoords left="0" right="1" top="0" bottom="1" />
+						</Texture>
+					</Layer>
+				</Layers>
+			</Frame>
+
+			<Frame name="$parentLabel">
+				<Anchors>
+					<Anchor point="TOPLEFT">
+						<Offset>
+							<AbsDimension x="6" y="0" />
+						</Offset>
+					</Anchor>
+					<Anchor point="BOTTOMRIGHT" relativeTo="$parentIcon" relativePoint="LEFT">
+						<Offset>
+							<AbsDimension x="-4" y="0" />
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Layers>
+					<Layer>
+						<FontString name="$parentLabel" setAllPoints="true" text="" justifyH="LEFT" inherits="VuDoBigFontTemplate">
+						</FontString>
+					</Layer>
+				</Layers>
+			</Frame>
+		</Frames>
+		<Scripts>
+			<OnShow>
+				VUHDO_lnfPatchFont(self, "LabelLabel");
+			</OnShow>
+		</Scripts>
+	</Button>
+
+	<Frame name="VuhDoAutoCompletePopup" parent="UIParent" frameStrata="TOOLTIP" enableMouse="true" hidden="true" clampedToScreen="true" inherits="BackdropTemplate" mixin="BackdropTemplateMixin">
+		<KeyValues>
+			<KeyValue key="backdropInfo" value="BACKDROP_VUHDO_PANEL_16_16_3333" type="global" />
+		</KeyValues>
+		<Size>
+			<AbsDimension x="220" y="24" />
+		</Size>
+		<Scripts>
+			<OnLoad>
+				VUHDO_lnfAutoCompleteInit();
+			</OnLoad>
+		</Scripts>
+	</Frame>
+
+</Ui>

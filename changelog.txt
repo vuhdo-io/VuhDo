@@ -20,6 +20,7 @@ Bugfixes:
 Improvements:  
 -- Added Druid 'Nature's Grasp' to Buff Watch (Forever)  
 -- Added Hunter 'Trueshot Aura' to Buff Watch (Forever)  
+-- Added autocomplete to VuhDo Options edit boxes  
   
   
 --------------------------------------------------------------  

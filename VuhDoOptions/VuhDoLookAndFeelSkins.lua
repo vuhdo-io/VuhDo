@@ -2052,6 +2052,52 @@ end
 
 do
 	--
+	local tComboItemColors;
+	local tAutoCompleteRowColor;
+	function VUHDO_lnfSkinApplyAutoCompleteRowBackdrop(aRow)
+
+		if not sSkinReady or not aRow or not aRow.SetBackdropColor then
+			return;
+		end
+
+		VUHDO_lnfSkinSnapshotBackdrop(aRow);
+
+		tComboItemColors = VUHDO_lnfSkinGetActiveEntry()["comboItemColors"];
+
+		if not tComboItemColors then
+			return;
+		end
+
+		if aRow["vuhdoAutoCompleteIsHighlighted"] then
+			tAutoCompleteRowColor = tComboItemColors["hover"];
+		else
+			tAutoCompleteRowColor = tComboItemColors["normal"];
+		end
+
+		if tAutoCompleteRowColor then
+			aRow:SetBackdropColor(tAutoCompleteRowColor[1], tAutoCompleteRowColor[2], tAutoCompleteRowColor[3], tAutoCompleteRowColor[4] or 1);
+		end
+
+		return;
+
+	end
+
+
+
+	--
+	function VUHDO_lnfSkinOnAutoCompleteRowHighlight(aRow)
+
+		VUHDO_lnfSkinApplyAutoCompleteRowBackdrop(aRow);
+
+		return;
+
+	end
+end
+
+
+
+do
+	--
 	local tComboName;
 	local tTable;
 	local tDropdownBox;
@@ -3567,7 +3613,9 @@ function VUHDO_lnfSkinApplyToComponent(aComponent, aLabelName)
 		tName = tSliderParent and tSliderParent.GetName and tSliderParent:GetName();
 
 		if not (tName and _G[tName .. "Slider"] and (aComponent == _G[tName .. "DecLeft"] or aComponent == _G[tName .. "DecRight"])) then
-			if aComponent["skinListEntry"] then
+			if aComponent["skinAutoCompleteRow"] then
+				VUHDO_lnfSkinApplyAutoCompleteRowBackdrop(aComponent);
+			elseif aComponent["skinListEntry"] then
 				VUHDO_lnfSkinStyleListEntry(aComponent, aComponent["skinListEntrySelected"]);
 			elseif VUHDO_lnfSkinIsTriState(aComponent) then
 				VUHDO_lnfSkinApplyTriStateDot(aComponent);
@@ -3860,6 +3908,10 @@ function VUHDO_lnfSkinApplyAll()
 
 	if VuhDoYesNoFrame then
 		VUHDO_lnfSkinEnqueueFrameTree(VuhDoYesNoFrame);
+	end
+
+	if VuhDoAutoCompletePopup then
+		VUHDO_lnfSkinEnqueueFrameTree(VuhDoAutoCompletePopup);
 	end
 
 	for tPanelNum = 1, VUHDO_MAX_PANELS do
@@ -4451,6 +4503,7 @@ do
 			hooksecurefunc("VUHDO_lnfComboButtonClicked", VUHDO_lnfSkinOnComboButtonClicked);
 			hooksecurefunc("VUHDO_lnfCheckTreeRowOnEnter", VUHDO_lnfSkinOnCheckTreeRowOnEnter);
 			hooksecurefunc("VUHDO_lnfCheckTreeRowOnLeave", VUHDO_lnfSkinOnCheckTreeRowOnLeave);
+			hooksecurefunc("VUHDO_lnfAutoCompleteSetRowHighlight", VUHDO_lnfSkinOnAutoCompleteRowHighlight);
 
 			sHooked["combo"] = true;
 		end

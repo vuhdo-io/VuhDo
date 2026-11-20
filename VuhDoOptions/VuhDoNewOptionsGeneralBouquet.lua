@@ -903,6 +903,10 @@ function VUHDO_bouquetsBuffComboValueChanged(aComboBox, aValue)
 		VUHDO_rebuildAllBouquetItems(nil, VUHDO_CURR_SELECTED_ITEM_INDEX);
 	end
 
+	VUHDO_lnfAutoCompleteMarkDirty();
+
+	return;
+
 end
 
 
@@ -1195,6 +1199,10 @@ function VUHDO_bouquetItemAddClicked()
 
 	tinsert(tBouquet, VUHDO_deepCopyTable(VUHDO_SANE_BOUQUET_ITEM));
 	VUHDO_rebuildAllBouquetItems(nil, #tBouquet);
+	VUHDO_lnfAutoCompleteMarkDirty();
+
+	return;
+
 end
 
 

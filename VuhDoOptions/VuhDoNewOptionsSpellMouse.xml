@@ -38,6 +38,9 @@
 					</Anchor>
 				</Anchors>
 				<Scripts>
+					<OnLoad>
+						VUHDO_lnfAutoCompleteAttach(self, VUHDO_LF_AUTOCOMPLETE_ACTIONS);
+					</OnLoad>
 					<OnTextChanged>
 						VUHDO_lnfEditBoxUpdateModel(self);
 						VUHDO_newOptionsSpellEditBoxCheckSpell(self);
@@ -224,6 +227,9 @@
 							</Anchor>
 						</Anchors>
 						<Scripts>
+							<OnLoad>
+								VUHDO_lnfAutoCompleteAttach(self, VUHDO_LF_AUTOCOMPLETE_ACTIONS);
+							</OnLoad>
 							<OnTextChanged>
 								VUHDO_lnfEditBoxUpdateModel(self);
 								VUHDO_newOptionsSpellEditBoxCheckSpell(self);
@@ -249,6 +255,9 @@
 							</Anchor>
 						</Anchors>
 						<Scripts>
+							<OnLoad>
+								VUHDO_lnfAutoCompleteAttach(self, VUHDO_LF_AUTOCOMPLETE_ACTIONS);
+							</OnLoad>
 							<OnTextChanged>
 								VUHDO_lnfEditBoxUpdateModel(self);
 								VUHDO_newOptionsSpellEditBoxCheckSpell(self);

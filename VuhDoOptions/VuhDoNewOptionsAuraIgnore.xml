@@ -52,6 +52,8 @@
 							<OnLoad>
 								VUHDO_setComboModel(self, "VUHDO_SELECTED_AURA_IGNORE", VUHDO_AURA_IGNORE_COMBO_MODEL);
 								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K702);
+
+								VUHDO_lnfAutoCompleteAttach(_G[self:GetName() .. "EditBox"], VUHDO_LF_AUTOCOMPLETE_AURAS, true);
 							</OnLoad>
 						</Scripts>
 					</Button>

@@ -71,6 +71,7 @@
 						<Scripts>
 							<OnLoad>
 								VUHDO_lnfSetModel(self, "VUHDO_SPELLS_KEYBOARD.SPELL1");
+							VUHDO_lnfAutoCompleteAttach(self, VUHDO_LF_AUTOCOMPLETE_ACTIONS);
 							</OnLoad>
 							<OnTextChanged>
 								VUHDO_lnfEditBoxUpdateModel(self);
@@ -121,6 +122,7 @@
 						<Scripts>
 							<OnLoad>
 								VUHDO_lnfSetModel(self, "VUHDO_SPELLS_KEYBOARD.SPELL9");
+							VUHDO_lnfAutoCompleteAttach(self, VUHDO_LF_AUTOCOMPLETE_ACTIONS);
 							</OnLoad>
 							<OnTextChanged>
 								VUHDO_lnfEditBoxUpdateModel(self);
@@ -143,6 +145,7 @@
 						<Scripts>
 							<OnLoad>
 								VUHDO_lnfSetModel(self, "VUHDO_SPELLS_KEYBOARD.SPELL10");
+							VUHDO_lnfAutoCompleteAttach(self, VUHDO_LF_AUTOCOMPLETE_ACTIONS);
 							</OnLoad>
 							<OnTextChanged>
 								VUHDO_lnfEditBoxUpdateModel(self);
@@ -203,6 +206,7 @@
 						<Scripts>
 							<OnLoad>
 								VUHDO_lnfSetModel(self, "VUHDO_SPELLS_KEYBOARD.SPELL2");
+							VUHDO_lnfAutoCompleteAttach(self, VUHDO_LF_AUTOCOMPLETE_ACTIONS);
 							</OnLoad>
 							<OnTextChanged>
 								VUHDO_lnfEditBoxUpdateModel(self);
@@ -225,6 +229,7 @@
 						<Scripts>
 							<OnLoad>
 								VUHDO_lnfSetModel(self, "VUHDO_SPELLS_KEYBOARD.SPELL11");
+							VUHDO_lnfAutoCompleteAttach(self, VUHDO_LF_AUTOCOMPLETE_ACTIONS);
 							</OnLoad>
 							<OnTextChanged>
 								VUHDO_lnfEditBoxUpdateModel(self);
@@ -285,6 +290,7 @@
 						<Scripts>
 							<OnLoad>
 								VUHDO_lnfSetModel(self, "VUHDO_SPELLS_KEYBOARD.SPELL3");
+							VUHDO_lnfAutoCompleteAttach(self, VUHDO_LF_AUTOCOMPLETE_ACTIONS);
 							</OnLoad>
 							<OnTextChanged>
 								VUHDO_lnfEditBoxUpdateModel(self);
@@ -307,6 +313,7 @@
 						<Scripts>
 							<OnLoad>
 								VUHDO_lnfSetModel(self, "VUHDO_SPELLS_KEYBOARD.SPELL13");
+							VUHDO_lnfAutoCompleteAttach(self, VUHDO_LF_AUTOCOMPLETE_ACTIONS);
 							</OnLoad>
 							<OnTextChanged>
 								VUHDO_lnfEditBoxUpdateModel(self);
@@ -367,6 +374,7 @@
 						<Scripts>
 							<OnLoad>
 								VUHDO_lnfSetModel(self, "VUHDO_SPELLS_KEYBOARD.SPELL5");
+							VUHDO_lnfAutoCompleteAttach(self, VUHDO_LF_AUTOCOMPLETE_ACTIONS);
 							</OnLoad>
 							<OnTextChanged>
 								VUHDO_lnfEditBoxUpdateModel(self);
@@ -389,6 +397,7 @@
 						<Scripts>
 							<OnLoad>
 								VUHDO_lnfSetModel(self, "VUHDO_SPELLS_KEYBOARD.SPELL12");
+							VUHDO_lnfAutoCompleteAttach(self, VUHDO_LF_AUTOCOMPLETE_ACTIONS);
 							</OnLoad>
 							<OnTextChanged>
 								VUHDO_lnfEditBoxUpdateModel(self);
@@ -449,6 +458,7 @@
 						<Scripts>
 							<OnLoad>
 								VUHDO_lnfSetModel(self, "VUHDO_SPELLS_KEYBOARD.SPELL4");
+							VUHDO_lnfAutoCompleteAttach(self, VUHDO_LF_AUTOCOMPLETE_ACTIONS);
 							</OnLoad>
 							<OnTextChanged>
 								VUHDO_lnfEditBoxUpdateModel(self);
@@ -471,6 +481,7 @@
 						<Scripts>
 							<OnLoad>
 								VUHDO_lnfSetModel(self, "VUHDO_SPELLS_KEYBOARD.SPELL14");
+							VUHDO_lnfAutoCompleteAttach(self, VUHDO_LF_AUTOCOMPLETE_ACTIONS);
 							</OnLoad>
 							<OnTextChanged>
 								VUHDO_lnfEditBoxUpdateModel(self);
@@ -531,6 +542,7 @@
 						<Scripts>
 							<OnLoad>
 								VUHDO_lnfSetModel(self, "VUHDO_SPELLS_KEYBOARD.SPELL6");
+							VUHDO_lnfAutoCompleteAttach(self, VUHDO_LF_AUTOCOMPLETE_ACTIONS);
 							</OnLoad>
 							<OnTextChanged>
 								VUHDO_lnfEditBoxUpdateModel(self);
@@ -553,6 +565,7 @@
 						<Scripts>
 							<OnLoad>
 								VUHDO_lnfSetModel(self, "VUHDO_SPELLS_KEYBOARD.SPELL15");
+							VUHDO_lnfAutoCompleteAttach(self, VUHDO_LF_AUTOCOMPLETE_ACTIONS);
 							</OnLoad>
 							<OnTextChanged>
 								VUHDO_lnfEditBoxUpdateModel(self);
@@ -613,6 +626,7 @@
 						<Scripts>
 							<OnLoad>
 								VUHDO_lnfSetModel(self, "VUHDO_SPELLS_KEYBOARD.SPELL7");
+							VUHDO_lnfAutoCompleteAttach(self, VUHDO_LF_AUTOCOMPLETE_ACTIONS);
 							</OnLoad>
 							<OnTextChanged>
 								VUHDO_lnfEditBoxUpdateModel(self);
@@ -635,6 +649,7 @@
 						<Scripts>
 							<OnLoad>
 								VUHDO_lnfSetModel(self, "VUHDO_SPELLS_KEYBOARD.SPELL16");
+							VUHDO_lnfAutoCompleteAttach(self, VUHDO_LF_AUTOCOMPLETE_ACTIONS);
 							</OnLoad>
 							<OnTextChanged>
 								VUHDO_lnfEditBoxUpdateModel(self);
@@ -695,6 +710,7 @@
 						<Scripts>
 							<OnLoad>
 								VUHDO_lnfSetModel(self, "VUHDO_SPELLS_KEYBOARD.SPELL8");
+							VUHDO_lnfAutoCompleteAttach(self, VUHDO_LF_AUTOCOMPLETE_ACTIONS);
 							</OnLoad>
 							<OnTextChanged>
 								VUHDO_lnfEditBoxUpdateModel(self);

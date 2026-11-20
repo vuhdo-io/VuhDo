@@ -233,6 +233,7 @@
 						<Scripts>
 							<OnLoad>
 								VUHDO_lnfSetModel(self, "VUHDO_CONFIG.RANGE_SPELL.HELPFUL");
+								VUHDO_lnfAutoCompleteAttach(self, VUHDO_LF_AUTOCOMPLETE_SPELLS);
 								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K067);
 								VUHDO_lnfAddConstraint(self, VUHDO_LF_CONSTRAINT_DISABLE, "VUHDO_CONFIG.RANGE_PESSIMISTIC.HELPFUL", true);
 							</OnLoad>
@@ -330,6 +331,7 @@
 						<Scripts>
 							<OnLoad>
 								VUHDO_lnfSetModel(self, "VUHDO_CONFIG.RANGE_SPELL.HARMFUL");
+								VUHDO_lnfAutoCompleteAttach(self, VUHDO_LF_AUTOCOMPLETE_SPELLS);
 								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K067);
 								VUHDO_lnfAddConstraint(self, VUHDO_LF_CONSTRAINT_DISABLE, "VUHDO_CONFIG.RANGE_PESSIMISTIC.HARMFUL", true);
 							</OnLoad>

@@ -35,6 +35,7 @@ Libs\ChatThrottleLib\ChatThrottleLib.xml
 VuhDoLookAndFeel.xml
 VuhDoLookAndFeelStandardFont.xml
 VuhDoLookAndFeelStandardShare.xml
+VuhDoLookAndFeelAutoComplete.xml
 
 VuhDoPanelConfig.xml
 VuhDoNewColorPicker.xml

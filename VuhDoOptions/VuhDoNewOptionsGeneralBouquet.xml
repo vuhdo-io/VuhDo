@@ -572,10 +572,15 @@
 							<OnLoad>
 								VUHDO_lnfSetModel(self, nil);
 								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K460);
+
+								VUHDO_lnfAutoCompleteAttach(self, VUHDO_LF_AUTOCOMPLETE_AURAS, true);
 							</OnLoad>
 							<OnTextChanged>
 								VUHDO_lnfEditBoxUpdateModel(self);
 							</OnTextChanged>
+							<OnEditFocusLost>
+								VUHDO_lnfAutoCompleteMarkDirty();
+							</OnEditFocusLost>
 						</Scripts>
 					</EditBox>
 

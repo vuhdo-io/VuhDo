@@ -445,6 +445,8 @@
 			</OnLoad>
 			<OnShow>
 				VUHDO_updateGlobalIconList();
+
+				VUHDO_lnfAutoCompleteMarkDirty();
 			</OnShow>
 		</Scripts>
 	</Frame>

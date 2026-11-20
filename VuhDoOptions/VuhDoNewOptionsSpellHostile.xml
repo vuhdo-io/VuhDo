@@ -78,6 +78,9 @@
 							</Anchor>
 						</Anchors>
 						<Scripts>
+							<OnLoad>
+								VUHDO_lnfAutoCompleteAttach(self, VUHDO_LF_AUTOCOMPLETE_HOSTILE_ACTIONS);
+							</OnLoad>
 							<OnTextChanged>
 								VUHDO_lnfEditBoxUpdateModel(self);
 								VUHDO_newOptionsSpellEditBoxCheckHostileSpell(self);
@@ -97,6 +100,9 @@
 							</Anchor>
 						</Anchors>
 						<Scripts>
+							<OnLoad>
+								VUHDO_lnfAutoCompleteAttach(self, VUHDO_LF_AUTOCOMPLETE_HOSTILE_ACTIONS);
+							</OnLoad>
 							<OnTextChanged>
 								VUHDO_lnfEditBoxUpdateModel(self);
 								VUHDO_newOptionsSpellEditBoxCheckHostileSpell(self);
@@ -116,6 +122,9 @@
 							</Anchor>
 						</Anchors>
 						<Scripts>
+							<OnLoad>
+								VUHDO_lnfAutoCompleteAttach(self, VUHDO_LF_AUTOCOMPLETE_HOSTILE_ACTIONS);
+							</OnLoad>
 							<OnTextChanged>
 								VUHDO_lnfEditBoxUpdateModel(self);
 								VUHDO_newOptionsSpellEditBoxCheckHostileSpell(self);
@@ -135,6 +144,9 @@
 							</Anchor>
 						</Anchors>
 						<Scripts>
+							<OnLoad>
+								VUHDO_lnfAutoCompleteAttach(self, VUHDO_LF_AUTOCOMPLETE_HOSTILE_ACTIONS);
+							</OnLoad>
 							<OnTextChanged>
 								VUHDO_lnfEditBoxUpdateModel(self);
 								VUHDO_newOptionsSpellEditBoxCheckHostileSpell(self);
@@ -154,6 +166,9 @@
 							</Anchor>
 						</Anchors>
 						<Scripts>
+							<OnLoad>
+								VUHDO_lnfAutoCompleteAttach(self, VUHDO_LF_AUTOCOMPLETE_HOSTILE_ACTIONS);
+							</OnLoad>
 							<OnTextChanged>
 								VUHDO_lnfEditBoxUpdateModel(self);
 								VUHDO_newOptionsSpellEditBoxCheckHostileSpell(self);
@@ -351,6 +366,9 @@
 							</Anchor>
 						</Anchors>
 						<Scripts>
+							<OnLoad>
+								VUHDO_lnfAutoCompleteAttach(self, VUHDO_LF_AUTOCOMPLETE_HOSTILE_ACTIONS);
+							</OnLoad>
 							<OnTextChanged>
 								VUHDO_lnfEditBoxUpdateModel(self);
 								VUHDO_newOptionsSpellEditBoxCheckHostileSpell(self);
@@ -370,6 +388,9 @@
 							</Anchor>
 						</Anchors>
 						<Scripts>
+							<OnLoad>
+								VUHDO_lnfAutoCompleteAttach(self, VUHDO_LF_AUTOCOMPLETE_HOSTILE_ACTIONS);
+							</OnLoad>
 							<OnTextChanged>
 								VUHDO_lnfEditBoxUpdateModel(self);
 								VUHDO_newOptionsSpellEditBoxCheckHostileSpell(self);
