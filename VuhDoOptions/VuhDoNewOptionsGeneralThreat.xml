@@ -17,12 +17,12 @@
 
 					<Frame name="$parentRefreshSlider" inherits="VuhDoHSliderTemplate">
 						<Size>
-							<AbsDimension x="128" y="32" />
+							<AbsDimension x="160" y="32" />
 						</Size>
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="130" y="-41" />
+									<AbsDimension x="112" y="-41" />
 								</Offset>
 							</Anchor>
 						</Anchors>

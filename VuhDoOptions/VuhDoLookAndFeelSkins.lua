@@ -2958,6 +2958,16 @@ function VUHDO_lnfSkinDecorateSlider(aFrame)
 			tRegion:ClearAllPoints();
 			VUHDO_PixelUtil.SetPoint(tRegion, "TOP", tDecLeft, "BOTTOM", 0, -2);
 		end
+	elseif tSliderStyle == "arrows" then
+		if tLabel then
+			tLabel:ClearAllPoints();
+			VUHDO_PixelUtil.SetPoint(tLabel, "BOTTOMLEFT", tSlider, "TOPLEFT", 2, 5);
+		end
+
+		if tRegion then
+			tRegion:ClearAllPoints();
+			VUHDO_PixelUtil.SetPoint(tRegion, "BOTTOMRIGHT", tSlider, "TOPRIGHT", -2, 5);
+		end
 	else
 		if tLabel then
 			VUHDO_lnfSkinRestoreSliderLabelAnchors(tLabel);
