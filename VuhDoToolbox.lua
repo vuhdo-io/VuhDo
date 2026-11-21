@@ -532,6 +532,80 @@ function VUHDO_tableGetKeyFromValue(aTable, aValue)
 end
 
 
+
+do
+	--
+	local tMid;
+	function VUHDO_tableLowerBound(aSortedArray, aValue, aFirst, aLast, aLessThan)
+
+		aFirst = aFirst or 1;
+		aLast = aLast or #aSortedArray;
+
+		if aLessThan then
+			while aFirst <= aLast do
+				tMid = floor((aFirst + aLast) * 0.5);
+
+				if aLessThan(aSortedArray[tMid], aValue) then
+					aFirst = tMid + 1;
+				else
+					aLast = tMid - 1;
+				end
+			end
+		else
+			while aFirst <= aLast do
+				tMid = floor((aFirst + aLast) * 0.5);
+
+				if aSortedArray[tMid] < aValue then
+					aFirst = tMid + 1;
+				else
+					aLast = tMid - 1;
+				end
+			end
+		end
+
+		return aFirst;
+
+	end
+end
+
+
+
+do
+	--
+	local tMid;
+	function VUHDO_tableUpperBound(aSortedArray, aValue, aFirst, aLast, aLessThan)
+
+		aFirst = aFirst or 1;
+		aLast = aLast or #aSortedArray;
+
+		if aLessThan then
+			while aFirst <= aLast do
+				tMid = floor((aFirst + aLast) * 0.5);
+
+				if aLessThan(aValue, aSortedArray[tMid]) then
+					aLast = tMid - 1;
+				else
+					aFirst = tMid + 1;
+				end
+			end
+		else
+			while aFirst <= aLast do
+				tMid = floor((aFirst + aLast) * 0.5);
+
+				if aValue < aSortedArray[tMid] then
+					aLast = tMid - 1;
+				else
+					aFirst = tMid + 1;
+				end
+			end
+		end
+
+		return aFirst;
+
+	end
+end
+
+
 ----------------------------------------------------
 local VUHDO_RAID;
 local VUHDO_UNIT_BUTTONS;

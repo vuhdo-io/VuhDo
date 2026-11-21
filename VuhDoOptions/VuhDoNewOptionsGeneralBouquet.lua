@@ -903,7 +903,7 @@ function VUHDO_bouquetsBuffComboValueChanged(aComboBox, aValue)
 		VUHDO_rebuildAllBouquetItems(nil, VUHDO_CURR_SELECTED_ITEM_INDEX);
 	end
 
-	VUHDO_lnfAutoCompleteMarkDirty();
+	VUHDO_lnfAutoCompleteMarkDirty(VUHDO_LF_AUTOCOMPLETE_AURAS);
 
 	return;
 
@@ -1179,7 +1179,7 @@ end
 --
 function VUHDO_importBouquetOkayClicked(aButton)
 	VuhDoYesNoFrameText:SetText(VUHDO_I18N_REALLY_IMPORT);
-	
+
 	VuhDoYesNoFrame:SetAttribute("callback", VUHDO_yesNoImportBouquetCallback);
 	VuhDoYesNoFrame:SetAttribute("importStringEditBoxName", aButton:GetParent():GetName() .. "StringScrollFrameStringEditBox");
 
@@ -1198,8 +1198,10 @@ function VUHDO_bouquetItemAddClicked()
 	end
 
 	tinsert(tBouquet, VUHDO_deepCopyTable(VUHDO_SANE_BOUQUET_ITEM));
+
 	VUHDO_rebuildAllBouquetItems(nil, #tBouquet);
-	VUHDO_lnfAutoCompleteMarkDirty();
+
+	VUHDO_lnfAutoCompleteMarkDirty(VUHDO_LF_AUTOCOMPLETE_AURAS);
 
 	return;
 

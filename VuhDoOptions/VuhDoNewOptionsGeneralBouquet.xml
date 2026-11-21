@@ -579,7 +579,7 @@
 								VUHDO_lnfEditBoxUpdateModel(self);
 							</OnTextChanged>
 							<OnEditFocusLost>
-								VUHDO_lnfAutoCompleteMarkDirty();
+								VUHDO_lnfAutoCompleteMarkDirty(VUHDO_LF_AUTOCOMPLETE_AURAS);
 							</OnEditFocusLost>
 						</Scripts>
 					</EditBox>

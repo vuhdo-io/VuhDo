@@ -49,6 +49,7 @@ local VUHDO_BOUQUET_BUFFS_SPECIAL;
 local VUHDO_resolveSpellId;
 local VUHDO_getGlobalIcon;
 local VUHDO_decompressIfCompressed;
+local VUHDO_tableLowerBound;
 
 local VUHDO_PixelUtil;
 
@@ -64,6 +65,9 @@ local sIsInitialized;
 local sLowerFocusText;
 local sFriendlyCommands = { };
 local sHostileCommands = { };
+local sEventFrame;
+local sPendingEditBox;
+local sPositionedEditBox;
 
 
 
@@ -79,6 +83,7 @@ do
 		VUHDO_resolveSpellId = _G["VUHDO_resolveSpellId"];
 		VUHDO_getGlobalIcon = _G["VUHDO_getGlobalIcon"];
 		VUHDO_decompressIfCompressed = _G["VUHDO_decompressIfCompressed"];
+		VUHDO_tableLowerBound = _G["VUHDO_tableLowerBound"];
 
 		VUHDO_PixelUtil = _G["VUHDO_PixelUtil"];
 
@@ -135,12 +140,18 @@ end
 
 do
 	--
-	function VUHDO_lnfAutoCompleteMarkDirty()
+	function VUHDO_lnfAutoCompleteMarkDirty(aProviderId)
 
-		for tProviderId = VUHDO_LF_AUTOCOMPLETE_SPELLS, VUHDO_LF_AUTOCOMPLETE_HOSTILE_ACTIONS do
-			VUHDO_lnfAutoCompleteEnsureProviderState(tProviderId);
+		if aProviderId then
+			VUHDO_lnfAutoCompleteEnsureProviderState(aProviderId);
 
-			sProviderStates[tProviderId]["isDirty"] = true;
+			sProviderStates[aProviderId]["isDirty"] = true;
+		else
+			for tProviderId = VUHDO_LF_AUTOCOMPLETE_SPELLS, VUHDO_LF_AUTOCOMPLETE_HOSTILE_ACTIONS do
+				VUHDO_lnfAutoCompleteEnsureProviderState(tProviderId);
+
+				sProviderStates[tProviderId]["isDirty"] = true;
+			end
 		end
 
 		return;
@@ -575,11 +586,11 @@ end
 do
 	--
 	local tState;
-	function VUHDO_lnfAutoCompleteGetIndex(aProviderId)
+	function VUHDO_lnfAutoCompleteGetIndex(aProviderId, anIsRebuildAllowed)
 
 		tState = VUHDO_lnfAutoCompleteEnsureProviderState(aProviderId);
 
-		if not tState["isDirty"] and #tState["keys"] > 0 then
+		if #tState["keys"] > 0 and not (tState["isDirty"] and anIsRebuildAllowed) then
 			return tState;
 		end
 
@@ -602,37 +613,11 @@ end
 
 do
 	--
-	local tMid;
-	local tMidKey;
-	function VUHDO_lnfAutoCompleteBinaryLowerBound(aKeys, aFirst, aLast, aPrefix)
-
-		while aFirst <= aLast do
-			tMid = rshift(aFirst + aLast, 1);
-			tMidKey = aKeys[tMid];
-
-			if tMidKey < aPrefix then
-				aFirst = tMid + 1;
-			else
-				aLast = tMid - 1;
-			end
-		end
-
-		return aFirst;
-
-	end
-end
-
-
-
-do
-	--
 	local tParentPrefix;
 	local tParentPacked;
 	local tParentFirst;
 	local tParentLast;
 	local tKeys;
-	local tPrefixLen;
-	local tKey;
 	local tPacked;
 	local tRangeFirst;
 	local tRangeLast;
@@ -679,26 +664,13 @@ do
 			return;
 		end
 
-		tPrefixLen = strlen(aPrefix);
+		tRangeFirst = VUHDO_tableLowerBound(tKeys, aPrefix, tParentFirst, tParentLast);
+		tRangeLast = VUHDO_tableLowerBound(tKeys, aPrefix .. "\255", tRangeFirst, tParentLast) - 1;
 
-		tRangeFirst = VUHDO_lnfAutoCompleteBinaryLowerBound(tKeys, tParentFirst, tParentLast, aPrefix);
-
-		tRangeLast = tRangeFirst;
-
-		while tRangeLast <= tParentLast do
-			tKey = tKeys[tRangeLast];
-
-			if strsub(tKey, 1, tPrefixLen) ~= aPrefix then
-				break;
-			end
-
-			tRangeLast = tRangeLast + 1;
-		end
-
-		if tRangeFirst > tParentLast or strsub(tKeys[tRangeFirst] or "", 1, tPrefixLen) ~= aPrefix then
+		if tRangeLast < tRangeFirst then
 			tPacked = 0;
 		else
-			tPacked = bor(lshift(tRangeFirst, 16), tRangeLast - 1);
+			tPacked = bor(lshift(tRangeFirst, 16), tRangeLast);
 		end
 
 		aState["rangeByPrefix"][aPrefix] = tPacked;
@@ -707,7 +679,7 @@ do
 			return;
 		end
 
-		return tRangeFirst, tRangeLast - 1;
+		return tRangeFirst, tRangeLast;
 
 	end
 end
@@ -844,7 +816,7 @@ do
 	local tState;
 	function VUHDO_lnfAutoCompleteQuery(aProviderId, aPrefix, aResults)
 
-		tState = VUHDO_lnfAutoCompleteGetIndex(aProviderId);
+		tState = VUHDO_lnfAutoCompleteGetIndex(aProviderId, false);
 
 		return VUHDO_lnfAutoCompleteFillResults(tState, strlower(strtrim(aPrefix or "")), aResults);
 
@@ -856,6 +828,8 @@ end
 do
 	--
 	local tIconFrame;
+	local tTargetScale;
+	local tIconOffsetX;
 	function VUHDO_lnfAutoCompleteSetRowHighlight(aRow, anIsHighlighted)
 
 		tIconFrame = aRow["vuhdoAutoCompleteIconFrame"];
@@ -865,13 +839,18 @@ do
 		if anIsHighlighted then
 			aRow:SetBackdropColor(0.8, 0.8, 1, 1);
 
-			tIconFrame:SetScale(2);
-			VUHDO_PixelUtil.SetPoint(tIconFrame, "RIGHT", aRow:GetName(), "RIGHT", -10, 0);
+			tTargetScale = 2;
+			tIconOffsetX = -10;
 		else
 			aRow:SetBackdropColor(1, 1, 1, 1);
 
-			tIconFrame:SetScale(1);
-			VUHDO_PixelUtil.SetPoint(tIconFrame, "RIGHT", aRow:GetName(), "RIGHT", -6, 0);
+			tTargetScale = 1;
+			tIconOffsetX = -6;
+		end
+
+		if tIconFrame:GetScale() ~= tTargetScale then
+			tIconFrame:SetScale(tTargetScale);
+			VUHDO_PixelUtil.SetPoint(tIconFrame, "RIGHT", aRow:GetName(), "RIGHT", tIconOffsetX, 0);
 		end
 
 		return;
@@ -952,6 +931,7 @@ do
 		sActiveEditBox = nil;
 		sShownCount = 0;
 		sSelectedIndex = 0;
+		sPositionedEditBox = nil;
 
 		return;
 
@@ -1044,13 +1024,38 @@ do
 
 		sActiveEditBox = anEditBox;
 
-		VUHDO_PixelUtil.SetScale(sPopup, anEditBox:GetEffectiveScale() / UIParent:GetEffectiveScale());
+		if anEditBox ~= sPositionedEditBox then
+			VUHDO_PixelUtil.SetScale(sPopup, anEditBox:GetEffectiveScale() / UIParent:GetEffectiveScale());
 
-		sPopup:ClearAllPoints();
-		VUHDO_PixelUtil.SetPoint(sPopup, "TOPLEFT", anEditBox:GetName(), "BOTTOMLEFT", 0, -2);
-		VUHDO_PixelUtil.SetWidth(sPopup, max(280, anEditBox:GetWidth() + 60));
+			sPopup:ClearAllPoints();
+			VUHDO_PixelUtil.SetPoint(sPopup, "TOPLEFT", anEditBox:GetName(), "BOTTOMLEFT", 0, -2);
+			VUHDO_PixelUtil.SetWidth(sPopup, max(280, anEditBox:GetWidth() + 60));
+
+			sPositionedEditBox = anEditBox;
+		end
 
 		VUHDO_lnfAutoCompleteRefreshPopup();
+
+		return;
+
+	end
+end
+
+
+
+do
+	--
+	local tEditBox;
+	function VUHDO_lnfAutoCompleteFlushPendingUpdate()
+
+		if sPendingEditBox then
+			tEditBox = sPendingEditBox;
+			sPendingEditBox = nil;
+
+			VUHDO_lnfAutoCompleteUpdatePopup(tEditBox);
+		end
+
+		sEventFrame:SetScript("OnUpdate", nil);
 
 		return;
 
@@ -1067,7 +1072,9 @@ do
 			sActiveEditBox = anEditBox;
 			sSelectedIndex = 1;
 
-			VUHDO_lnfAutoCompleteUpdatePopup(anEditBox);
+			sPendingEditBox = anEditBox;
+
+			sEventFrame:SetScript("OnUpdate", VUHDO_lnfAutoCompleteFlushPendingUpdate);
 		end
 
 		return;
@@ -1084,6 +1091,8 @@ do
 		sActiveEditBox = anEditBox;
 
 		sLowerFocusText = strlower(strtrim(anEditBox:GetText() or ""));
+
+		VUHDO_lnfAutoCompleteGetIndex(anEditBox["vuhdoAutoCompleteProvider"], true);
 
 		return;
 
@@ -1112,6 +1121,8 @@ do
 	local tOrigHandler;
 	function VUHDO_lnfAutoCompleteOnEnterPressed(anEditBox)
 
+		VUHDO_lnfAutoCompleteFlushPendingUpdate();
+
 		if sActiveEditBox == anEditBox and sShownCount > 0 and VUHDO_lnfAutoCompleteAcceptSelection(anEditBox, sSelectedIndex) then
 			return;
 		end
@@ -1134,6 +1145,8 @@ do
 	local tOrigHandler;
 	function VUHDO_lnfAutoCompleteOnTabPressed(anEditBox)
 
+		VUHDO_lnfAutoCompleteFlushPendingUpdate();
+
 		if sActiveEditBox == anEditBox and sShownCount > 0 and VUHDO_lnfAutoCompleteAcceptSelection(anEditBox, sSelectedIndex) then
 			return;
 		end
@@ -1155,6 +1168,8 @@ do
 	--
 	local tOrigHandler;
 	function VUHDO_lnfAutoCompleteOnArrowPressed(anEditBox, aKey)
+
+		VUHDO_lnfAutoCompleteFlushPendingUpdate();
 
 		if sActiveEditBox == anEditBox and sShownCount > 0 then
 			if "UP" == aKey then
@@ -1226,6 +1241,8 @@ do
 	local tEditBox;
 	function VUHDO_lnfAutoCompleteRowOnMouseDown(aRow)
 
+		VUHDO_lnfAutoCompleteFlushPendingUpdate();
+
 		tRowIndex = aRow["vuhdoAutoCompleteIndex"];
 		tEditBox = sActiveEditBox;
 
@@ -1262,9 +1279,16 @@ end
 
 do
 	--
-	function VUHDO_lnfAutoCompleteOnEvent()
+	function VUHDO_lnfAutoCompleteOnEvent(aFrame, anEvent)
 
-		VUHDO_lnfAutoCompleteMarkDirty();
+		if "UPDATE_MACROS" == anEvent then
+			VUHDO_lnfAutoCompleteMarkDirty(VUHDO_LF_AUTOCOMPLETE_ACTIONS);
+			VUHDO_lnfAutoCompleteMarkDirty(VUHDO_LF_AUTOCOMPLETE_HOSTILE_ACTIONS);
+		else
+			VUHDO_lnfAutoCompleteMarkDirty(VUHDO_LF_AUTOCOMPLETE_SPELLS);
+			VUHDO_lnfAutoCompleteMarkDirty(VUHDO_LF_AUTOCOMPLETE_ACTIONS);
+			VUHDO_lnfAutoCompleteMarkDirty(VUHDO_LF_AUTOCOMPLETE_HOSTILE_ACTIONS);
+		end
 
 		return;
 
@@ -1347,7 +1371,6 @@ end
 
 do
 	--
-	local sEventFrame;
 	function VUHDO_lnfAutoCompleteInitEvents()
 
 		sEventFrame = CreateFrame("Frame");
