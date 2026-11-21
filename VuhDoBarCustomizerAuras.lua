@@ -849,7 +849,7 @@ do
 		tPanelNum = VUHDO_BUTTON_CACHE and VUHDO_BUTTON_CACHE[aButton];
 		tBarHeight = tPanelNum and VUHDO_getHealthBarHeight(tPanelNum) or 40;
 
-		return tBarHeight * (anAnchorConfig["size"] or 40) * 0.01;
+		return tBarHeight * (anAnchorConfig["size"] or 30) * 0.01;
 
 	end
 

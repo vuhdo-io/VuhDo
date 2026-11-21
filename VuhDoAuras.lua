@@ -3334,6 +3334,22 @@ do
 			end
 
 			tAuraAnchors["1"]["size"] = VUHDO_convertBarPercentToHealthBarPercent(aPanelNum, tSizePct);
+
+			if tHots["TIMER_TEXT"] then
+				tAuraAnchors["1"]["TIMER_TEXT"] = VUHDO_deepCopyTable(tHots["TIMER_TEXT"]);
+
+				if not tAuraAnchors["1"]["TIMER_TEXT"]["COLOR"] then
+					tAuraAnchors["1"]["TIMER_TEXT"]["COLOR"] = VUHDO_makeFullColor(0, 0, 0, 1, 1, 1, 1, 1);
+				end
+			end
+
+			if tHots["COUNTER_TEXT"] then
+				tAuraAnchors["1"]["COUNTER_TEXT"] = VUHDO_deepCopyTable(tHots["COUNTER_TEXT"]);
+
+				if not tAuraAnchors["1"]["COUNTER_TEXT"]["COLOR"] then
+					tAuraAnchors["1"]["COUNTER_TEXT"]["COLOR"] = VUHDO_makeFullColor(0, 0, 0, 1, 0, 1, 0, 1);
+				end
+			end
 		end
 
 		if tRadioValue <= 14 then
@@ -3345,22 +3361,6 @@ do
 		tAuraAnchors["1"]["maxRows"] = 1;
 		tAuraAnchors["1"]["spacing"] = 0;
 		tAuraAnchors["1"]["sortRule"] = 3;
-
-		if tHots["TIMER_TEXT"] then
-			tAuraAnchors["1"]["TIMER_TEXT"] = VUHDO_deepCopyTable(tHots["TIMER_TEXT"]);
-
-			if not tAuraAnchors["1"]["TIMER_TEXT"]["COLOR"] then
-				tAuraAnchors["1"]["TIMER_TEXT"]["COLOR"] = VUHDO_makeFullColor(0, 0, 0, 1, 1, 1, 1, 1);
-			end
-		end
-
-		if tHots["COUNTER_TEXT"] then
-			tAuraAnchors["1"]["COUNTER_TEXT"] = VUHDO_deepCopyTable(tHots["COUNTER_TEXT"]);
-
-			if not tAuraAnchors["1"]["COUNTER_TEXT"]["COLOR"] then
-				tAuraAnchors["1"]["COUNTER_TEXT"]["COLOR"] = VUHDO_makeFullColor(0, 0, 0, 1, 0, 1, 0, 1);
-			end
-		end
 
 		tIconRadioValue = tHots["iconRadioValue"];
 
@@ -3515,6 +3515,22 @@ do
 
 		if not anIsFreshPanelSetup then
 			tAuraAnchors["2"]["size"] = VUHDO_convertBarPercentToHealthBarPercent(aPanelNum, (tDebuff["scale"] or 0.8) * 70);
+
+			if tDebuff["TIMER_TEXT"] then
+				tAuraAnchors["2"]["TIMER_TEXT"] = VUHDO_deepCopyTable(tDebuff["TIMER_TEXT"]);
+
+				if not tAuraAnchors["2"]["TIMER_TEXT"]["COLOR"] then
+					tAuraAnchors["2"]["TIMER_TEXT"]["COLOR"] = VUHDO_makeFullColor(0, 0, 0, 1, 1, 1, 1, 1);
+				end
+			end
+
+			if tDebuff["COUNTER_TEXT"] then
+				tAuraAnchors["2"]["COUNTER_TEXT"] = VUHDO_deepCopyTable(tDebuff["COUNTER_TEXT"]);
+
+				if not tAuraAnchors["2"]["COUNTER_TEXT"]["COLOR"] then
+					tAuraAnchors["2"]["COUNTER_TEXT"]["COLOR"] = VUHDO_makeFullColor(0, 0, 0, 1, 0, 1, 0, 1);
+				end
+			end
 		end
 
 		tTranslation = VUHDO_DEBUFF_OFFSET_TRANSLATION[tPoint] or sEmpty;
@@ -3527,22 +3543,6 @@ do
 		tAuraAnchors["2"]["maxColumns"] = tDebuff["max_num"] or 3;
 		tAuraAnchors["2"]["maxRows"] = 1;
 		tAuraAnchors["2"]["spacing"] = 0;
-
-		if tDebuff["TIMER_TEXT"] then
-			tAuraAnchors["2"]["TIMER_TEXT"] = VUHDO_deepCopyTable(tDebuff["TIMER_TEXT"]);
-
-			if not tAuraAnchors["2"]["TIMER_TEXT"]["COLOR"] then
-				tAuraAnchors["2"]["TIMER_TEXT"]["COLOR"] = VUHDO_makeFullColor(0, 0, 0, 1, 1, 1, 1, 1);
-			end
-		end
-
-		if tDebuff["COUNTER_TEXT"] then
-			tAuraAnchors["2"]["COUNTER_TEXT"] = VUHDO_deepCopyTable(tDebuff["COUNTER_TEXT"]);
-
-			if not tAuraAnchors["2"]["COUNTER_TEXT"]["COLOR"] then
-				tAuraAnchors["2"]["COUNTER_TEXT"]["COLOR"] = VUHDO_makeFullColor(0, 0, 0, 1, 0, 1, 0, 1);
-			end
-		end
 
 		return;
 
@@ -4228,7 +4228,7 @@ do
 			if tAnchors then
 				for tAnchorKey, tAnchorData in pairs(tAnchors) do
 					if tAnchorData["size"] == nil then
-						tAnchorData["size"] = 40;
+						tAnchorData["size"] = 30;
 					end
 
 					if tAnchorData["barWidth"] == nil then

@@ -68,7 +68,7 @@ local sDefaultAnchorEntry = {
 	["maxRows"] = 1,
 	["sortRule"] = 3,
 	["sortDir"] = 0,
-	["size"] = 40,
+	["size"] = 30,
 	["barWidth"] = 100,
 	["barHeight"] = 12,
 	["spacing"] = 2,
@@ -94,24 +94,24 @@ local sDefaultAnchorEntry = {
 	["fixedSlots"] = false,
 	["TIMER_TEXT"] = {
 		["ANCHOR"] = "BOTTOMRIGHT",
-		["X_ADJUST"] = 20,
-		["Y_ADJUST"] = 26,
-		["SCALE"] = 85,
+		["X_ADJUST"] = 25,
+		["Y_ADJUST"] = 0,
+		["SCALE"] = 60,
 		["FONT"] = "Interface\\AddOns\\VuhDo\\Fonts\\ariblk.ttf",
 		["COLOR"] = VUHDO_makeFullColor(0, 0, 0, 1, 1, 1, 1, 1),
-		["USE_SHADOW"] = true,
-		["USE_OUTLINE"] = false,
+		["USE_SHADOW"] = false,
+		["USE_OUTLINE"] = true,
 		["USE_MONO"] = false,
 	},
 	["COUNTER_TEXT"] = {
-		["ANCHOR"] = "TOPLEFT",
-		["X_ADJUST"] = -10,
-		["Y_ADJUST"] = -15,
-		["SCALE"] = 70,
+		["ANCHOR"] = "TOP",
+		["X_ADJUST"] = -25,
+		["Y_ADJUST"] = 0,
+		["SCALE"] = 60,
 		["FONT"] = "Interface\\AddOns\\VuhDo\\Fonts\\ariblk.ttf",
 		["COLOR"] = VUHDO_makeFullColor(0, 0, 0, 1, 0, 1, 0, 1),
-		["USE_SHADOW"] = true,
-		["USE_OUTLINE"] = false,
+		["USE_SHADOW"] = false,
+		["USE_OUTLINE"] = true,
 		["USE_MONO"] = false,
 	},
 };
@@ -556,7 +556,7 @@ function VUHDO_panelAurasUpdateStyleControlsEnabled(aParent, aStyleValue)
 
 		if tSyncAnchorData then
 			if tStyleIsBars then
-				tSize = tSyncAnchorData["size"] or 40;
+				tSize = tSyncAnchorData["size"] or 30;
 
 				if tSyncAnchorData["barVertical"] then
 					VUHDO_lnfUpdateVar(format("VUHDO_PANEL_SETUP.#PNUM#.AURA_ANCHORS.%s.barWidth", tSyncAnchorKey), tSize, DESIGN_MISC_PANEL_NUM);
