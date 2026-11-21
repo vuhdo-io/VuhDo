@@ -4,7 +4,7 @@
 
 			<Frame name="$parentAggroPanel" inherits="VuhDoPanelTemplate">
 				<Size>
-					<AbsDimension x="280" y="130" />
+					<AbsDimension x="300" y="130" />
 				</Size>
 				<Anchors>
 					<Anchor point="TOPLEFT">
@@ -22,7 +22,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="112" y="-41" />
+									<AbsDimension x="130" y="-41" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -94,7 +94,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="210" y="-79" />
+									<AbsDimension x="240" y="-79" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -133,7 +133,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="219" y="-70" />
+									<AbsDimension x="249" y="-70" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -163,7 +163,7 @@
 				<Anchors>
 					<Anchor point="TOPLEFT">
 						<Offset>
-							<AbsDimension x="298" y="-12" />
+							<AbsDimension x="318" y="-12" />
 						</Offset>
 					</Anchor>
 				</Anchors>
