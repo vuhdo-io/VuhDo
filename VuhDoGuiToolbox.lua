@@ -32,7 +32,8 @@ local VUHDO_RAID_TARGET_TEXTURE_ROWS = 4;
 local VUHDO_RAID_TARGET_TEXTURE_COLUMNS = 4;
 
 local VUHDO_FONT_CYRILLIC_FALLBACK_PATH = "Interface\\AddOns\\VuhDo\\Fonts\\ariblk.ttf";
-local VUHDO_FONT_FAMILY_ALPHABETS = { "russian", "korean", "simplifiedchinese", "traditionalchinese" };
+local VUHDO_FONT_FAMILY_ALPHABETS = { "roman", "russian", "korean", "simplifiedchinese", "traditionalchinese" };
+local VUHDO_FONT_FAMILY_NON_ROMAN_ALPHABETS = { "russian", "korean", "simplifiedchinese", "traditionalchinese" };
 
 local sIsNotInChina = GetLocale() ~= "zhCN" and GetLocale() ~= "zhTW" and GetLocale() ~= "koKR";
 local sCjkFontSize = 12;
@@ -631,14 +632,19 @@ do
 
 	--
 	local tMemberPath;
+	local tMemberFont;
 	local tFamilyKey;
 	local tFamilyName;
 	local tMembers;
 	local tFamily;
-	local function VUHDO_getFontFamily(aFontPath, aSize, aFlags)
+	local tShadowAlpha;
+	local function VUHDO_getFontFamily(aFontPath, aSize, aFlags, aShadowAlpha)
+
+		tShadowAlpha = aShadowAlpha or 1;
 
 		tFamilyKey = (aFontPath or "") .. "\031" .. (aSize or 0) .. "\031" .. (aFlags or "")
-			.. "\031" .. tostring(VUHDO_CONFIG["IS_FORCE_CYRILLIC_FALLBACK"]);
+			.. "\031" .. tostring(VUHDO_CONFIG["IS_FORCE_CYRILLIC_FALLBACK"])
+			.. "\031" .. tShadowAlpha;
 
 		tFamily = sFontFamilyCache[tFamilyKey];
 
@@ -655,7 +661,7 @@ do
 			},
 		};
 
-		for _, tAlphabet in ipairs(VUHDO_FONT_FAMILY_ALPHABETS) do
+		for _, tAlphabet in ipairs(VUHDO_FONT_FAMILY_NON_ROMAN_ALPHABETS) do
 			if tAlphabet == "russian" then
 				tMemberPath = VUHDO_resolveCyrillicFontPath(aFontPath);
 			else
@@ -683,6 +689,16 @@ do
 
 		tFamily = CreateFontFamily(tFamilyName, tMembers);
 
+		tFamily:SetShadowOffset(1, -1);
+		tFamily:SetShadowColor(0, 0, 0, tShadowAlpha);
+
+		for _, tAlphabet in ipairs(VUHDO_FONT_FAMILY_ALPHABETS) do
+			tMemberFont = tFamily:GetFontObjectForAlphabet(tAlphabet);
+
+			tMemberFont:SetShadowOffset(1, -1);
+			tMemberFont:SetShadowColor(0, 0, 0, tShadowAlpha);
+		end
+
 		sFontFamilyCache[tFamilyKey] = tFamily;
 
 		return tFamily;
@@ -692,9 +708,9 @@ do
 
 
 	--
-	function VUHDO_setFontWithFallback(aFontString, aFontPath, aSize, aFlags)
+	function VUHDO_setFontWithFallback(aFontString, aFontPath, aSize, aFlags, aShadowAlpha)
 
-		aFontString:SetFontObject(VUHDO_getFontFamily(aFontPath, aSize, aFlags));
+		aFontString:SetFontObject(VUHDO_getFontFamily(aFontPath, aSize, aFlags, aShadowAlpha));
 
 		return;
 

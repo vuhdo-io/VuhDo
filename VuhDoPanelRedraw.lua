@@ -943,14 +943,17 @@ do
 		VUHDO_PixelUtil.SetWidth(tNameText, aWidth);
 		VUHDO_PixelUtil.SetHeight(tNameText, sPanelConfig[aPanelNum]["mainFontHeight"]);
 
-		VUHDO_setFontWithFallback(tNameText, sPanelConfig[aPanelNum]["mainFont"], sPanelConfig[aPanelNum]["mainFontHeight"], sPanelConfig[aPanelNum]["outlineText"] or "");
+		VUHDO_setFontWithFallback(tNameText, sPanelConfig[aPanelNum]["mainFont"], sPanelConfig[aPanelNum]["mainFontHeight"], sPanelConfig[aPanelNum]["outlineText"] or "", sPanelConfig[aPanelNum]["shadowAlpha"]);
+
 		tNameText:SetShadowColor(0, 0, 0, sPanelConfig[aPanelNum]["shadowAlpha"]);
 
-		VUHDO_setFontWithFallback(tNameTextSolo, sPanelConfig[aPanelNum]["mainFont"], sPanelConfig[aPanelNum]["mainFontHeight"], sPanelConfig[aPanelNum]["outlineText"] or "");
+		VUHDO_setFontWithFallback(tNameTextSolo, sPanelConfig[aPanelNum]["mainFont"], sPanelConfig[aPanelNum]["mainFontHeight"], sPanelConfig[aPanelNum]["outlineText"] or "", sPanelConfig[aPanelNum]["shadowAlpha"]);
+
 		tNameTextSolo:SetShadowColor(0, 0, 0, sPanelConfig[aPanelNum]["shadowAlpha"]);
 		tNameTextSolo:SetText("");
 
-		VUHDO_setFontWithFallback(tLifeText, sPanelConfig[aPanelNum]["mainFont"], sPanelConfig[aPanelNum]["lifeFontHeight"], sPanelConfig[aPanelNum]["outlineText"] or "");
+		VUHDO_setFontWithFallback(tLifeText, sPanelConfig[aPanelNum]["mainFont"], sPanelConfig[aPanelNum]["lifeFontHeight"], sPanelConfig[aPanelNum]["outlineText"] or "", sPanelConfig[aPanelNum]["shadowAlpha"]);
+
 		tLifeText:SetShadowColor(0, 0, 0, sPanelConfig[aPanelNum]["shadowAlpha"]);
 		tLifeText:SetText("");
 
@@ -959,11 +962,9 @@ do
 
 		tAddHeight = 0;
 
-		tIsLifeHorizontal = VUHDO_LT_POS_RIGHT == sPanelConfig[aPanelNum]["lifeText"]["position"]
-			or VUHDO_LT_POS_LEFT == sPanelConfig[aPanelNum]["lifeText"]["position"];
+		tIsLifeHorizontal = VUHDO_LT_POS_RIGHT == sPanelConfig[aPanelNum]["lifeText"]["position"] or VUHDO_LT_POS_LEFT == sPanelConfig[aPanelNum]["lifeText"]["position"];
 
-		tIsLifeHidden = not sPanelConfig[aPanelNum]["lifeText"]["show"]
-			and not sPanelConfig[aPanelNum]["panelSetup"]["ID_TEXT"]["showTags"];
+		tIsLifeHidden = not sPanelConfig[aPanelNum]["lifeText"]["show"] and not sPanelConfig[aPanelNum]["panelSetup"]["ID_TEXT"]["showTags"];
 
 		if tIsLifeHidden then
 			VUHDO_PixelUtil.SetWidth(tLifeText, 0);
