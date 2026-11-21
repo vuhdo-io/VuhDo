@@ -3396,6 +3396,9 @@ function VUHDO_loadDefaultPanelSetup()
 
 			if VUHDO_DEFAULT_MODELS[tPanelNum] and VUHDO_ID_PRIVATE_TANKS == VUHDO_DEFAULT_MODELS[tPanelNum][1] then
 				tAktPanel["SCALING"]["ommitEmptyWhenStructured"] = false;
+
+				tAktPanel["AURA_ANCHORS"]["4"] = VUHDO_deepCopyTable(VUHDO_DEFAULT_AURA_ANCHORS["2"]);
+				tAktPanel["AURA_ANCHORS"]["4"]["groupId"] = "MY_DEBUFFS";
 			end
 
 			if GetLocale() == "zhCN" or GetLocale() == "zhTW" or GetLocale() == "koKR" then
