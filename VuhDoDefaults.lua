@@ -793,6 +793,7 @@ local VUHDO_DEFAULT_CONFIG = {
 	["IS_USE_BUTTON_FACADE"] = false,
 	["IS_SHARE"] = true,
 	["IS_READY_CHECK_DISABLED"] = false,
+	["IS_FORCE_CYRILLIC_FALLBACK"] = false,
 	["SYNC_SUMMARY_LEVEL"] = 1,
 
 	["SHOW_SPELL_TRACE"] = false,
@@ -3401,8 +3402,8 @@ function VUHDO_loadDefaultPanelSetup()
 				tAktPanel["PANEL_COLOR"]["TEXT"]["font"] = "";
 				tAktPanel["PANEL_COLOR"]["HEADER"]["font"] = "";
 			else
-				tAktPanel["PANEL_COLOR"]["TEXT"]["font"] = VUHDO_LibSharedMedia:Fetch('font', "Emblem");
-				tAktPanel["PANEL_COLOR"]["HEADER"]["font"] = VUHDO_LibSharedMedia:Fetch('font', "Emblem");
+				tAktPanel["PANEL_COLOR"]["TEXT"]["font"] = VUHDO_LibSharedMedia:Fetch('font', "Friz Quadrata TT");
+				tAktPanel["PANEL_COLOR"]["HEADER"]["font"] = VUHDO_LibSharedMedia:Fetch('font', "Friz Quadrata TT");
 			end
 
 			if VUHDO_DEFAULT_MODELS[tPanelNum] and VUHDO_ID_MAINTANKS == VUHDO_DEFAULT_MODELS[tPanelNum][1] then

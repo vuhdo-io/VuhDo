@@ -8,7 +8,10 @@ local max = math.max;
 local tonumber = tonumber;
 local strsub = strsub;
 local pairs = pairs;
+local ipairs = ipairs;
 local format = format;
+local strupper = string.upper;
+local strlower = string.lower;
 local GetLocale = GetLocale;
 local InCombatLockdown = InCombatLockdown;
 local UnitExists = UnitExists;
@@ -28,6 +31,9 @@ local MEMBERS_PER_RAID_GROUP = MEMBERS_PER_RAID_GROUP or 5;
 local VUHDO_RAID_TARGET_TEXTURE_ROWS = 4;
 local VUHDO_RAID_TARGET_TEXTURE_COLUMNS = 4;
 
+local VUHDO_FONT_CYRILLIC_FALLBACK_PATH = "Interface\\AddOns\\VuhDo\\Fonts\\ariblk.ttf";
+local VUHDO_FONT_FAMILY_ALPHABETS = { "russian", "korean", "simplifiedchinese", "traditionalchinese" };
+
 local sIsNotInChina = GetLocale() ~= "zhCN" and GetLocale() ~= "zhTW" and GetLocale() ~= "koKR";
 local sCjkFontSize = 12;
 local sIsManaBar = { };
@@ -46,6 +52,35 @@ local sCompactPartyOnShowHooked = false;
 local sBlizzRestoreNeedsReload = false;
 local sFontTestRegion;
 local sFontValidationCache = { };
+local sFontFamilyCache = { };
+local sFontFamilyCount = 0;
+local sAlphabetFontPathCache = { };
+
+local sNoCyrillicFontPaths = {
+	["Interface\\AddOns\\VuhDo\\Fonts\\Emblem.ttf"] = true,
+	["Interface\\AddOns\\VuhDo\\Fonts\\vixar.ttf"] = true,
+
+	["Interface\\AddOns\\SharedMedia\\fonts\\adventure\\Adventure.ttf"] = true,
+	["Interface\\AddOns\\SharedMedia\\fonts\\all_hooked_up\\HookedUp.ttf"] = true,
+	["Interface\\AddOns\\SharedMedia\\fonts\\bazooka\\Bazooka.ttf"] = true,
+	["Interface\\AddOns\\SharedMedia\\fonts\\black_chancery\\BlackChancery.ttf"] = true,
+	["Interface\\AddOns\\SharedMedia\\fonts\\doris_pp\\DorisPP.ttf"] = true,
+	["Interface\\AddOns\\SharedMedia\\fonts\\fitzgerald\\Fitzgerald.ttf"] = true,
+	["Interface\\AddOns\\SharedMedia\\fonts\\sf_atarian_system\\SFAtarianSystem.ttf"] = true,
+	["Interface\\AddOns\\SharedMedia\\fonts\\sf_covington\\SFCovington.ttf"] = true,
+	["Interface\\AddOns\\SharedMedia\\fonts\\sf_movie_poster\\SFMoviePoster-Bold.ttf"] = true,
+	["Interface\\AddOns\\SharedMedia\\fonts\\sf_wonder_comic\\SFWonderComic.ttf"] = true,
+	["Interface\\AddOns\\SharedMedia\\fonts\\tex_gyre_adventor\\texgyreadventor-regular.otf"] = true,
+	["Interface\\AddOns\\SharedMedia\\fonts\\tex_gyre_adventor\\texgyreadventor-bold.otf"] = true,
+	["Interface\\AddOns\\SharedMedia\\fonts\\yellowjacket\\yellow.ttf"] = true,
+};
+
+local sNoCyrillicFonts = { };
+
+for tNoCyrillicPath, _ in pairs(sNoCyrillicFontPaths) do
+	sNoCyrillicFonts[strlower(tNoCyrillicPath)] = true;
+end
+
 local sPendingAuraHostUpdates = { };
 
 local tEmptyColor = { };
@@ -467,7 +502,7 @@ function VUHDO_isValidFontPath(aFontPath)
 		sFontTestRegion = UIParent:CreateFontString(nil, "BACKGROUND");
 	end
 
-	tIsValid = pcall(sFontTestRegion.SetFont, sFontTestRegion, aFontPath, 10, "");
+	tIsValid = sFontTestRegion:SetFont(aFontPath, 10, "");
 
 	sFontValidationCache[aFontPath] = tIsValid;
 
@@ -503,6 +538,167 @@ function VUHDO_getFont(aFont)
 
 	return GameFontNormal:GetFont();
 
+end
+
+
+
+do
+	--
+	local tFileName;
+	local tBaseName;
+	local function VUHDO_getFontFileKey(aFontPath)
+
+		if (aFontPath or "") == "" then
+			return "";
+		end
+
+		tFileName = aFontPath:match("([^\\/]+)$");
+
+		if not tFileName then
+			return "";
+		end
+
+		tBaseName = tFileName:match("(.+)%..+$");
+
+		if not tBaseName then
+			return strupper(tFileName);
+		end
+
+		return strupper(tBaseName);
+
+	end
+
+
+
+	--
+	local tAlphabetFont;
+	local tAlphabetFontPath;
+	local function VUHDO_getAlphabetFontPath(anAlphabet)
+
+		tAlphabetFontPath = sAlphabetFontPathCache[anAlphabet];
+
+		if tAlphabetFontPath ~= nil then
+			return tAlphabetFontPath ~= false and tAlphabetFontPath or nil;
+		end
+
+		tAlphabetFont = GameFontNormal:GetFontObjectForAlphabet(anAlphabet);
+
+		if tAlphabetFont then
+			tAlphabetFontPath = tAlphabetFont:GetFont();
+		else
+			tAlphabetFontPath = nil;
+		end
+
+		sAlphabetFontPathCache[anAlphabet] = tAlphabetFontPath or false;
+
+		return tAlphabetFontPath;
+
+	end
+
+
+
+	--
+	local tCyrillicFontPath;
+	local tPairedFontPath;
+	local function VUHDO_resolveCyrillicFontPath(aFontPath)
+
+		tPairedFontPath = VUHDO_FONT_CYRILLIC_PAIRS[VUHDO_getFontFileKey(aFontPath)];
+
+		if tPairedFontPath and VUHDO_isValidFontPath(tPairedFontPath) then
+			return tPairedFontPath;
+		end
+
+		if not VUHDO_CONFIG["IS_FORCE_CYRILLIC_FALLBACK"]
+			and not sNoCyrillicFonts[strlower(aFontPath or "")] then
+			return aFontPath;
+		end
+
+		tCyrillicFontPath = VUHDO_getAlphabetFontPath("russian");
+
+		if tCyrillicFontPath and VUHDO_isValidFontPath(tCyrillicFontPath) then
+			return tCyrillicFontPath;
+		end
+
+		if VUHDO_isValidFontPath(VUHDO_FONT_CYRILLIC_FALLBACK_PATH) then
+			return VUHDO_FONT_CYRILLIC_FALLBACK_PATH;
+		end
+
+		return nil;
+
+	end
+
+
+
+	--
+	local tMemberPath;
+	local tFamilyKey;
+	local tFamilyName;
+	local tMembers;
+	local tFamily;
+	local function VUHDO_getFontFamily(aFontPath, aSize, aFlags)
+
+		tFamilyKey = (aFontPath or "") .. "\031" .. (aSize or 0) .. "\031" .. (aFlags or "")
+			.. "\031" .. tostring(VUHDO_CONFIG["IS_FORCE_CYRILLIC_FALLBACK"]);
+
+		tFamily = sFontFamilyCache[tFamilyKey];
+
+		if tFamily then
+			return tFamily;
+		end
+
+		tMembers = {
+			{
+				["alphabet"] = "roman",
+				["file"] = aFontPath,
+				["height"] = aSize,
+				["flags"] = aFlags or "",
+			},
+		};
+
+		for _, tAlphabet in ipairs(VUHDO_FONT_FAMILY_ALPHABETS) do
+			if tAlphabet == "russian" then
+				tMemberPath = VUHDO_resolveCyrillicFontPath(aFontPath);
+			else
+				tMemberPath = VUHDO_getAlphabetFontPath(tAlphabet);
+
+				if tMemberPath and not VUHDO_isValidFontPath(tMemberPath) then
+					tMemberPath = nil;
+				end
+			end
+
+			if not tMemberPath then
+				tMemberPath = aFontPath;
+			end
+
+			tinsert(tMembers, {
+				["alphabet"] = tAlphabet,
+				["file"] = tMemberPath,
+				["height"] = aSize,
+				["flags"] = aFlags or "",
+			});
+		end
+
+		sFontFamilyCount = sFontFamilyCount + 1;
+		tFamilyName = "VuhDoFontFamily" .. sFontFamilyCount;
+
+		tFamily = CreateFontFamily(tFamilyName, tMembers);
+
+		sFontFamilyCache[tFamilyKey] = tFamily;
+
+		return tFamily;
+
+	end
+
+
+
+	--
+	function VUHDO_setFontWithFallback(aFontString, aFontPath, aSize, aFlags)
+
+		aFontString:SetFontObject(VUHDO_getFontFamily(aFontPath, aSize, aFlags));
+
+		return;
+
+	end
 end
 
 

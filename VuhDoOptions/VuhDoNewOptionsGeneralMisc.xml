@@ -172,7 +172,7 @@
 
 			<Frame name="$parentOtherPanel" inherits="VuhDoPanelTemplate">
 				<Size>
-					<AbsDimension x="236" y="96" />
+					<AbsDimension x="236" y="134" />
 				</Size>
 				<Anchors>
 					<Anchor point="TOPLEFT">
@@ -243,6 +243,22 @@
 							<OnLoad>
 								VUHDO_lnfSetModel(self, "VUHDO_CONFIG.IS_READY_CHECK_DISABLED");
 								VUHDO_lnfSetTooltip(self, "Check to enable ready check icons. You need to be at least assistant in order to see ready checks anyway.");
+							</OnLoad>
+						</Scripts>
+					</CheckButton>
+
+					<CheckButton name="$parentCyrillicFallbackCheckButton" text="VUHDO_I18N_CYRILLIC_FALLBACK" inherits="VuhDoCheckButtonTemplate">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="13" y="-89" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								VUHDO_lnfSetModel(self, "VUHDO_CONFIG.IS_FORCE_CYRILLIC_FALLBACK");
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K912);
 							</OnLoad>
 						</Scripts>
 					</CheckButton>

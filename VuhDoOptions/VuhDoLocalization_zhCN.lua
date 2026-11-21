@@ -964,6 +964,7 @@ VUHDO_I18N_TT.K908 = "追踪你自己和其他玩家施加的虚弱灵魂效果�
 VUHDO_I18N_TT.K909 = "在显示的名字后追加角色姓氏。";
 VUHDO_I18N_TT.K910 = "在显示的名字后追加服务器名称（仅跨服务器玩家）。";
 VUHDO_I18N_TT.K911 = "仅当其他队伍成员存在同名角色时，才追加姓氏或服务器名称。";
+VUHDO_I18N_TT.K912 = "Enable this if your font shows squares for Cyrillic names.";
 
 VUHDO_I18N_DEFAULT_PROFILE = "预设存档";
 VUHDO_I18N_DEFAULT_LAYOUT = "预设按键配置";
@@ -1359,6 +1360,7 @@ VUHDO_I18N_STOP_CAST = "停止施法";
 VUHDO_I18N_COMBINED_BUFF = "综合";
 VUHDO_I18N_OPTIONS = "选项";
 VUHDO_I18N_CUSTOM_ADDONS = "自订插件";
+VUHDO_I18N_CYRILLIC_FALLBACK = "Cyrillic\nFallback";
 VUHDO_I18N_CLIQUE = "Clique";
 VUHDO_I18N_BUTTON_FACADE = "Masque";
 -- 2.70

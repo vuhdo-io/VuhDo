@@ -16,6 +16,7 @@ local issecretvalue = issecretvalue;
 local RemovePrivateAuraAnchor = C_UnitAuras and C_UnitAuras.RemovePrivateAuraAnchor;
 
 local VUHDO_getFont;
+local VUHDO_setFontWithFallback;
 local VUHDO_getHealthBar;
 local VUHDO_updateAuraAnchorHost;
 local VUHDO_layoutHealthBarGeometry;
@@ -138,6 +139,7 @@ function VUHDO_panelRedrawInitLocalOverrides()
 	VUHDO_STATUSBAR_TOP_TO_BOTTOM = _G["VUHDO_STATUSBAR_TOP_TO_BOTTOM"];
 
 	VUHDO_getFont = _G["VUHDO_getFont"];
+	VUHDO_setFontWithFallback = _G["VUHDO_setFontWithFallback"];
 	VUHDO_getHealthBar = _G["VUHDO_getHealthBar"];
 	VUHDO_updateAuraAnchorHost = _G["VUHDO_updateAuraAnchorHost"];
 	VUHDO_layoutHealthBarGeometry = _G["VUHDO_layoutHealthBarGeometry"];
@@ -941,14 +943,14 @@ do
 		VUHDO_PixelUtil.SetWidth(tNameText, aWidth);
 		VUHDO_PixelUtil.SetHeight(tNameText, sPanelConfig[aPanelNum]["mainFontHeight"]);
 
-		tNameText:SetFont(sPanelConfig[aPanelNum]["mainFont"], sPanelConfig[aPanelNum]["mainFontHeight"], sPanelConfig[aPanelNum]["outlineText"] or "");
+		VUHDO_setFontWithFallback(tNameText, sPanelConfig[aPanelNum]["mainFont"], sPanelConfig[aPanelNum]["mainFontHeight"], sPanelConfig[aPanelNum]["outlineText"] or "");
 		tNameText:SetShadowColor(0, 0, 0, sPanelConfig[aPanelNum]["shadowAlpha"]);
 
-		tNameTextSolo:SetFont(sPanelConfig[aPanelNum]["mainFont"], sPanelConfig[aPanelNum]["mainFontHeight"], sPanelConfig[aPanelNum]["outlineText"] or "");
+		VUHDO_setFontWithFallback(tNameTextSolo, sPanelConfig[aPanelNum]["mainFont"], sPanelConfig[aPanelNum]["mainFontHeight"], sPanelConfig[aPanelNum]["outlineText"] or "");
 		tNameTextSolo:SetShadowColor(0, 0, 0, sPanelConfig[aPanelNum]["shadowAlpha"]);
 		tNameTextSolo:SetText("");
 
-		tLifeText:SetFont(sPanelConfig[aPanelNum]["mainFont"], sPanelConfig[aPanelNum]["lifeFontHeight"], sPanelConfig[aPanelNum]["outlineText"] or "");
+		VUHDO_setFontWithFallback(tLifeText, sPanelConfig[aPanelNum]["mainFont"], sPanelConfig[aPanelNum]["lifeFontHeight"], sPanelConfig[aPanelNum]["outlineText"] or "");
 		tLifeText:SetShadowColor(0, 0, 0, sPanelConfig[aPanelNum]["shadowAlpha"]);
 		tLifeText:SetText("");
 
@@ -1093,7 +1095,7 @@ do
 		tOvhColor = VUHDO_PANEL_SETUP["BAR_COLORS"]["OVERHEAL_TEXT"];
 
 		tOvhText:SetTextColor(tOvhColor["TR"], tOvhColor["TG"], tOvhColor["TB"], tOvhColor["TO"]);
-		tOvhText:SetFont(sPanelConfig[aPanelNum]["mainFont"], sPanelConfig[aPanelNum]["mainFontHeight"], "");
+		VUHDO_setFontWithFallback(tOvhText, sPanelConfig[aPanelNum]["mainFont"], sPanelConfig[aPanelNum]["mainFontHeight"], "");
 		tOvhText:SetJustifyH("CENTER");
 		tOvhText:SetText("");
 

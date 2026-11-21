@@ -972,6 +972,7 @@ VUHDO_I18N_TT.K908 = "Tracks Weakened Soul from yourself and from others.";
 VUHDO_I18N_TT.K909 = "Append the character surname to the displayed name.";
 VUHDO_I18N_TT.K910 = "Append the realm name to the displayed name (cross-realm players only).";
 VUHDO_I18N_TT.K911 = "Append surname or realm name only when another group member shares the same name.";
+VUHDO_I18N_TT.K912 = "Enable this if your font shows squares for Cyrillic names.";
 
 VUHDO_I18N_DEFAULT_PROFILE = "Profil\npar d\195\169faut";
 VUHDO_I18N_DEFAULT_LAYOUT = "Disposition \npar d\195\169faut";
@@ -1372,6 +1373,7 @@ VUHDO_I18N_STOP_CAST = "Arr\195\170ter\nl'incant.";
 VUHDO_I18N_COMBINED_BUFF = "Combin\195\169";
 VUHDO_I18N_OPTIONS = "Options";
 VUHDO_I18N_CUSTOM_ADDONS = "Addons personnalis\195\169s";
+VUHDO_I18N_CYRILLIC_FALLBACK = "Cyrillic\nFallback";
 VUHDO_I18N_CLIQUE = "Clique";
 VUHDO_I18N_BUTTON_FACADE = "Masque";
 -- 2.70

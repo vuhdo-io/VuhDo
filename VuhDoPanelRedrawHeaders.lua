@@ -5,14 +5,16 @@ local huge = math.huge;
 
 local VUHDO_getHeader;
 local VUHDO_isTableHeaderOrFooter;
-local VUHDO_LibSharedMedia;
 local VUHDO_getFont;
+local VUHDO_setFontWithFallback;
 local VUHDO_getHeaderTextId;
 local VUHDO_getHeaderWidth;
 local VUHDO_getHeaderHeight;
 local VUHDO_getHeaderPos;
 local VUHDO_customizeHeader;
 local VUHDO_isPanelHorizontal;
+
+local VUHDO_LibSharedMedia;
 
 local sHeaderTextRotation = math.pi * 0.5;
 
@@ -23,14 +25,16 @@ function VUHDO_panelRedrawHeadersInitLocalOverrides()
 
 	VUHDO_getHeader = _G["VUHDO_getHeader"];
 	VUHDO_isTableHeaderOrFooter = _G["VUHDO_isTableHeaderOrFooter"];
-	VUHDO_LibSharedMedia = _G["VUHDO_LibSharedMedia"];
 	VUHDO_getFont = _G["VUHDO_getFont"];
+	VUHDO_setFontWithFallback = _G["VUHDO_setFontWithFallback"];
 	VUHDO_getHeaderTextId = _G["VUHDO_getHeaderTextId"];
 	VUHDO_getHeaderWidth = _G["VUHDO_getHeaderWidth"];
 	VUHDO_getHeaderHeight = _G["VUHDO_getHeaderHeight"];
 	VUHDO_getHeaderPos = _G["VUHDO_getHeaderPos"];
 	VUHDO_customizeHeader = _G["VUHDO_customizeHeader"];
 	VUHDO_isPanelHorizontal = _G["VUHDO_isPanelHorizontal"];
+
+	VUHDO_LibSharedMedia = _G["VUHDO_LibSharedMedia"];
 
 	return;
 
@@ -99,7 +103,7 @@ function VUHDO_positionTableHeaders(aPanel, aPanelNum)
 		end
 
 		tHeaderText = VUHDO_getHeaderTextId(tHeader);
-		tHeaderText:SetFont(tFont, tTextSize, "OUTLINE");
+		VUHDO_setFontWithFallback(tHeaderText, tFont, tTextSize, "OUTLINE");
 
 		VUHDO_customizeHeader(tHeader, aPanelNum, tModel[tCnt]);
 
