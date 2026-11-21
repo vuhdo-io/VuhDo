@@ -38,7 +38,12 @@
 							<AbsDimension x="6" y="0" />
 						</Offset>
 					</Anchor>
-					<Anchor point="BOTTOMRIGHT" relativeTo="$parentIcon" relativePoint="LEFT">
+					<Anchor point="BOTTOMLEFT">
+						<Offset>
+							<AbsDimension x="6" y="0" />
+						</Offset>
+					</Anchor>
+					<Anchor point="RIGHT" relativeTo="$parentIcon" relativePoint="LEFT">
 						<Offset>
 							<AbsDimension x="-4" y="0" />
 						</Offset>
@@ -46,7 +51,7 @@
 				</Anchors>
 				<Layers>
 					<Layer>
-						<FontString name="$parentLabel" setAllPoints="true" text="" justifyH="LEFT" inherits="VuDoBigFontTemplate">
+						<FontString name="$parentLabel" setAllPoints="true" text="" justifyH="LEFT" justifyV="MIDDLE" inherits="VuDoBigFontTemplate">
 						</FontString>
 					</Layer>
 				</Layers>
