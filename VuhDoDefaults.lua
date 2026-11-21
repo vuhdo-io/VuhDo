@@ -2961,7 +2961,7 @@ VUHDO_DEFAULT_AURA_ANCHORS = {
 		["maxRows"] = 1,
 		["sortRule"] = 3,
 		["sortDir"] = 0,
-		["size"] = 20,
+		["size"] = 40,
 		["barWidth"] = 100,
 		["barHeight"] = 12,
 		["barVertical"] = false,
@@ -3019,7 +3019,7 @@ VUHDO_DEFAULT_AURA_ANCHORS = {
 		["maxRows"] = 1,
 		["sortRule"] = 0,
 		["sortDir"] = 0,
-		["size"] = 20,
+		["size"] = 40,
 		["barWidth"] = 100,
 		["barHeight"] = 12,
 		["barVertical"] = false,
@@ -3380,7 +3380,10 @@ local tPrivateAura;
 local tBarColors;
 local tHealthLossColor;
 local tDebuffColor;
+local tIsFreshPanelSetup;
 function VUHDO_loadDefaultPanelSetup()
+
+	tIsFreshPanelSetup = not VUHDO_PANEL_SETUP;
 
 	if not VUHDO_PANEL_SETUP then
 		VUHDO_PANEL_SETUP = VUHDO_decompressOrCopy(VUHDO_DEFAULT_PANEL_SETUP);
@@ -3617,7 +3620,7 @@ function VUHDO_loadDefaultPanelSetup()
 		VUHDO_PANEL_SETUP["HOTS"] = nil;
 	end
 
-	VUHDO_migrateOldConfigsToAuraAnchors();
+	VUHDO_migrateOldConfigsToAuraAnchors(tIsFreshPanelSetup);
 
 	VUHDO_PANEL_SETUP = VUHDO_ensureSanity("VUHDO_PANEL_SETUP", VUHDO_PANEL_SETUP, VUHDO_DEFAULT_PANEL_SETUP);
 	VUHDO_DEFAULT_PANEL_SETUP = VUHDO_compressAndPackTable(VUHDO_DEFAULT_PANEL_SETUP);

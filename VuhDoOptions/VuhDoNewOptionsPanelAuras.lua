@@ -68,7 +68,7 @@ local sDefaultAnchorEntry = {
 	["maxRows"] = 1,
 	["sortRule"] = 3,
 	["sortDir"] = 0,
-	["size"] = 20,
+	["size"] = 40,
 	["barWidth"] = 100,
 	["barHeight"] = 12,
 	["spacing"] = 2,
@@ -556,7 +556,7 @@ function VUHDO_panelAurasUpdateStyleControlsEnabled(aParent, aStyleValue)
 
 		if tSyncAnchorData then
 			if tStyleIsBars then
-				tSize = tSyncAnchorData["size"] or 20;
+				tSize = tSyncAnchorData["size"] or 40;
 
 				if tSyncAnchorData["barVertical"] then
 					VUHDO_lnfUpdateVar(format("VUHDO_PANEL_SETUP.#PNUM#.AURA_ANCHORS.%s.barWidth", tSyncAnchorKey), tSize, DESIGN_MISC_PANEL_NUM);

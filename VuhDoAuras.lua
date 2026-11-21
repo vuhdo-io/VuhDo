@@ -6,6 +6,7 @@ local tinsert = table.insert;
 local tremove = table.remove;
 local twipe = table.wipe;
 local floor = math.floor;
+local max = math.max;
 local strfind = string.find;
 local gsub = string.gsub;
 local strsub = string.sub;
@@ -1052,13 +1053,13 @@ do
 
 		twipe(sAllGroups);
 
-		for tGroupId, tGroup in pairs(VUHDO_DEFAULT_AURA_GROUPS or _G["VUHDO_DEFAULT_AURA_GROUPS"] or sEmpty) do
+		for tGroupId, tGroup in pairs(_G["VUHDO_DEFAULT_AURA_GROUPS"] or sEmpty) do
 			if not tGroup["playerClassRequired"] or tGroup["playerClassRequired"] == VUHDO_PLAYER_CLASS then
 				sAllGroups[tGroupId] = tGroup;
 			end
 		end
 
-		for tGroupId, tGroup in pairs(VUHDO_AURA_GROUPS or (_G["VUHDO_CONFIG"] and _G["VUHDO_CONFIG"]["AURA_GROUPS"]) or sEmpty) do
+		for tGroupId, tGroup in pairs((_G["VUHDO_CONFIG"] or sEmpty)["AURA_GROUPS"] or sEmpty) do
 			sAllGroups[tGroupId] = tGroup;
 		end
 
@@ -1243,14 +1244,19 @@ do
 
 
 	--
+	local tDefaultAuraGroups;
+	local tConfig;
 	local tAuraGroups;
 	function VUHDO_resolveAllAuraGroupFilters()
 
-		for _, tGroup in pairs(VUHDO_DEFAULT_AURA_GROUPS or sEmpty) do
+		tDefaultAuraGroups = _G["VUHDO_DEFAULT_AURA_GROUPS"];
+
+		for _, tGroup in pairs(tDefaultAuraGroups or sEmpty) do
 			VUHDO_resolveAuraGroupFilter(tGroup);
 		end
 
-		tAuraGroups = VUHDO_CONFIG and VUHDO_CONFIG["AURA_GROUPS"];
+		tConfig = _G["VUHDO_CONFIG"];
+		tAuraGroups = tConfig and tConfig["AURA_GROUPS"];
 
 		for _, tGroup in pairs(tAuraGroups or sEmpty) do
 			VUHDO_resolveAuraGroupFilter(tGroup);
@@ -3242,6 +3248,41 @@ end
 
 do
 	--
+	local tPanelSetup;
+	local tScaling;
+	local tBarHeight;
+	local tHealthBarHeight;
+	local tManaBarHeight;
+	local tIndicatorConfig;
+	local tBouquets;
+	local tManaBarBouquetName;
+	function VUHDO_convertBarPercentToHealthBarPercent(aPanelNum, aBarPercent)
+
+		tPanelSetup = _G["VUHDO_PANEL_SETUP"];
+		tScaling = tPanelSetup and tPanelSetup[aPanelNum] and tPanelSetup[aPanelNum]["SCALING"];
+
+		tBarHeight = tScaling and tScaling["barHeight"] or 40;
+		tHealthBarHeight = tBarHeight;
+
+		tIndicatorConfig = (_G["VUHDO_INDICATOR_CONFIG"] or sEmpty)[aPanelNum];
+		tBouquets = tIndicatorConfig and tIndicatorConfig["BOUQUETS"];
+		tManaBarBouquetName = tBouquets and tBouquets["MANA_BAR"];
+
+		if tManaBarBouquetName ~= "" then
+			tManaBarHeight = tScaling and tScaling["manaBarHeight"] or 0;
+			tHealthBarHeight = max(1, tBarHeight - tManaBarHeight);
+		end
+
+		return floor(aBarPercent * tBarHeight / tHealthBarHeight + 0.5);
+
+	end
+
+end
+
+
+
+do
+	--
 	local tHots;
 	local tAuraAnchors;
 	local tRadioValue;
@@ -3257,10 +3298,11 @@ do
 	local tStacksRadioValue;
 	local tBarColors;
 	local tHotsColors;
+	local tIndicatorConfig;
 	local tHotBarsConfig;
 	local tIsVertical;
 	local tBarsRadioValue;
-	function VUHDO_migrateHotsToAuraAnchors(aPanelNum)
+	function VUHDO_migrateHotsToAuraAnchors(aPanelNum, anIsFreshPanelSetup)
 
 		tPanelSetup = _G["VUHDO_PANEL_SETUP"];
 
@@ -3282,15 +3324,17 @@ do
 		tAuraAnchors["1"]["radioValue"] = tRadioValue;
 		tAuraAnchors["1"]["fixedSlots"] = true;
 
-		tOriginalRadioValue = tHots["radioValue"];
-		tMostCommonScale = VUHDO_getMostCommonSlotScale(tHots);
-		tSizePct = (tHots["size"] or 40) * tMostCommonScale;
+		if not anIsFreshPanelSetup then
+			tOriginalRadioValue = tHots["radioValue"];
+			tMostCommonScale = VUHDO_getMostCommonSlotScale(tHots);
+			tSizePct = (tHots["size"] or 40) * tMostCommonScale;
 
-		if 20 == tOriginalRadioValue or 21 == tOriginalRadioValue then
-			tSizePct = tSizePct * 0.5;
+			if 20 == tOriginalRadioValue or 21 == tOriginalRadioValue then
+				tSizePct = tSizePct * 0.5;
+			end
+
+			tAuraAnchors["1"]["size"] = VUHDO_convertBarPercentToHealthBarPercent(aPanelNum, tSizePct);
 		end
-
-		tAuraAnchors["1"]["size"] = floor(tSizePct);
 
 		if tRadioValue <= 14 then
 			tAuraAnchors["1"]["growthDir"] = VUHDO_HOTS_RADIOVALUE_GROWTH[tRadioValue] or "RIGHT";
@@ -3392,10 +3436,8 @@ do
 				tAuraAnchors["1"]["barHeight"] = tBarsConfig["width"] or 25;
 			end
 
-			tHotBarsConfig = VUHDO_INDICATOR_CONFIG and
-				VUHDO_INDICATOR_CONFIG[aPanelNum] and
-				VUHDO_INDICATOR_CONFIG[aPanelNum]["CUSTOM"] and
-				VUHDO_INDICATOR_CONFIG[aPanelNum]["CUSTOM"]["HOT_BARS"];
+			tIndicatorConfig = (_G["VUHDO_INDICATOR_CONFIG"] or sEmpty)[aPanelNum];
+			tHotBarsConfig = tIndicatorConfig and tIndicatorConfig["CUSTOM"] and tIndicatorConfig["CUSTOM"]["HOT_BARS"];
 
 			tIsVertical = tHotBarsConfig and tHotBarsConfig["vertical"] or false;
 			tBarsRadioValue = tBarsConfig and tBarsConfig["radioValue"] or 1;
@@ -3452,7 +3494,7 @@ do
 	local tTranslation;
 	local tConfig;
 	local tPanelSetup;
-	function VUHDO_migrateCustomDebuffsToAuraAnchors(aPanelNum)
+	function VUHDO_migrateCustomDebuffsToAuraAnchors(aPanelNum, anIsFreshPanelSetup)
 
 		tConfig = _G["VUHDO_CONFIG"];
 		tPanelSetup = _G["VUHDO_PANEL_SETUP"];
@@ -3471,7 +3513,9 @@ do
 		tAuraAnchors["2"]["radioValue"] = VUHDO_POINT_TO_RADIOVALUE[tPoint];
 		tAuraAnchors["2"]["fixedSlots"] = true;
 
-		tAuraAnchors["2"]["size"] = tDebuff["scale"] and floor(tDebuff["scale"] * 70) or 40;
+		if not anIsFreshPanelSetup then
+			tAuraAnchors["2"]["size"] = VUHDO_convertBarPercentToHealthBarPercent(aPanelNum, (tDebuff["scale"] or 0.8) * 70);
+		end
 
 		tTranslation = VUHDO_DEBUFF_OFFSET_TRANSLATION[tPoint] or sEmpty;
 		tAuraAnchors["2"]["offsetX"] = (tDebuff["xAdjust"] or -2) + (tTranslation["x"] or 0);
@@ -3960,7 +4004,7 @@ do
 	--
 	local tPanelSetup;
 	local tCurrentMigrationVersion;
-	function VUHDO_migrateOldConfigsToAuraAnchors()
+	function VUHDO_migrateOldConfigsToAuraAnchors(anIsFreshPanelSetup)
 
 		tPanelSetup = _G["VUHDO_PANEL_SETUP"];
 		tCurrentMigrationVersion = tPanelSetup["AURA_MIGRATION_VERSION"] or 0;
@@ -3975,8 +4019,8 @@ do
 					tPanelSetup[tPanelNum]["AURA_ANCHORS"] = VUHDO_deepCopyTable(VUHDO_DEFAULT_AURA_ANCHORS);
 				end
 
-				VUHDO_migrateHotsToAuraAnchors(tPanelNum);
-				VUHDO_migrateCustomDebuffsToAuraAnchors(tPanelNum);
+				VUHDO_migrateHotsToAuraAnchors(tPanelNum, anIsFreshPanelSetup);
+				VUHDO_migrateCustomDebuffsToAuraAnchors(tPanelNum, anIsFreshPanelSetup);
 			end
 
 			VUHDO_migrateHotsToAuraAnchorsV2();
@@ -4184,7 +4228,7 @@ do
 			if tAnchors then
 				for tAnchorKey, tAnchorData in pairs(tAnchors) do
 					if tAnchorData["size"] == nil then
-						tAnchorData["size"] = 20;
+						tAnchorData["size"] = 40;
 					end
 
 					if tAnchorData["barWidth"] == nil then
