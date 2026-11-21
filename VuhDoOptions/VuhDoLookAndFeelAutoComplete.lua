@@ -29,11 +29,22 @@ local GetSpellTexture = GetSpellTexture or C_Spell.GetSpellTexture;
 local SpellBookSpellBank = Enum.SpellBookSpellBank;
 local SpellBookItemType = Enum.SpellBookItemType;
 local GetMacroInfo = GetMacroInfo;
+local GetInventoryItemID = GetInventoryItemID;
+local GetInventoryItemTexture = GetInventoryItemTexture;
+local GetItemInfo = C_Item.GetItemInfo;
+local GetItemSpell = C_Item.GetItemSpell;
 
 VUHDO_LF_AUTOCOMPLETE_SPELLS = 1;
 VUHDO_LF_AUTOCOMPLETE_AURAS = 2;
 VUHDO_LF_AUTOCOMPLETE_ACTIONS = 3;
 VUHDO_LF_AUTOCOMPLETE_HOSTILE_ACTIONS = 4;
+VUHDO_LF_AUTOCOMPLETE_INSTANTS = 5;
+
+local sItemProviderIds = {
+	[VUHDO_LF_AUTOCOMPLETE_ACTIONS] = true,
+	[VUHDO_LF_AUTOCOMPLETE_HOSTILE_ACTIONS] = true,
+	[VUHDO_LF_AUTOCOMPLETE_INSTANTS] = true,
+};
 
 local VUHDO_LF_AUTOCOMPLETE_MIN_LEN = 2;
 local VUHDO_LF_AUTOCOMPLETE_MAX_RESULTS = 10;
@@ -147,11 +158,26 @@ do
 
 			sProviderStates[aProviderId]["isDirty"] = true;
 		else
-			for tProviderId = VUHDO_LF_AUTOCOMPLETE_SPELLS, VUHDO_LF_AUTOCOMPLETE_HOSTILE_ACTIONS do
+			for tProviderId = VUHDO_LF_AUTOCOMPLETE_SPELLS, VUHDO_LF_AUTOCOMPLETE_INSTANTS do
 				VUHDO_lnfAutoCompleteEnsureProviderState(tProviderId);
 
 				sProviderStates[tProviderId]["isDirty"] = true;
 			end
+		end
+
+		return;
+
+	end
+end
+
+
+
+do
+	--
+	function VUHDO_lnfAutoCompleteMarkItemProvidersDirty()
+
+		for tProviderId, _ in pairs(sItemProviderIds) do
+			VUHDO_lnfAutoCompleteMarkDirty(tProviderId);
 		end
 
 		return;
@@ -382,6 +408,44 @@ end
 
 do
 	--
+	local tItemId;
+	local tItemName;
+	local tDisplay;
+	local tIsItemDataPending;
+	function VUHDO_lnfAutoCompleteCollectEquippedItemEntries(aSeenTexts, aKeyedEntries)
+
+		tIsItemDataPending = false;
+
+		for tSlot = INVSLOT_FIRST_EQUIPPED, INVSLOT_LAST_EQUIPPED do
+			tItemId = GetInventoryItemID("player", tSlot);
+
+			if tItemId then
+				tItemName = GetItemInfo(tItemId);
+
+				if not tItemName then
+					tIsItemDataPending = true;
+				elseif GetItemSpell(tItemId) then
+					tDisplay = format("%s (%s)", tItemName, VUHDO_I18N_ITEM);
+
+					VUHDO_lnfAutoCompleteAddEntry(aSeenTexts, aKeyedEntries, tDisplay, tItemName, tItemName, nil, tItemName,
+						GetInventoryItemTexture("player", tSlot) or false, strlower(tItemName));
+				end
+			end
+		end
+
+		if tIsItemDataPending then
+			sEventFrame:RegisterEvent("GET_ITEM_INFO_RECEIVED");
+		end
+
+		return;
+
+	end
+end
+
+
+
+do
+	--
 	local tValue;
 	local tSpellId;
 	local tSpellName;
@@ -537,6 +601,31 @@ do
 		VUHDO_lnfAutoCompleteCollectSpellbookEntries(tSeenTexts, tKeyedEntries);
 		VUHDO_lnfAutoCompleteCollectCommandEntries(aCommands, tSeenTexts, tKeyedEntries);
 		VUHDO_lnfAutoCompleteCollectMacroEntries(tSeenTexts, tKeyedEntries);
+		VUHDO_lnfAutoCompleteCollectEquippedItemEntries(tSeenTexts, tKeyedEntries);
+		VUHDO_lnfAutoCompleteStoreIndex(aState, tKeyedEntries);
+
+		return;
+
+	end
+end
+
+
+
+do
+	--
+	local tKeyedEntries;
+	local tSeenTexts;
+	function VUHDO_lnfAutoCompleteBuildInstantIndex(aState)
+
+		if InCombatLockdown() and #aState["keys"] > 0 then
+			return;
+		end
+
+		tKeyedEntries = { };
+		tSeenTexts = { };
+
+		VUHDO_lnfAutoCompleteCollectSpellbookEntries(tSeenTexts, tKeyedEntries);
+		VUHDO_lnfAutoCompleteCollectEquippedItemEntries(tSeenTexts, tKeyedEntries);
 		VUHDO_lnfAutoCompleteStoreIndex(aState, tKeyedEntries);
 
 		return;
@@ -602,6 +691,8 @@ do
 			VUHDO_lnfAutoCompleteBuildActionIndex(tState, sFriendlyCommands);
 		elseif VUHDO_LF_AUTOCOMPLETE_HOSTILE_ACTIONS == aProviderId then
 			VUHDO_lnfAutoCompleteBuildActionIndex(tState, sHostileCommands);
+		elseif VUHDO_LF_AUTOCOMPLETE_INSTANTS == aProviderId then
+			VUHDO_lnfAutoCompleteBuildInstantIndex(tState);
 		end
 
 		return tState;
@@ -1279,15 +1370,50 @@ end
 
 do
 	--
+	local tProviderId;
+	function VUHDO_lnfAutoCompleteOnItemInfoReceived()
+
+		sEventFrame:UnregisterEvent("GET_ITEM_INFO_RECEIVED");
+
+		VUHDO_lnfAutoCompleteMarkItemProvidersDirty();
+
+		if not sActiveEditBox then
+			return;
+		end
+
+		tProviderId = sActiveEditBox["vuhdoAutoCompleteProvider"];
+
+		if not sItemProviderIds[tProviderId] then
+			return;
+		end
+
+		VUHDO_lnfAutoCompleteGetIndex(tProviderId, true);
+
+		sPendingEditBox = sActiveEditBox;
+
+		sEventFrame:SetScript("OnUpdate", VUHDO_lnfAutoCompleteFlushPendingUpdate);
+
+		return;
+
+	end
+end
+
+
+
+do
+	--
 	function VUHDO_lnfAutoCompleteOnEvent(aFrame, anEvent)
 
 		if "UPDATE_MACROS" == anEvent then
 			VUHDO_lnfAutoCompleteMarkDirty(VUHDO_LF_AUTOCOMPLETE_ACTIONS);
 			VUHDO_lnfAutoCompleteMarkDirty(VUHDO_LF_AUTOCOMPLETE_HOSTILE_ACTIONS);
+		elseif "PLAYER_EQUIPMENT_CHANGED" == anEvent then
+			VUHDO_lnfAutoCompleteMarkItemProvidersDirty();
+		elseif "GET_ITEM_INFO_RECEIVED" == anEvent then
+			VUHDO_lnfAutoCompleteOnItemInfoReceived();
 		else
 			VUHDO_lnfAutoCompleteMarkDirty(VUHDO_LF_AUTOCOMPLETE_SPELLS);
-			VUHDO_lnfAutoCompleteMarkDirty(VUHDO_LF_AUTOCOMPLETE_ACTIONS);
-			VUHDO_lnfAutoCompleteMarkDirty(VUHDO_LF_AUTOCOMPLETE_HOSTILE_ACTIONS);
+			VUHDO_lnfAutoCompleteMarkItemProvidersDirty();
 		end
 
 		return;
@@ -1379,6 +1505,7 @@ do
 		sEventFrame:RegisterEvent("LEARNED_SPELL_IN_SKILL_LINE");
 		sEventFrame:RegisterEvent("TRAIT_CONFIG_UPDATED");
 		sEventFrame:RegisterEvent("UPDATE_MACROS");
+		sEventFrame:RegisterEvent("PLAYER_EQUIPMENT_CHANGED");
 
 		sEventFrame:SetScript("OnEvent", VUHDO_lnfAutoCompleteOnEvent);
 
