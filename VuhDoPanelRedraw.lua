@@ -12,8 +12,8 @@ local max = math.max;
 local xpcall = xpcall;
 
 local InCombatLockdown = InCombatLockdown;
-local issecretvalue = issecretvalue;
 local RemovePrivateAuraAnchor = C_UnitAuras and C_UnitAuras.RemovePrivateAuraAnchor;
+local CreateFrame = CreateFrame;
 
 local VUHDO_getFont;
 local VUHDO_setFontWithFallback;
@@ -37,33 +37,53 @@ local VUHDO_buildAllIndicatorAlphaChains;
 local VUHDO_buildBooleanOverlaysForButton;
 local VUHDO_buildTargetIndicatorAlphaChains;
 local VUHDO_resetButtonVisuals;
+local VUHDO_getSideBarWidthLeft;
+local VUHDO_getSideBarWidthRight;
 
-local VUHDO_STD_BACKDROP = nil;
-local VUHDO_DESIGN_BACKDROP = nil;
-local VUHDO_CONFIG;
-local VUHDO_INDICATOR_CONFIG;
+VUHDO_PREDICTION_ANCHOR_STATS = nil;
 
-local VUHDO_STATUSBAR_LEFT_TO_RIGHT;
-local VUHDO_STATUSBAR_RIGHT_TO_LEFT;
-local VUHDO_STATUSBAR_BOTTOM_TO_TOP;
-local VUHDO_STATUSBAR_TOP_TO_BOTTOM;
+local VUHDO_IMMEDIATE = Enum.StatusBarInterpolation.Immediate;
 
-local VUHDO_PRIVATE_AURA_ANCHOR_FACTORS = VUHDO_PRIVATE_AURA_ANCHOR_FACTORS;
+local VUHDO_PREDICTION_SPAN_EDGES = {
+	["RIGHT"] = {
+		["near"] = { "TOPLEFT", "BOTTOMLEFT" },
+		["far"] = { "TOPRIGHT", "BOTTOMRIGHT" },
+		["isVertical"] = false,
+		["isReverseFill"] = true,
+	},
+	["LEFT"] = {
+		["near"] = { "TOPRIGHT", "BOTTOMRIGHT" },
+		["far"] = { "TOPLEFT", "BOTTOMLEFT" },
+		["isVertical"] = false,
+		["isReverseFill"] = false,
+	},
+	["UP"] = {
+		["near"] = { "BOTTOMLEFT", "BOTTOMRIGHT" },
+		["far"] = { "TOPLEFT", "TOPRIGHT" },
+		["isVertical"] = true,
+		["isReverseFill"] = true,
+	},
+	["DOWN"] = {
+		["near"] = { "TOPLEFT", "TOPRIGHT" },
+		["far"] = { "BOTTOMLEFT", "BOTTOMRIGHT" },
+		["isVertical"] = true,
+		["isReverseFill"] = false,
+	},
+};
 
-local sPanelConfig = { };
-local sButtonInitSemaphores = { };
-local sButtonPositionSemaphores = { };
-local sRedrawAllPanelsSemaphore;
-local sRedrawPanelSemaphores = { };
-local sPanelCompletionTracker;
-local sWaitingAllPanelsRedraws = { };
-local sWaitingIndividualRedraws = { };
-local sQueuedAllPanelsRequests = { };
-local sQueuedIndividualRequests = { };
-local sIsManaBouquet = { };
-local sPanelInitRevision = { };
+local VUHDO_PREDICTION_SPAN_FORWARD = {
+	["HORIZONTAL"] = "RIGHT",
+	["HORIZONTAL_INV"] = "LEFT",
+	["VERTICAL"] = "UP",
+	["VERTICAL_INV"] = "DOWN",
+};
 
-local sSecretsEnabled = VUHDO_SECRETS_ENABLED;
+local VUHDO_PREDICTION_SPAN_BACKWARD = {
+	["HORIZONTAL"] = "LEFT",
+	["HORIZONTAL_INV"] = "RIGHT",
+	["VERTICAL"] = "DOWN",
+	["VERTICAL_INV"] = "UP",
+};
 
 local VUHDO_SEMAPHORE_CONFIG = {
 	["BUTTON_INIT_TIME_US"] = 1200,
@@ -92,9 +112,44 @@ local VUHDO_SEMAPHORE_CONFIG = {
 	["MEDIUM_RAID_PANEL_SAFETY"] = 1.25,
 	["LARGE_RAID_PANEL_MULTIPLIER"] = 1.3, -- large raid (26+) multiplier
 };
+
+local VUHDO_STD_BACKDROP = nil;
+local VUHDO_DESIGN_BACKDROP = nil;
+local VUHDO_CONFIG;
+local VUHDO_INDICATOR_CONFIG;
+
+local VUHDO_STATUSBAR_LEFT_TO_RIGHT;
+local VUHDO_STATUSBAR_RIGHT_TO_LEFT;
+local VUHDO_STATUSBAR_BOTTOM_TO_TOP;
+local VUHDO_STATUSBAR_TOP_TO_BOTTOM;
+
+local VUHDO_PRIVATE_AURA_ANCHOR_FACTORS = VUHDO_PRIVATE_AURA_ANCHOR_FACTORS;
+
+local sPanelConfig = { };
+local sButtonInitSemaphores = { };
+local sButtonPositionSemaphores = { };
+local sRedrawAllPanelsSemaphore;
+local sRedrawPanelSemaphores = { };
+local sPanelCompletionTracker;
+local sWaitingAllPanelsRedraws = { };
+local sWaitingIndividualRedraws = { };
+local sQueuedAllPanelsRequests = { };
+local sQueuedIndividualRequests = { };
+local sIsManaBouquet = { };
+local sPanelInitRevision = { };
+
+local sSecretsEnabled = VUHDO_SECRETS_ENABLED;
+
 local sButtonInitTimeouts = { };
 local sButtonPositionTimeouts = { };
 local sPanelRedrawTimeout = 0;
+
+local sGrowthOffsets = {
+	["LEFT"] = { -1, 0 },
+	["RIGHT"] = { 1, 0 },
+	["UP"] = { 0, 1 },
+	["DOWN"] = { 0, -1 },
+};
 
 
 
@@ -118,15 +173,6 @@ end
 
 
 
-local sGrowthOffsets = {
-	["LEFT"] = { -1, 0 },
-	["RIGHT"] = { 1, 0 },
-	["UP"] = { 0, 1 },
-	["DOWN"] = { 0, -1 },
-};
-
-
-
 --
 function VUHDO_panelRedrawInitLocalOverrides()
 
@@ -144,6 +190,8 @@ function VUHDO_panelRedrawInitLocalOverrides()
 	VUHDO_updateAuraAnchorHost = _G["VUHDO_updateAuraAnchorHost"];
 	VUHDO_layoutHealthBarGeometry = _G["VUHDO_layoutHealthBarGeometry"];
 	VUHDO_hasManaOffsetBar = _G["VUHDO_hasManaOffsetBar"];
+	VUHDO_getSideBarWidthLeft = _G["VUHDO_getSideBarWidthLeft"];
+	VUHDO_getSideBarWidthRight = _G["VUHDO_getSideBarWidthRight"];
 	VUHDO_getPixelPerfectBorderEdgeSize = _G["VUHDO_getPixelPerfectBorderEdgeSize"];
 	VUHDO_getPixelPerfectBorderInsets = _G["VUHDO_getPixelPerfectBorderInsets"];
 	VUHDO_getDynamicModelArray = _G["VUHDO_getDynamicModelArray"];
@@ -880,7 +928,7 @@ do
 	--
 	function VUHDO_initIncomingOrShieldBar(aButton, aBarNum, aPanelNum)
 
-		VUHDO_invalidateShieldMaskAnchors(aButton);
+		VUHDO_invalidatePredictionAnchors(aButton);
 
 		tBar = VUHDO_getHealthBar(aButton, aBarNum);
 
@@ -1537,10 +1585,11 @@ end
 
 
 --
-function VUHDO_invalidateShieldMaskAnchors(aButton)
+function VUHDO_invalidatePredictionAnchors(aButton)
 
-	VUHDO_getHealthBar(aButton, 19)["maskOrientation"] = nil;
-	VUHDO_getHealthBar(aButton, 20)["maskOrientation"] = nil;
+	VUHDO_getHealthBar(aButton, 6)["anchorOrientation"] = nil;
+	VUHDO_getHealthBar(aButton, 19)["anchorOrientation"] = nil;
+	VUHDO_getHealthBar(aButton, 20)["anchorOrientation"] = nil;
 
 	return;
 
@@ -1550,35 +1599,19 @@ end
 
 do
 	--
-	local tIncBar;
-	local tShieldBar;
-	local tOrientation;
-	local tHealthHeight;
-	local function VUHDO_layoutPredictionBarHeights(aButton, aPanelNum)
+	local function VUHDO_registerPredictionSpan(aButton, aSpanBar)
 
-		if VUHDO_INDICATOR_CONFIG[aPanelNum]["CUSTOM"]["HEALTH_BAR"]["invertGrowth"] then
-			return;
+		if not aButton["predictionSpanList"] then
+			aButton["predictionSpanList"] = { };
 		end
 
-		tOrientation = VUHDO_getStatusbarOrientationString("HEALTH_BAR", aPanelNum);
-
-		if "VERTICAL" ~= tOrientation and "VERTICAL_INV" ~= tOrientation then
-			return;
+		for tSpanIdx = 1, #aButton["predictionSpanList"] do
+			if aButton["predictionSpanList"][tSpanIdx] == aSpanBar then
+				return;
+			end
 		end
 
-		tIncBar = VUHDO_getHealthBar(aButton, 6);
-		tShieldBar = VUHDO_getHealthBar(aButton, 19);
-
-		if not tIncBar or not tShieldBar then
-			return;
-		end
-
-		tHealthHeight = (aButton["regularHeight"] or 0) - (aButton["manaBarLayoutHeight"] or 0);
-
-		if tHealthHeight > 0 then
-			VUHDO_PixelUtil.SetHeight(tIncBar, tHealthHeight);
-			VUHDO_PixelUtil.SetHeight(tShieldBar, tHealthHeight);
-		end
+		tinsert(aButton["predictionSpanList"], aSpanBar);
 
 		return;
 
@@ -1587,21 +1620,233 @@ do
 
 
 	--
-	function VUHDO_refreshShieldMaskAnchors(aButton, aPanelNum)
+	local function VUHDO_registerPredictionRuler(aButton, aRulerBar)
 
-		if not VUHDO_hasManaOffsetBar(aButton) then
-			return;
+		if not aButton["predictionRulerList"] then
+			aButton["predictionRulerList"] = { };
 		end
 
-		VUHDO_layoutPredictionBarHeights(aButton, aPanelNum);
+		for tRulerIdx = 1, #aButton["predictionRulerList"] do
+			if aButton["predictionRulerList"][tRulerIdx] == aRulerBar then
+				return;
+			end
+		end
 
-		VUHDO_invalidateShieldMaskAnchors(aButton);
-		VUHDO_updateIncShieldMaskAnchors(aButton, aPanelNum);
-		VUHDO_updateOvershieldMaskAnchors(aButton, aPanelNum);
+		tinsert(aButton["predictionRulerList"], aRulerBar);
 
 		return;
 
 	end
+
+
+
+	--
+	local tSpanEntry;
+	local tSpanBar;
+	local tRulerBar;
+	local tBgBar;
+	local tButtonName;
+	function VUHDO_getOrCreatePredictionSpan(aButton, aBarNumber, anIsVertical)
+
+		if not aButton["predictionSpanEntries"] then
+			aButton["predictionSpanEntries"] = { };
+		end
+
+		tSpanEntry = aButton["predictionSpanEntries"][aBarNumber];
+
+		if not tSpanEntry then
+			tBgBar = VUHDO_getHealthBar(aButton, 3);
+			tButtonName = aButton:GetName();
+			tSpanBar = CreateFrame("StatusBar", tButtonName .. "BgBarPrdSpan" .. tostring(aBarNumber), tBgBar, "VuhDoSpanBarTemplate");
+
+			tSpanBar:SetAlpha(0);
+			tSpanBar:EnableMouse(false);
+
+			tSpanEntry = { ["span"] = tSpanBar };
+
+			aButton["predictionSpanEntries"][aBarNumber] = tSpanEntry;
+
+			VUHDO_registerPredictionSpan(aButton, tSpanBar);
+		end
+
+		if anIsVertical and not tSpanEntry["ruler"] then
+			tBgBar = VUHDO_getHealthBar(aButton, 3);
+			tButtonName = aButton:GetName();
+
+			tRulerBar = CreateFrame("StatusBar", tButtonName .. "BgBarPrdRuler" .. tostring(aBarNumber), tBgBar, "VuhDoSpanBarTemplate");
+
+			tRulerBar:SetAlpha(0);
+			tRulerBar:EnableMouse(false);
+
+			tSpanEntry["ruler"] = tRulerBar;
+
+			VUHDO_registerPredictionRuler(aButton, tRulerBar);
+		end
+
+		return tSpanEntry;
+
+	end
+end
+
+
+
+do
+	--
+	local tSpanEntry;
+	local tSpanBar;
+	local tRulerBar;
+	local tEdges;
+	local tEdgePoints;
+	local tSpanTexture;
+	local tRulerTexture;
+	local tLossPerc;
+	local tManaInset;
+	local tRegularHeight;
+	local tSpanLength;
+	local tIsVertical;
+	function VUHDO_layoutPredictionSpan(aButton, aPanelNum, aTargetBar, aBarNumber, anEdgeRegion, aDirection, anIsFarEdge)
+
+		if not VUHDO_hasManaOffsetBar(aButton) or not anEdgeRegion or not aDirection then
+			return;
+		end
+
+		tEdges = VUHDO_PREDICTION_SPAN_EDGES[aDirection];
+
+		if not tEdges then
+			return;
+		end
+
+		tEdgePoints = anIsFarEdge and tEdges["far"] or tEdges["near"];
+		tIsVertical = tEdges["isVertical"];
+
+		tSpanEntry = VUHDO_getOrCreatePredictionSpan(aButton, aBarNumber, tIsVertical);
+
+		tSpanBar = tSpanEntry["span"];
+		tRulerBar = tSpanEntry["ruler"];
+
+		tSpanBar:ClearAllPoints();
+
+		tSpanBar:SetOrientation(tIsVertical and "VERTICAL" or "HORIZONTAL");
+		tSpanBar:SetReverseFill(tEdges["isReverseFill"]);
+		tSpanBar:SetMinMaxValues(0, 1);
+
+		tLossPerc = aButton["predictionSpanLoss"] or 0;
+
+		if aButton["isHealthLossAnchored"] == false then
+			tLossPerc = 0;
+		end
+
+		tSpanBar:SetValue(tLossPerc, VUHDO_IMMEDIATE);
+
+		VUHDO_PixelUtil.SetPoint(tSpanBar, tEdges["near"][1], anEdgeRegion, tEdgePoints[1], 0, 0);
+		VUHDO_PixelUtil.SetPoint(tSpanBar, tEdges["near"][2], anEdgeRegion, tEdgePoints[2], 0, 0);
+
+		if tIsVertical and tRulerBar then
+			tRulerBar:ClearAllPoints();
+
+			tRulerBar:SetOrientation("VERTICAL");
+			tRulerBar:SetReverseFill(tEdges["isReverseFill"]);
+
+			VUHDO_PixelUtil.SetPoint(tRulerBar, tEdges["near"][1], anEdgeRegion, tEdgePoints[1], 0, 0);
+			VUHDO_PixelUtil.SetPoint(tRulerBar, tEdges["near"][2], anEdgeRegion, tEdgePoints[2], 0, 0);
+
+			tRegularHeight = aButton["regularHeight"] or 0;
+			VUHDO_PixelUtil.SetHeight(tRulerBar, tRegularHeight);
+			tRulerBar:SetMinMaxValues(0, tRegularHeight);
+
+			tManaInset = aButton["manaBarLayoutHeight"] or 0;
+			tRulerBar:SetValue(tManaInset, VUHDO_IMMEDIATE);
+
+			tRulerTexture = tRulerBar:GetStatusBarTexture();
+
+			VUHDO_PixelUtil.SetPoint(tSpanBar, tEdges["far"][1], tRulerTexture, tEdges["near"][1], 0, 0);
+			VUHDO_PixelUtil.SetPoint(tSpanBar, tEdges["far"][2], tRulerTexture, tEdges["near"][2], 0, 0);
+		elseif not tIsVertical then
+			tSpanLength = sPanelConfig[aPanelNum]["barWidth"];
+
+			VUHDO_PixelUtil.SetWidth(tSpanBar, tSpanLength);
+		end
+
+		tSpanTexture = tSpanBar:GetStatusBarTexture();
+
+		aTargetBar:ClearAllPoints();
+
+		VUHDO_PixelUtil.SetPoint(aTargetBar, tEdges["near"][1], anEdgeRegion, tEdgePoints[1], 0, 0);
+		VUHDO_PixelUtil.SetPoint(aTargetBar, tEdges["near"][2], anEdgeRegion, tEdgePoints[2], 0, 0);
+		VUHDO_PixelUtil.SetPoint(aTargetBar, tEdges["far"][1], tSpanTexture, tEdges["near"][1], 0, 0);
+		VUHDO_PixelUtil.SetPoint(aTargetBar, tEdges["far"][2], tSpanTexture, tEdges["near"][2], 0, 0);
+
+		return;
+
+	end
+end
+
+
+
+do
+	--
+	local tSpanBar;
+	local tSpanInterpolation;
+	function VUHDO_setPredictionSpanLoss(aButton, aLossPerc, anInterpolation)
+
+		if not aButton["predictionSpanList"] then
+			return;
+		end
+
+		aButton["predictionSpanLoss"] = aLossPerc;
+		tSpanInterpolation = anInterpolation or VUHDO_IMMEDIATE;
+
+		for tSpanIdx = 1, #aButton["predictionSpanList"] do
+			tSpanBar = aButton["predictionSpanList"][tSpanIdx];
+			tSpanBar:SetValue(aLossPerc, tSpanInterpolation);
+		end
+
+		return;
+
+	end
+
+end
+
+
+
+do
+	--
+	local tRulerBar;
+	function VUHDO_setPredictionSpanManaInset(aButton, aManaInset)
+
+		if not aButton["predictionRulerList"] then
+			return;
+		end
+
+		for tRulerIdx = 1, #aButton["predictionRulerList"] do
+			tRulerBar = aButton["predictionRulerList"][tRulerIdx];
+			tRulerBar:SetValue(aManaInset, VUHDO_IMMEDIATE);
+		end
+
+		return;
+
+	end
+
+end
+
+
+
+--
+function VUHDO_refreshPredictionAnchors(aButton, aPanelNum, anIsForced)
+
+	if not VUHDO_hasManaOffsetBar(aButton) then
+		return;
+	end
+
+	if anIsForced then
+		VUHDO_invalidatePredictionAnchors(aButton);
+	end
+
+	VUHDO_updateIncShieldPredictionAnchors(aButton, aPanelNum);
+	VUHDO_updateOvershieldPredictionAnchors(aButton, aPanelNum);
+
+	return;
+
 end
 
 
@@ -1616,17 +1861,19 @@ do
 	local tOrientation;
 	local tIsInverted;
 	local tOvershieldOrientation;
-	local tIsFlipped;
 	local tHealthTexture;
 	local tOffsetTexture;
 	local tClipFrame;
-	local tUseIncExtension;
+	local tIsIncomingEnabled;
 	local tHealthLevel;
-	local tHealthWidth;
-	local tHealthHeight;
-	function VUHDO_updateOvershieldMaskAnchors(aButton, aPanelNum)
+	local tAnchorStats;
+	local tForwardDirection;
+	local tBackwardDirection;
+	local tOvershieldDirection;
+	local tIsOvershieldReverseFill;
+	function VUHDO_updateOvershieldPredictionAnchors(aButton, aPanelNum)
 
-		if not sSecretsEnabled then
+		if not sSecretsEnabled or not VUHDO_hasManaOffsetBar(aButton) then
 			return;
 		end
 
@@ -1639,6 +1886,12 @@ do
 			return;
 		end
 
+		tAnchorStats = VUHDO_PREDICTION_ANCHOR_STATS;
+
+		if tAnchorStats then
+			tAnchorStats["overshieldCalls"] = (tAnchorStats["overshieldCalls"] or 0) + 1;
+		end
+
 		tClipFrame = tOvershieldBar:GetParent();
 
 		tOrientation = VUHDO_getStatusbarOrientationString("HEALTH_BAR", aPanelNum);
@@ -1649,28 +1902,26 @@ do
 		tOvershieldOrientation = VUHDO_calculateDerivedOrientation(tOrientation, VUHDO_INDICATOR_CONFIG[aPanelNum]["CUSTOM"]["HEALTH_BAR"]["turnAxisOvershield"]);
 		tShouldMirror = tOvershieldOrientation ~= tOrientation;
 
-		tUseIncExtension = (VUHDO_CONFIG["SHOW_INCOMING"] or VUHDO_CONFIG["SHOW_OWN_INCOMING"]) and tIncBar:IsShown();
+		tIsIncomingEnabled = (VUHDO_CONFIG["SHOW_INCOMING"] or VUHDO_CONFIG["SHOW_OWN_INCOMING"]) and tIncBar:IsShown();
 
-		tHealthWidth = tHealthBar:GetWidth();
-		tHealthHeight = tHealthBar:GetHeight();
 		tHealthLevel = tHealthBar:GetFrameLevel();
 
-		if not (sSecretsEnabled and (issecretvalue(tHealthWidth) or issecretvalue(tHealthHeight))) then
-			if tOvershieldBar["maskOrientation"] == tOrientation and tOvershieldBar["maskIsInverted"] == tIsInverted
-				and tOvershieldBar["maskIsMirrored"] == tShouldMirror and tOvershieldBar["maskIsIncoming"] == tUseIncExtension
-				and tOvershieldBar["maskHealthWidth"] == tHealthWidth and tOvershieldBar["maskHealthHeight"] == tHealthHeight
-				and tOvershieldBar["maskHealthLevel"] == tHealthLevel then
-				return;
-			end
+		if tOvershieldBar["anchorOrientation"] == tOrientation and tOvershieldBar["anchorIsInverted"] == tIsInverted
+			and tOvershieldBar["anchorIsMirrored"] == tShouldMirror and tOvershieldBar["anchorIsIncoming"] == tIsIncomingEnabled
+			and tOvershieldBar["anchorHealthLevel"] == tHealthLevel
+			and tClipFrame:GetFrameLevel() == tHealthLevel + 2 then
+			return;
 		end
 
-		tOvershieldBar["maskOrientation"] = tOrientation;
-		tOvershieldBar["maskIsInverted"] = tIsInverted;
-		tOvershieldBar["maskIsMirrored"] = tShouldMirror;
-		tOvershieldBar["maskIsIncoming"] = tUseIncExtension;
-		tOvershieldBar["maskHealthWidth"] = tHealthWidth;
-		tOvershieldBar["maskHealthHeight"] = tHealthHeight;
-		tOvershieldBar["maskHealthLevel"] = tHealthLevel;
+		if tAnchorStats then
+			tAnchorStats["overshieldRebuilds"] = (tAnchorStats["overshieldRebuilds"] or 0) + 1;
+		end
+
+		tOvershieldBar["anchorOrientation"] = tOrientation;
+		tOvershieldBar["anchorIsInverted"] = tIsInverted;
+		tOvershieldBar["anchorIsMirrored"] = tShouldMirror;
+		tOvershieldBar["anchorIsIncoming"] = tIsIncomingEnabled;
+		tOvershieldBar["anchorHealthLevel"] = tHealthLevel;
 
 		tClipFrame:ClearAllPoints();
 
@@ -1712,134 +1963,63 @@ do
 		end
 
 		if not tShouldMirror then
+			tIsOvershieldReverseFill = tIsInverted == (tOvershieldOrientation == "HORIZONTAL_INV" or tOvershieldOrientation == "VERTICAL_INV");
+
+			VUHDO_setStatusBarOrientation(tOvershieldBar, VUHDO_getStatusbarOrientationNumber("HEALTH_BAR", aPanelNum));
+			tOvershieldBar:SetReverseFill(tIsOvershieldReverseFill);
+
 			tOffsetBar:ClearAllPoints();
 			tOffsetBar:SetAllPoints(tHealthBar);
 			tOffsetBar:SetOrientation(tOvershieldBar:GetOrientation());
-			tOffsetBar:SetReverseFill(tOvershieldBar:GetReverseFill());
+			tOffsetBar:SetReverseFill(tIsOvershieldReverseFill);
 		end
 
+		tForwardDirection = VUHDO_PREDICTION_SPAN_FORWARD[tOrientation];
+		tBackwardDirection = VUHDO_PREDICTION_SPAN_BACKWARD[tOrientation];
+
 		if tShouldMirror and not tIsInverted then
-			tOffsetBar:ClearAllPoints();
-			VUHDO_PixelUtil.SetSize(tOffsetBar, tHealthWidth, tHealthHeight);
+			VUHDO_layoutPredictionSpan(aButton, aPanelNum, tOffsetBar, 23, tHealthTexture, tForwardDirection, true);
 			tOffsetBar:SetOrientation(tHealthBar:GetOrientation());
 			tOffsetBar:SetReverseFill(tHealthBar:GetReverseFill());
 
-			tOvershieldBar:ClearAllPoints();
-			VUHDO_PixelUtil.SetSize(tOvershieldBar, tHealthWidth, tHealthHeight);
+			tOffsetTexture = tOffsetBar:GetStatusBarTexture();
+
+			VUHDO_layoutPredictionSpan(aButton, aPanelNum, tOvershieldBar, 20, tOffsetTexture, tBackwardDirection, false);
 			tOvershieldBar:SetOrientation(tHealthBar:GetOrientation());
 			tOvershieldBar:SetReverseFill(tHealthBar:GetReverseFill());
-
-			if tOrientation == "HORIZONTAL" then
-				VUHDO_PixelUtil.SetPoint(tOffsetBar, "TOPLEFT", tHealthTexture, "TOPRIGHT", 0, 0);
-				VUHDO_PixelUtil.SetPoint(tOffsetBar, "BOTTOMLEFT", tHealthTexture, "BOTTOMRIGHT", 0, 0);
-
-				tOffsetTexture = tOffsetBar:GetStatusBarTexture();
-
-				VUHDO_PixelUtil.SetPoint(tOvershieldBar, "TOPRIGHT", tOffsetTexture, "TOPRIGHT", 0, 0);
-				VUHDO_PixelUtil.SetPoint(tOvershieldBar, "BOTTOMRIGHT", tOffsetTexture, "BOTTOMRIGHT", 0, 0);
-			elseif tOrientation == "HORIZONTAL_INV" then
-				VUHDO_PixelUtil.SetPoint(tOffsetBar, "TOPRIGHT", tHealthTexture, "TOPLEFT", 0, 0);
-				VUHDO_PixelUtil.SetPoint(tOffsetBar, "BOTTOMRIGHT", tHealthTexture, "BOTTOMLEFT", 0, 0);
-
-				tOffsetTexture = tOffsetBar:GetStatusBarTexture();
-
-				VUHDO_PixelUtil.SetPoint(tOvershieldBar, "TOPLEFT", tOffsetTexture, "TOPLEFT", 0, 0);
-				VUHDO_PixelUtil.SetPoint(tOvershieldBar, "BOTTOMLEFT", tOffsetTexture, "BOTTOMLEFT", 0, 0);
-			elseif tOrientation == "VERTICAL" then
-				VUHDO_PixelUtil.SetPoint(tOffsetBar, "BOTTOMLEFT", tHealthTexture, "TOPLEFT", 0, 0);
-				VUHDO_PixelUtil.SetPoint(tOffsetBar, "BOTTOMRIGHT", tHealthTexture, "TOPRIGHT", 0, 0);
-
-				tOffsetTexture = tOffsetBar:GetStatusBarTexture();
-
-				VUHDO_PixelUtil.SetPoint(tOvershieldBar, "TOPLEFT", tOffsetTexture, "TOPLEFT", 0, 0);
-				VUHDO_PixelUtil.SetPoint(tOvershieldBar, "TOPRIGHT", tOffsetTexture, "TOPRIGHT", 0, 0);
-			else
-				VUHDO_PixelUtil.SetPoint(tOffsetBar, "TOPLEFT", tHealthTexture, "BOTTOMLEFT", 0, 0);
-				VUHDO_PixelUtil.SetPoint(tOffsetBar, "TOPRIGHT", tHealthTexture, "BOTTOMRIGHT", 0, 0);
-
-				tOffsetTexture = tOffsetBar:GetStatusBarTexture();
-
-				VUHDO_PixelUtil.SetPoint(tOvershieldBar, "BOTTOMLEFT", tOffsetTexture, "BOTTOMLEFT", 0, 0);
-				VUHDO_PixelUtil.SetPoint(tOvershieldBar, "BOTTOMRIGHT", tOffsetTexture, "BOTTOMRIGHT", 0, 0);
-			end
 		elseif tShouldMirror then
-			tOffsetBar:ClearAllPoints();
-			VUHDO_PixelUtil.SetSize(tOffsetBar, tHealthWidth, tHealthHeight);
+			VUHDO_layoutPredictionSpan(aButton, aPanelNum, tOffsetBar, 23, tHealthTexture, tBackwardDirection, false);
 			tOffsetBar:SetOrientation(tHealthBar:GetOrientation());
 
-			tOvershieldBar:ClearAllPoints();
-			VUHDO_PixelUtil.SetSize(tOvershieldBar, tHealthWidth, tHealthHeight);
-			tOvershieldBar:SetOrientation(tHealthBar:GetOrientation());
+			tOffsetTexture = tOffsetBar:GetStatusBarTexture();
 
-			if tOrientation == "HORIZONTAL" then
+			if tOrientation == "HORIZONTAL" or tOrientation == "VERTICAL" then
 				tOffsetBar:SetReverseFill(true);
-				VUHDO_PixelUtil.SetPoint(tOffsetBar, "TOPRIGHT", tHealthTexture, "TOPRIGHT", 0, 0);
-				VUHDO_PixelUtil.SetPoint(tOffsetBar, "BOTTOMRIGHT", tHealthTexture, "BOTTOMRIGHT", 0, 0);
-
-				tOffsetTexture = tOffsetBar:GetStatusBarTexture();
-
-				tOvershieldBar:SetReverseFill(true);
-				VUHDO_PixelUtil.SetPoint(tOvershieldBar, "TOPLEFT", tOffsetTexture, "TOPLEFT", 0, 0);
-				VUHDO_PixelUtil.SetPoint(tOvershieldBar, "BOTTOMLEFT", tOffsetTexture, "BOTTOMLEFT", 0, 0);
-			elseif tOrientation == "HORIZONTAL_INV" then
-				tOffsetBar:SetReverseFill(false);
-				VUHDO_PixelUtil.SetPoint(tOffsetBar, "TOPLEFT", tHealthTexture, "TOPLEFT", 0, 0);
-				VUHDO_PixelUtil.SetPoint(tOffsetBar, "BOTTOMLEFT", tHealthTexture, "BOTTOMLEFT", 0, 0);
-
-				tOffsetTexture = tOffsetBar:GetStatusBarTexture();
-
-				tOvershieldBar:SetReverseFill(false);
-				VUHDO_PixelUtil.SetPoint(tOvershieldBar, "TOPRIGHT", tOffsetTexture, "TOPRIGHT", 0, 0);
-				VUHDO_PixelUtil.SetPoint(tOvershieldBar, "BOTTOMRIGHT", tOffsetTexture, "BOTTOMRIGHT", 0, 0);
-			elseif tOrientation == "VERTICAL" then
-				tOffsetBar:SetReverseFill(true);
-				VUHDO_PixelUtil.SetPoint(tOffsetBar, "TOPLEFT", tHealthTexture, "TOPLEFT", 0, 0);
-				VUHDO_PixelUtil.SetPoint(tOffsetBar, "TOPRIGHT", tHealthTexture, "TOPRIGHT", 0, 0);
-
-				tOffsetTexture = tOffsetBar:GetStatusBarTexture();
-
-				tOvershieldBar:SetReverseFill(true);
-				VUHDO_PixelUtil.SetPoint(tOvershieldBar, "BOTTOMLEFT", tOffsetTexture, "BOTTOMLEFT", 0, 0);
-				VUHDO_PixelUtil.SetPoint(tOvershieldBar, "BOTTOMRIGHT", tOffsetTexture, "BOTTOMRIGHT", 0, 0);
 			else
 				tOffsetBar:SetReverseFill(false);
-				VUHDO_PixelUtil.SetPoint(tOffsetBar, "BOTTOMLEFT", tHealthTexture, "BOTTOMLEFT", 0, 0);
-				VUHDO_PixelUtil.SetPoint(tOffsetBar, "BOTTOMRIGHT", tHealthTexture, "BOTTOMRIGHT", 0, 0);
-
-				tOffsetTexture = tOffsetBar:GetStatusBarTexture();
-
-				tOvershieldBar:SetReverseFill(false);
-				VUHDO_PixelUtil.SetPoint(tOvershieldBar, "TOPLEFT", tOffsetTexture, "TOPLEFT", 0, 0);
-				VUHDO_PixelUtil.SetPoint(tOvershieldBar, "TOPRIGHT", tOffsetTexture, "TOPRIGHT", 0, 0);
 			end
-		elseif not tUseIncExtension then
+
+			VUHDO_layoutPredictionSpan(aButton, aPanelNum, tOvershieldBar, 20, tOffsetTexture, tForwardDirection, false);
+			tOvershieldBar:SetOrientation(tHealthBar:GetOrientation());
+
+			if tOrientation == "HORIZONTAL" or tOrientation == "VERTICAL" then
+				tOvershieldBar:SetReverseFill(true);
+			else
+				tOvershieldBar:SetReverseFill(false);
+			end
+		elseif not tIsIncomingEnabled then
 			tOvershieldBar:ClearAllPoints();
 			tOvershieldBar:SetAllPoints(tHealthBar);
 		else
 			tOffsetTexture = tOffsetBar:GetStatusBarTexture();
 
-			tIsFlipped = (tOvershieldOrientation == "HORIZONTAL_INV" or tOvershieldOrientation == "VERTICAL_INV") ~= tIsInverted;
-
-			tOvershieldBar:ClearAllPoints();
-			VUHDO_PixelUtil.SetSize(tOvershieldBar, tHealthWidth, tHealthHeight);
-
 			if tOrientation == "HORIZONTAL" or tOrientation == "HORIZONTAL_INV" then
-				if tIsFlipped then
-					VUHDO_PixelUtil.SetPoint(tOvershieldBar, "TOPLEFT", tOffsetTexture, "TOPRIGHT", 0, 0);
-					VUHDO_PixelUtil.SetPoint(tOvershieldBar, "BOTTOMLEFT", tOffsetTexture, "BOTTOMRIGHT", 0, 0);
-				else
-					VUHDO_PixelUtil.SetPoint(tOvershieldBar, "TOPRIGHT", tOffsetTexture, "TOPLEFT", 0, 0);
-					VUHDO_PixelUtil.SetPoint(tOvershieldBar, "BOTTOMRIGHT", tOffsetTexture, "BOTTOMLEFT", 0, 0);
-				end
+				tOvershieldDirection = tIsOvershieldReverseFill and "LEFT" or "RIGHT";
 			else
-				if tIsFlipped then
-					VUHDO_PixelUtil.SetPoint(tOvershieldBar, "BOTTOMLEFT", tOffsetTexture, "TOPLEFT", 0, 0);
-					VUHDO_PixelUtil.SetPoint(tOvershieldBar, "BOTTOMRIGHT", tOffsetTexture, "TOPRIGHT", 0, 0);
-				else
-					VUHDO_PixelUtil.SetPoint(tOvershieldBar, "TOPLEFT", tOffsetTexture, "BOTTOMLEFT", 0, 0);
-					VUHDO_PixelUtil.SetPoint(tOvershieldBar, "TOPRIGHT", tOffsetTexture, "BOTTOMRIGHT", 0, 0);
-				end
+				tOvershieldDirection = tIsOvershieldReverseFill and "DOWN" or "UP";
 			end
+
+			VUHDO_layoutPredictionSpan(aButton, aPanelNum, tOvershieldBar, 20, tOffsetTexture, tOvershieldDirection, true);
 		end
 
 		return;
@@ -1856,17 +2036,18 @@ do
 	local tShieldBar;
 	local tClipFrame;
 	local tHealthTexture;
+	local tIncTexture;
 	local tOrientation;
 	local tIsInverted;
 	local tIsFlipped;
-	local tIncTexture;
-	local tHealthLevel;
-	local tHealthWidth;
-	local tHealthHeight;
 	local tIsIncomingEnabled;
-	function VUHDO_updateIncShieldMaskAnchors(aButton, aPanelNum)
+	local tHealthLevel;
+	local tAnchorStats;
+	local tForwardDirection;
+	local tBackwardDirection;
+	function VUHDO_updateIncShieldPredictionAnchors(aButton, aPanelNum)
 
-		if not sSecretsEnabled then
+		if not VUHDO_hasManaOffsetBar(aButton) then
 			return;
 		end
 
@@ -1878,32 +2059,43 @@ do
 			return;
 		end
 
+		tAnchorStats = VUHDO_PREDICTION_ANCHOR_STATS;
+
+		if tAnchorStats then
+			tAnchorStats["incShieldCalls"] = (tAnchorStats["incShieldCalls"] or 0) + 1;
+		end
+
 		tClipFrame = tIncBar:GetParent();
 		tHealthTexture = tHealthBar:GetStatusBarTexture();
 
 		tOrientation = VUHDO_getStatusbarOrientationString("HEALTH_BAR", aPanelNum);
 		tIsInverted = VUHDO_INDICATOR_CONFIG[aPanelNum]["CUSTOM"]["HEALTH_BAR"]["invertGrowth"];
-		tIsIncomingEnabled = VUHDO_CONFIG["SHOW_INCOMING"] or VUHDO_CONFIG["SHOW_OWN_INCOMING"];
-
-		tHealthWidth = tHealthBar:GetWidth();
-		tHealthHeight = tHealthBar:GetHeight();
+		tIsIncomingEnabled = (VUHDO_CONFIG["SHOW_INCOMING"] or VUHDO_CONFIG["SHOW_OWN_INCOMING"]) and tIncBar:IsShown();
 		tHealthLevel = tHealthBar:GetFrameLevel();
 
-		if not (sSecretsEnabled and (issecretvalue(tHealthWidth) or issecretvalue(tHealthHeight))) then
-			if tShieldBar["maskOrientation"] == tOrientation and tShieldBar["maskIsInverted"] == tIsInverted
-				and tShieldBar["maskIsIncoming"] == tIsIncomingEnabled
-				and tShieldBar["maskHealthWidth"] == tHealthWidth and tShieldBar["maskHealthHeight"] == tHealthHeight
-				and tShieldBar["maskHealthLevel"] == tHealthLevel then
-				return;
-			end
+		if tIncBar["anchorOrientation"] == tOrientation and tIncBar["anchorIsInverted"] == tIsInverted
+			and tIncBar["anchorIsIncoming"] == tIsIncomingEnabled
+			and tIncBar["anchorHealthLevel"] == tHealthLevel
+			and (not tClipFrame or tClipFrame:GetFrameLevel() == tHealthLevel + 2) then
+			return;
 		end
 
-		tShieldBar["maskOrientation"] = tOrientation;
-		tShieldBar["maskIsInverted"] = tIsInverted;
-		tShieldBar["maskIsIncoming"] = tIsIncomingEnabled;
-		tShieldBar["maskHealthWidth"] = tHealthWidth;
-		tShieldBar["maskHealthHeight"] = tHealthHeight;
-		tShieldBar["maskHealthLevel"] = tHealthLevel;
+		if tAnchorStats then
+			tAnchorStats["incShieldRebuilds"] = (tAnchorStats["incShieldRebuilds"] or 0) + 1;
+		end
+
+		tIncBar["anchorOrientation"] = tOrientation;
+		tIncBar["anchorIsInverted"] = tIsInverted;
+		tIncBar["anchorIsIncoming"] = tIsIncomingEnabled;
+		tIncBar["anchorHealthLevel"] = tHealthLevel;
+
+		tShieldBar["anchorOrientation"] = tOrientation;
+		tShieldBar["anchorIsInverted"] = tIsInverted;
+		tShieldBar["anchorIsIncoming"] = tIsIncomingEnabled;
+		tShieldBar["anchorHealthLevel"] = tHealthLevel;
+
+		tForwardDirection = VUHDO_PREDICTION_SPAN_FORWARD[tOrientation];
+		tBackwardDirection = VUHDO_PREDICTION_SPAN_BACKWARD[tOrientation];
 
 		if not tIsInverted then
 			if tClipFrame then
@@ -1911,69 +2103,33 @@ do
 				tClipFrame:SetAllPoints(tHealthBar);
 			end
 
-			return;
-		end
+			VUHDO_layoutPredictionSpan(aButton, aPanelNum, tIncBar, 6, tHealthTexture, tForwardDirection, true);
+		else
+			if tClipFrame then
+				tClipFrame:ClearAllPoints();
+				tClipFrame:SetAllPoints(tHealthTexture);
+			end
 
-		if tClipFrame then
-			tClipFrame:ClearAllPoints();
-			tClipFrame:SetAllPoints(tHealthTexture);
+			VUHDO_layoutPredictionSpan(aButton, aPanelNum, tIncBar, 6, tHealthTexture, tBackwardDirection, false);
 		end
 
 		tIsFlipped = (tOrientation == "HORIZONTAL_INV" or tOrientation == "VERTICAL_INV") ~= tIsInverted;
 
-		tIncBar:ClearAllPoints();
-		VUHDO_PixelUtil.SetSize(tIncBar, tHealthWidth, tHealthHeight);
-
-		if tOrientation == "HORIZONTAL" then
-			VUHDO_PixelUtil.SetPoint(tIncBar, "TOPRIGHT", tHealthTexture, "TOPRIGHT", 0, 0);
-			VUHDO_PixelUtil.SetPoint(tIncBar, "BOTTOMRIGHT", tHealthTexture, "BOTTOMRIGHT", 0, 0);
-		elseif tOrientation == "HORIZONTAL_INV" then
-			VUHDO_PixelUtil.SetPoint(tIncBar, "TOPLEFT", tHealthTexture, "TOPLEFT", 0, 0);
-			VUHDO_PixelUtil.SetPoint(tIncBar, "BOTTOMLEFT", tHealthTexture, "BOTTOMLEFT", 0, 0);
-		elseif tOrientation == "VERTICAL" then
-			VUHDO_PixelUtil.SetPoint(tIncBar, "TOPLEFT", tHealthTexture, "TOPLEFT", 0, 0);
-			VUHDO_PixelUtil.SetPoint(tIncBar, "TOPRIGHT", tHealthTexture, "TOPRIGHT", 0, 0);
-		else
-			VUHDO_PixelUtil.SetPoint(tIncBar, "BOTTOMLEFT", tHealthTexture, "BOTTOMLEFT", 0, 0);
-			VUHDO_PixelUtil.SetPoint(tIncBar, "BOTTOMRIGHT", tHealthTexture, "BOTTOMRIGHT", 0, 0);
-		end
-
 		VUHDO_setStatusBarOrientation(tIncBar, VUHDO_getStatusbarOrientationNumber("HEALTH_BAR", aPanelNum));
 		tIncBar:SetReverseFill(tIsFlipped);
-
-		tShieldBar:ClearAllPoints();
-		VUHDO_PixelUtil.SetSize(tShieldBar, tHealthWidth, tHealthHeight);
 
 		if tIsIncomingEnabled then
 			tIncTexture = tIncBar:GetStatusBarTexture();
 
-			if tOrientation == "HORIZONTAL" then
-				VUHDO_PixelUtil.SetPoint(tShieldBar, "TOPRIGHT", tIncTexture, "TOPLEFT", 0, 0);
-				VUHDO_PixelUtil.SetPoint(tShieldBar, "BOTTOMRIGHT", tIncTexture, "BOTTOMLEFT", 0, 0);
-			elseif tOrientation == "HORIZONTAL_INV" then
-				VUHDO_PixelUtil.SetPoint(tShieldBar, "TOPLEFT", tIncTexture, "TOPRIGHT", 0, 0);
-				VUHDO_PixelUtil.SetPoint(tShieldBar, "BOTTOMLEFT", tIncTexture, "BOTTOMRIGHT", 0, 0);
-			elseif tOrientation == "VERTICAL" then
-				VUHDO_PixelUtil.SetPoint(tShieldBar, "TOPLEFT", tIncTexture, "BOTTOMLEFT", 0, 0);
-				VUHDO_PixelUtil.SetPoint(tShieldBar, "TOPRIGHT", tIncTexture, "BOTTOMRIGHT", 0, 0);
+			if tIsInverted then
+				VUHDO_layoutPredictionSpan(aButton, aPanelNum, tShieldBar, 19, tIncTexture, tBackwardDirection, true);
 			else
-				VUHDO_PixelUtil.SetPoint(tShieldBar, "BOTTOMLEFT", tIncTexture, "TOPLEFT", 0, 0);
-				VUHDO_PixelUtil.SetPoint(tShieldBar, "BOTTOMRIGHT", tIncTexture, "TOPRIGHT", 0, 0);
+				VUHDO_layoutPredictionSpan(aButton, aPanelNum, tShieldBar, 19, tIncTexture, tForwardDirection, true);
 			end
+		elseif tIsInverted then
+			VUHDO_layoutPredictionSpan(aButton, aPanelNum, tShieldBar, 19, tHealthTexture, tBackwardDirection, false);
 		else
-			if tOrientation == "HORIZONTAL" then
-				VUHDO_PixelUtil.SetPoint(tShieldBar, "TOPRIGHT", tHealthTexture, "TOPRIGHT", 0, 0);
-				VUHDO_PixelUtil.SetPoint(tShieldBar, "BOTTOMRIGHT", tHealthTexture, "BOTTOMRIGHT", 0, 0);
-			elseif tOrientation == "HORIZONTAL_INV" then
-				VUHDO_PixelUtil.SetPoint(tShieldBar, "TOPLEFT", tHealthTexture, "TOPLEFT", 0, 0);
-				VUHDO_PixelUtil.SetPoint(tShieldBar, "BOTTOMLEFT", tHealthTexture, "BOTTOMLEFT", 0, 0);
-			elseif tOrientation == "VERTICAL" then
-				VUHDO_PixelUtil.SetPoint(tShieldBar, "TOPLEFT", tHealthTexture, "TOPLEFT", 0, 0);
-				VUHDO_PixelUtil.SetPoint(tShieldBar, "TOPRIGHT", tHealthTexture, "TOPRIGHT", 0, 0);
-			else
-				VUHDO_PixelUtil.SetPoint(tShieldBar, "BOTTOMLEFT", tHealthTexture, "BOTTOMLEFT", 0, 0);
-				VUHDO_PixelUtil.SetPoint(tShieldBar, "BOTTOMRIGHT", tHealthTexture, "BOTTOMRIGHT", 0, 0);
-			end
+			VUHDO_layoutPredictionSpan(aButton, aPanelNum, tShieldBar, 19, tHealthTexture, tForwardDirection, true);
 		end
 
 		VUHDO_setStatusBarOrientation(tShieldBar, VUHDO_getStatusbarOrientationNumber("HEALTH_BAR", aPanelNum));
@@ -2011,12 +2167,10 @@ do
 	local tHealAbsorbOrientation;
 	local tHealthTexture;
 	local tHealthLossOrientation;
-	local tBarWidth;
-	local tBarHeight;
-	local tIncTexture;
+	local tIsVertical;
 	function VUHDO_initPredictionBarAnchors(aButton, aPanelNum)
 
-		VUHDO_invalidateShieldMaskAnchors(aButton);
+		VUHDO_invalidatePredictionAnchors(aButton);
 
 		tHealthBar = VUHDO_getHealthBar(aButton, 1);
 		tIncBar = VUHDO_getHealthBar(aButton, 6);
@@ -2038,9 +2192,6 @@ do
 
 		VUHDO_setStatusBarOrientation(tHealthBar, VUHDO_getStatusbarOrientationNumber("HEALTH_BAR", aPanelNum));
 
-		tBarWidth = sPanelConfig[aPanelNum]["barWidth"];
-		tBarHeight = sPanelConfig[aPanelNum]["barHeight"];
-
 		tIncBar:ClearAllPoints();
 		tIncBar:SetMinMaxValues(0, 1);
 		tIncBar:SetValue(0);
@@ -2051,73 +2202,17 @@ do
 		tShieldBar:SetValue(0);
 		VUHDO_setStatusBarOrientation(tShieldBar, VUHDO_getStatusbarOrientationNumber("HEALTH_BAR", aPanelNum));
 
-		tHealthTexture = tHealthBar:GetStatusBarTexture();
+		tIsVertical = tOrientation == "VERTICAL" or tOrientation == "VERTICAL_INV";
 
-		if not tIsInverted then
-			if tOrientation == "HORIZONTAL" then
-				VUHDO_PixelUtil.SetPoint(tIncBar, "TOPLEFT", tHealthTexture, "TOPRIGHT", 0, 0);
-				VUHDO_PixelUtil.SetPoint(tIncBar, "BOTTOMLEFT", tHealthTexture, "BOTTOMRIGHT", 0, 0);
-				VUHDO_PixelUtil.SetWidth(tIncBar, tBarWidth);
+		VUHDO_getOrCreatePredictionSpan(aButton, 6, tIsVertical);
+		VUHDO_getOrCreatePredictionSpan(aButton, 19, tIsVertical);
 
-				if VUHDO_CONFIG["SHOW_INCOMING"] or VUHDO_CONFIG["SHOW_OWN_INCOMING"] then
-					tIncTexture = tIncBar:GetStatusBarTexture();
-					VUHDO_PixelUtil.SetPoint(tShieldBar, "TOPLEFT", tIncTexture, "TOPRIGHT", 0, 0);
-					VUHDO_PixelUtil.SetPoint(tShieldBar, "BOTTOMLEFT", tIncTexture, "BOTTOMRIGHT", 0, 0);
-				else
-					VUHDO_PixelUtil.SetPoint(tShieldBar, "TOPLEFT", tHealthTexture, "TOPRIGHT", 0, 0);
-					VUHDO_PixelUtil.SetPoint(tShieldBar, "BOTTOMLEFT", tHealthTexture, "BOTTOMRIGHT", 0, 0);
-				end
-
-				VUHDO_PixelUtil.SetWidth(tShieldBar, tBarWidth);
-			elseif tOrientation == "HORIZONTAL_INV" then
-				VUHDO_PixelUtil.SetPoint(tIncBar, "TOPRIGHT", tHealthTexture, "TOPLEFT", 0, 0);
-				VUHDO_PixelUtil.SetPoint(tIncBar, "BOTTOMRIGHT", tHealthTexture, "BOTTOMLEFT", 0, 0);
-				VUHDO_PixelUtil.SetWidth(tIncBar, tBarWidth);
-
-				if VUHDO_CONFIG["SHOW_INCOMING"] or VUHDO_CONFIG["SHOW_OWN_INCOMING"] then
-					tIncTexture = tIncBar:GetStatusBarTexture();
-					VUHDO_PixelUtil.SetPoint(tShieldBar, "TOPRIGHT", tIncTexture, "TOPLEFT", 0, 0);
-					VUHDO_PixelUtil.SetPoint(tShieldBar, "BOTTOMRIGHT", tIncTexture, "BOTTOMLEFT", 0, 0);
-				else
-					VUHDO_PixelUtil.SetPoint(tShieldBar, "TOPRIGHT", tHealthTexture, "TOPLEFT", 0, 0);
-					VUHDO_PixelUtil.SetPoint(tShieldBar, "BOTTOMRIGHT", tHealthTexture, "BOTTOMLEFT", 0, 0);
-				end
-
-				VUHDO_PixelUtil.SetWidth(tShieldBar, tBarWidth);
-			elseif tOrientation == "VERTICAL" then
-				VUHDO_PixelUtil.SetPoint(tIncBar, "BOTTOMLEFT", tHealthTexture, "TOPLEFT", 0, 0);
-				VUHDO_PixelUtil.SetPoint(tIncBar, "BOTTOMRIGHT", tHealthTexture, "TOPRIGHT", 0, 0);
-				VUHDO_PixelUtil.SetHeight(tIncBar, tBarHeight);
-
-				if VUHDO_CONFIG["SHOW_INCOMING"] or VUHDO_CONFIG["SHOW_OWN_INCOMING"] then
-					tIncTexture = tIncBar:GetStatusBarTexture();
-					VUHDO_PixelUtil.SetPoint(tShieldBar, "TOPLEFT", tIncTexture, "BOTTOMLEFT", 0, 0);
-					VUHDO_PixelUtil.SetPoint(tShieldBar, "TOPRIGHT", tIncTexture, "BOTTOMRIGHT", 0, 0);
-				else
-					VUHDO_PixelUtil.SetPoint(tShieldBar, "TOPLEFT", tHealthTexture, "BOTTOMLEFT", 0, 0);
-					VUHDO_PixelUtil.SetPoint(tShieldBar, "TOPRIGHT", tHealthTexture, "BOTTOMRIGHT", 0, 0);
-				end
-
-				VUHDO_PixelUtil.SetHeight(tShieldBar, tBarHeight);
-			else
-				VUHDO_PixelUtil.SetPoint(tIncBar, "TOPLEFT", tHealthTexture, "BOTTOMLEFT", 0, 0);
-				VUHDO_PixelUtil.SetPoint(tIncBar, "TOPRIGHT", tHealthTexture, "BOTTOMRIGHT", 0, 0);
-				VUHDO_PixelUtil.SetHeight(tIncBar, tBarHeight);
-
-				if VUHDO_CONFIG["SHOW_INCOMING"] or VUHDO_CONFIG["SHOW_OWN_INCOMING"] then
-					tIncTexture = tIncBar:GetStatusBarTexture();
-					VUHDO_PixelUtil.SetPoint(tShieldBar, "BOTTOMLEFT", tIncTexture, "TOPLEFT", 0, 0);
-					VUHDO_PixelUtil.SetPoint(tShieldBar, "BOTTOMRIGHT", tIncTexture, "TOPRIGHT", 0, 0);
-				else
-					VUHDO_PixelUtil.SetPoint(tShieldBar, "BOTTOMLEFT", tHealthTexture, "TOPLEFT", 0, 0);
-					VUHDO_PixelUtil.SetPoint(tShieldBar, "BOTTOMRIGHT", tHealthTexture, "TOPRIGHT", 0, 0);
-				end
-
-				VUHDO_PixelUtil.SetHeight(tShieldBar, tBarHeight);
-			end
+		if tOvershieldBar and VUHDO_CONFIG["SHOW_OVERSHIELD_BAR"] then
+			VUHDO_getOrCreatePredictionSpan(aButton, 20, tIsVertical);
+			VUHDO_getOrCreatePredictionSpan(aButton, 23, tIsVertical);
 		end
 
-		VUHDO_updateIncShieldMaskAnchors(aButton, aPanelNum);
+		VUHDO_updateIncShieldPredictionAnchors(aButton, aPanelNum);
 
 		if tOvershieldBar then
 			tOvershieldOrientation = VUHDO_calculateDerivedOrientation(tOrientation, tTurnAxisOvershield);
@@ -2127,7 +2222,7 @@ do
 			VUHDO_setStatusBarOrientation(tOvershieldBar, VUHDO_getStatusbarOrientationNumber("HEALTH_BAR", aPanelNum));
 			tOvershieldBar:SetReverseFill(tIsInverted == (tOvershieldOrientation == "HORIZONTAL_INV" or tOvershieldOrientation == "VERTICAL_INV"));
 
-			VUHDO_updateOvershieldMaskAnchors(aButton, aPanelNum);
+			VUHDO_updateOvershieldPredictionAnchors(aButton, aPanelNum);
 		end
 
 		if tHealAbsorbBar then
@@ -2221,8 +2316,7 @@ do
 			VUHDO_PixelUtil.Show(tBar);
 		end
 
-		VUHDO_customizeIconText(tBar, 32, VUHDO_getHealthBarText(aButton, 17),
-			sPanelConfig[aPanelNum]["indicatorConfig"]["TEXT_INDICATORS"]["SIDE_LEFT"]["TEXT"]);
+		VUHDO_customizeIconText(tBar, 32, VUHDO_getHealthBarText(aButton, 17), sPanelConfig[aPanelNum]["indicatorConfig"]["TEXT_INDICATORS"]["SIDE_LEFT"]["TEXT"]);
 
 		return;
 
@@ -2244,8 +2338,7 @@ do
 			VUHDO_PixelUtil.Show(tBar);
 		end
 
-		VUHDO_customizeIconText(tBar, 32, VUHDO_getHealthBarText(aButton, 18),
-			sPanelConfig[aPanelNum]["indicatorConfig"]["TEXT_INDICATORS"]["SIDE_RIGHT"]["TEXT"]);
+		VUHDO_customizeIconText(tBar, 32, VUHDO_getHealthBarText(aButton, 18), sPanelConfig[aPanelNum]["indicatorConfig"]["TEXT_INDICATORS"]["SIDE_RIGHT"]["TEXT"]);
 
 		return;
 
@@ -3321,6 +3414,7 @@ do
 		return;
 
 	end
+
 	_G["VUHDO_redrawAllPanels"] = VUHDO_redrawAllPanels;
 end
 

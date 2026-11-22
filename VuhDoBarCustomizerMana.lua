@@ -27,7 +27,7 @@ local VUHDO_updateHealthLossBar;
 local VUHDO_syncOverlaysForUnit;
 local VUHDO_layoutHealthBarGeometry;
 local VUHDO_repositionAuraFramesForButton;
-local VUHDO_refreshShieldMaskAnchors;
+local VUHDO_setPredictionSpanManaInset;
 local VUHDO_hasManaOffsetBar;
 
 local sSecretsEnabled = VUHDO_SECRETS_ENABLED;
@@ -59,7 +59,7 @@ function VUHDO_customManaInitLocalOverrides()
 	VUHDO_syncOverlaysForUnit = _G["VUHDO_syncOverlaysForUnit"];
 	VUHDO_layoutHealthBarGeometry = _G["VUHDO_layoutHealthBarGeometry"];
 	VUHDO_repositionAuraFramesForButton = _G["VUHDO_repositionAuraFramesForButton"];
-	VUHDO_refreshShieldMaskAnchors = _G["VUHDO_refreshShieldMaskAnchors"];
+	VUHDO_setPredictionSpanManaInset = _G["VUHDO_setPredictionSpanManaInset"];
 	VUHDO_hasManaOffsetBar = _G["VUHDO_hasManaOffsetBar"];
 
 	VUHDO_syncOverlaysForUnit = _G["VUHDO_deferSyncOverlaysForUnit"];
@@ -249,7 +249,7 @@ do
 			end
 		end
 
-		VUHDO_refreshShieldMaskAnchors(aButton, aPanelNum);
+		VUHDO_setPredictionSpanManaInset(aButton, aManaBarHeight);
 
 		if VUHDO_CONFIG["SHOW_HEALTH_LOSS_BAR"] and aUnit then
 			VUHDO_updateHealthLossBar(aUnit);

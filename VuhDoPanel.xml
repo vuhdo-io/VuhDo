@@ -36,6 +36,17 @@
 		</Scripts>
 	</Frame>
 
+	<StatusBar name="VuhDoSpanBarTemplate" alpha="0" virtual="true" inherits="VuhDoStatusBar">
+		<Scripts>
+			<OnLoad>
+				self:SetMinMaxValues(0, 1);
+				self:SetValue(0);
+
+				self:EnableMouse(false);
+			</OnLoad>
+		</Scripts>
+	</StatusBar>
+
 	<StatusBar name="VuhDoDummyStatusBar" hidden="true" inherits="VuhDoStatusBar"> </StatusBar>
 	<StatusBar name="VuhDoGcdStatusBar" frameLevel="220" hidden="true" inherits="VuhDoStatusBar">	</StatusBar>
 
@@ -675,7 +686,7 @@
 						</Anchors>
 						<Scripts>
 							<OnLoad>
-								self.addLevel = 1;
+								self.addLevel = 2;
 							</OnLoad>
 						</Scripts>
 						<Frames>
@@ -722,6 +733,11 @@
 							<Anchor point="TOPLEFT" relativeTo="$parentHlBar" relativePoint="TOPLEFT"/>
 							<Anchor point="BOTTOMRIGHT" relativeTo="$parentHlBar" relativePoint="BOTTOMRIGHT"/>
 						</Anchors>
+						<Scripts>
+							<OnLoad>
+								self.addLevel = 2;
+							</OnLoad>
+						</Scripts>
 						<Frames>
 
 							<StatusBar name="$parentOvsBar" hidden="true" inherits="VuhDoStatusBar">

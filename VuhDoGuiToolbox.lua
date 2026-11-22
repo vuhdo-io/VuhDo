@@ -103,7 +103,7 @@ local VUHDO_getRealParent;
 local VUHDO_getStatusbarOrientationString;
 local VUHDO_calculateDerivedOrientation;
 local VUHDO_setStatusBarOrientation;
-local VUHDO_refreshShieldMaskAnchors;
+local VUHDO_refreshPredictionAnchors;
 local VUHDO_STATUSBAR_BOTTOM_TO_TOP;
 
 -----------------------------------------------------------------------
@@ -138,7 +138,7 @@ function VUHDO_guiToolboxInitLocalOverrides()
 	VUHDO_getStatusbarOrientationString = _G["VUHDO_getStatusbarOrientationString"];
 	VUHDO_calculateDerivedOrientation = _G["VUHDO_calculateDerivedOrientation"];
 	VUHDO_setStatusBarOrientation = _G["VUHDO_setStatusBarOrientation"];
-	VUHDO_refreshShieldMaskAnchors = _G["VUHDO_refreshShieldMaskAnchors"];
+	VUHDO_refreshPredictionAnchors = _G["VUHDO_refreshPredictionAnchors"];
 	VUHDO_STATUSBAR_BOTTOM_TO_TOP = _G["VUHDO_STATUSBAR_BOTTOM_TO_TOP"];
 
 	for tPanelNum = 1, 10 do -- VUHDO_MAX_PANELS
@@ -2306,8 +2306,9 @@ do
 		end
 
 		aButton["healthBarGeometrySignature"] = tSignature;
+		aButton["isHealthLossAnchored"] = tIsHealthLossAnchored;
 
-		VUHDO_refreshShieldMaskAnchors(aButton, aPanelNum);
+		VUHDO_refreshPredictionAnchors(aButton, aPanelNum, true);
 
 		return;
 
