@@ -40,8 +40,6 @@ local VUHDO_resetButtonVisuals;
 local VUHDO_getSideBarWidthLeft;
 local VUHDO_getSideBarWidthRight;
 
-VUHDO_PREDICTION_ANCHOR_STATS = nil;
-
 local VUHDO_IMMEDIATE = Enum.StatusBarInterpolation.Immediate;
 
 local VUHDO_PREDICTION_SPAN_EDGES = {
@@ -1866,7 +1864,6 @@ do
 	local tClipFrame;
 	local tIsIncomingEnabled;
 	local tHealthLevel;
-	local tAnchorStats;
 	local tForwardDirection;
 	local tBackwardDirection;
 	local tOvershieldDirection;
@@ -1884,12 +1881,6 @@ do
 
 		if not tHealthBar or not tIncBar or not tOvershieldBar or not tOffsetBar then
 			return;
-		end
-
-		tAnchorStats = VUHDO_PREDICTION_ANCHOR_STATS;
-
-		if tAnchorStats then
-			tAnchorStats["overshieldCalls"] = (tAnchorStats["overshieldCalls"] or 0) + 1;
 		end
 
 		tClipFrame = tOvershieldBar:GetParent();
@@ -1911,10 +1902,6 @@ do
 			and tOvershieldBar["anchorHealthLevel"] == tHealthLevel
 			and tClipFrame:GetFrameLevel() == tHealthLevel + 2 then
 			return;
-		end
-
-		if tAnchorStats then
-			tAnchorStats["overshieldRebuilds"] = (tAnchorStats["overshieldRebuilds"] or 0) + 1;
 		end
 
 		tOvershieldBar["anchorOrientation"] = tOrientation;
@@ -2042,7 +2029,6 @@ do
 	local tIsFlipped;
 	local tIsIncomingEnabled;
 	local tHealthLevel;
-	local tAnchorStats;
 	local tForwardDirection;
 	local tBackwardDirection;
 	function VUHDO_updateIncShieldPredictionAnchors(aButton, aPanelNum)
@@ -2059,12 +2045,6 @@ do
 			return;
 		end
 
-		tAnchorStats = VUHDO_PREDICTION_ANCHOR_STATS;
-
-		if tAnchorStats then
-			tAnchorStats["incShieldCalls"] = (tAnchorStats["incShieldCalls"] or 0) + 1;
-		end
-
 		tClipFrame = tIncBar:GetParent();
 		tHealthTexture = tHealthBar:GetStatusBarTexture();
 
@@ -2078,10 +2058,6 @@ do
 			and tIncBar["anchorHealthLevel"] == tHealthLevel
 			and (not tClipFrame or tClipFrame:GetFrameLevel() == tHealthLevel + 2) then
 			return;
-		end
-
-		if tAnchorStats then
-			tAnchorStats["incShieldRebuilds"] = (tAnchorStats["incShieldRebuilds"] or 0) + 1;
 		end
 
 		tIncBar["anchorOrientation"] = tOrientation;
