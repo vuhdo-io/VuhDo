@@ -43,6 +43,7 @@ local sTimerStartTimes = { };
 local sTimerDepth = 0;
 local sCallerParts = { };
 local sIsSecretForced = false;
+local sIsSecretSkipped = false;
 local sTailMeanArgs = { };
 local sDupSortRows = { };
 local sDupLineParts = { };
@@ -136,6 +137,7 @@ do
 				["changed"] = 0,
 				["duplicates"] = 0,
 				["secretForced"] = 0,
+				["secretSkipped"] = 0,
 				["dupEventTypePairs"] = { },
 				["dupCallers"] = { },
 				["merged"] = 0,
@@ -153,6 +155,17 @@ do
 	function VUHDO_recordBouquetSecretForced()
 
 		sIsSecretForced = true;
+
+		return;
+
+	end
+
+
+
+	--
+	function VUHDO_recordBouquetSecretSkipped()
+
+		sIsSecretSkipped = true;
 
 		return;
 
@@ -188,6 +201,7 @@ do
 	function VUHDO_recordBouquetEvalStart(aUnit, aBouquetName, anEventType)
 
 		sIsSecretForced = false;
+		sIsSecretSkipped = false;
 
 		tBouquetMetrics = VUHDO_getBouquetMetrics(aBouquetName);
 
@@ -262,6 +276,7 @@ do
 
 		if not tBouquetMetrics then
 			sIsSecretForced = false;
+			sIsSecretSkipped = false;
 
 			return;
 		end
@@ -278,7 +293,12 @@ do
 			tBouquetMetrics["secretForced"] = (tBouquetMetrics["secretForced"] or 0) + 1;
 		end
 
+		if sIsSecretSkipped then
+			tBouquetMetrics["secretSkipped"] = (tBouquetMetrics["secretSkipped"] or 0) + 1;
+		end
+
 		sIsSecretForced = false;
+		sIsSecretSkipped = false;
 
 		return;
 
@@ -647,7 +667,9 @@ do
 	local tChangedPct;
 	local tDupPct;
 	local tSecretForced;
+	local tSecretSkipped;
 	local tSecretPct;
+	local tSecretSkipPct;
 	local tEvalTracker;
 	local tDelegateTracker;
 	local tEvalTailMeans;
@@ -696,16 +718,18 @@ do
 			tChanged = tRowStats["changed"] or 0;
 			tDuplicates = tRowStats["duplicates"] or 0;
 			tSecretForced = tRowStats["secretForced"] or 0;
+			tSecretSkipped = tRowStats["secretSkipped"] or 0;
 			tEvalTotalUs = tEvalTracker and tEvalTracker:getCumulativeTotal() or 0;
 			tDelegateTotalUs = tDelegateTracker and tDelegateTracker:getCumulativeTotal() or 0;
 			tTotalUs = tEvalTotalUs + tDelegateTotalUs;
 			tChangedPct = tEvals > 0 and (100 * tChanged / tEvals) or 0;
 			tDupPct = tEvals > 0 and (100 * tDuplicates / tEvals) or 0;
 			tSecretPct = tEvals > 0 and (100 * tSecretForced / tEvals) or 0;
+			tSecretSkipPct = tEvals > 0 and (100 * tSecretSkipped / tEvals) or 0;
 			tMerged = tRowStats["merged"] or 0;
 
-			VUHDO_Msg(format("|cff98FB98Bouquet[%s]:|r E=%d, Chg=%.1f%%, Secret=%.1f%%, Dup=%.1f%%, Merged=%d, Total=%s",
-				tRowName, tEvals, tChangedPct, tSecretPct, tDupPct, tMerged, VUHDO_formatTime(tTotalUs)));
+			VUHDO_Msg(format("|cff98FB98Bouquet[%s]:|r E=%d, Chg=%.1f%%, Secret=%.1f%%, SecretSkip=%.1f%%, Dup=%.1f%%, Merged=%d, Total=%s",
+				tRowName, tEvals, tChangedPct, tSecretPct, tSecretSkipPct, tDupPct, tMerged, VUHDO_formatTime(tTotalUs)));
 
 			tDupEventTypePairs = tRowStats["dupEventTypePairs"];
 

@@ -1590,6 +1590,50 @@ end
 
 do
 	--
+	local function VUHDO_isInterestListEmpty(aInterests)
+
+		if not aInterests then
+			return true;
+		end
+
+		return #aInterests == 0;
+
+	end
+
+
+
+	--
+	local function VUHDO_addInterestsToSet(aDestSet, aInterests)
+
+		if not aInterests then
+			return;
+		end
+
+		for tCnt = 1, #aInterests do
+			aDestSet[aInterests[tCnt]] = true;
+		end
+
+		return;
+
+	end
+
+
+
+	--
+	local tInterestSet;
+	local function VUHDO_createInterestSet(aInterests)
+
+		tInterestSet = { };
+
+		VUHDO_addInterestsToSet(tInterestSet, aInterests);
+
+		return tInterestSet;
+
+	end
+
+
+
+	--
 	local tItem;
 	local tSpecial;
 	local tSecretType;
@@ -1617,6 +1661,7 @@ do
 	local tOverlayBarColor;
 	local tSyntheticItem;
 	local tSyntheticColor;
+	local tForcedEventTypes;
 	function VUHDO_buildBouquetLayerTemplate(aBouquetName)
 
 		tBouquet = VUHDO_BOUQUETS["STORED"][aBouquetName];
@@ -1659,7 +1704,11 @@ do
 			["nonSecretResults"] = { },
 			["auraResults"] = { },
 			["alphaResults"] = { },
+			["forcedEventTypes"] = { },
+			["isSecretSkippable"] = true,
 		};
+
+		tForcedEventTypes = tTemplate["forcedEventTypes"];
 
 		tCurveIdx = 0;
 		tBoolIdx = 0;
@@ -1682,6 +1731,8 @@ do
 			end
 
 			if not tSpecial then
+				tTemplate["isSecretSkippable"] = false;
+
 				tAuraIdx = tAuraIdx + 1;
 
 				tTemplate["hasAuras"] = true;
@@ -1705,6 +1756,10 @@ do
 					["name"] = nil,
 				};
 			else
+				if tSpecial["updateCyclic"] then
+					tTemplate["isSecretSkippable"] = false;
+				end
+
 				tSecretType = tSpecial["secretType"] or VUHDO_SECRET_TYPE_NONE;
 
 				if tSecretType == VUHDO_SECRET_TYPE_HEALTH_PERCENT or tSecretType == VUHDO_SECRET_TYPE_POWER_PERCENT then
@@ -1717,6 +1772,12 @@ do
 						["special"] = tSpecial,
 						["index"] = tCnt,
 					};
+
+					VUHDO_addInterestsToSet(tForcedEventTypes, tSpecial["interests"]);
+
+					if VUHDO_isInterestListEmpty(tSpecial["interests"]) then
+						tTemplate["isSecretSkippable"] = false;
+					end
 
 					tTemplate["curveResults"][tCurveIdx] = {
 						["isActive"] = false,
@@ -1866,7 +1927,12 @@ do
 						["item"] = tItem,
 						["special"] = tSpecial,
 						["index"] = tCnt,
+						["interestSet"] = VUHDO_createInterestSet(tSpecial["interests"]),
 					};
+
+					if VUHDO_isInterestListEmpty(tSpecial["interests"]) then
+						tTemplate["isSecretSkippable"] = false;
+					end
 
 					tTrueColor = VUHDO_getBouquetBoolColor(aBouquetName, tItem["name"]);
 					tTrueTextColor = VUHDO_getBouquetBoolTextColor(aBouquetName, tItem["name"]);
@@ -1979,6 +2045,12 @@ do
 						["index"] = tCnt,
 					};
 
+					VUHDO_addInterestsToSet(tForcedEventTypes, tSpecial["interests"]);
+
+					if VUHDO_isInterestListEmpty(tSpecial["interests"]) then
+						tTemplate["isSecretSkippable"] = false;
+					end
+
 					tTemplate["spriteCellResults"][tSpriteCellIdx] = {
 						["isActive"] = false,
 						["icon"] = nil,
@@ -2052,7 +2124,12 @@ do
 							["item"] = tSyntheticItem,
 							["special"] = tOverlaySpecial,
 							["index"] = tCnt,
+							["interestSet"] = VUHDO_createInterestSet(tOverlaySpecial["interests"]),
 						};
+
+						if VUHDO_isInterestListEmpty(tOverlaySpecial["interests"]) then
+							tTemplate["isSecretSkippable"] = false;
+						end
 
 						tTrueColor = VUHDO_getBouquetBoolColor(aBouquetName, tOverlayName);
 						tTrueTextColor = VUHDO_getBouquetBoolTextColor(aBouquetName, tOverlayName);
@@ -3648,6 +3725,430 @@ end
 
 
 do
+	local VUHDO_BOUQUET_SIGNATURE_TEMPLATE_IDX = 11;
+	local VUHDO_BOUQUET_SIGNATURE_START_IDX = 12;
+	local VUHDO_BOUQUET_SIGNATURE_SECRET = "secret";
+
+
+
+	--
+	local function VUHDO_updateSignatureValue(aState, anIndex, aValue)
+
+		if issecretvalue(aValue) then
+			aState[anIndex] = VUHDO_BOUQUET_SIGNATURE_SECRET;
+
+			return false;
+		end
+
+		if aState[anIndex] ~= aValue then
+			aState[anIndex] = aValue;
+
+			return false;
+		end
+
+		return true;
+
+	end
+
+
+
+	--
+	local function VUHDO_updateSignatureBoolean(aState, anIndex, aValue)
+
+		if issecretvalue(aValue) then
+			if aState[anIndex] == VUHDO_BOUQUET_SIGNATURE_SECRET then
+				return true;
+			end
+
+			aState[anIndex] = VUHDO_BOUQUET_SIGNATURE_SECRET;
+
+			return false;
+		end
+
+		return VUHDO_updateSignatureValue(aState, anIndex, aValue);
+
+	end
+
+
+
+	--
+	local tIsUnchanged;
+	local tSignatureIdx;
+	local tResultSlot;
+	local tColorHash;
+	local tBarColorHash;
+	local tNonSecretResults;
+	local tDispelResults;
+	local tBooleanResults;
+	local function VUHDO_updateSecretSignature(aState, aLayerTemplate)
+
+		if not aState or not aLayerTemplate then
+			return false;
+		end
+
+		if aState[VUHDO_BOUQUET_SIGNATURE_TEMPLATE_IDX] ~= aLayerTemplate then
+			tIsUnchanged = false;
+
+			aState[VUHDO_BOUQUET_SIGNATURE_TEMPLATE_IDX] = aLayerTemplate;
+		else
+			tIsUnchanged = true;
+		end
+
+		tSignatureIdx = VUHDO_BOUQUET_SIGNATURE_START_IDX;
+
+		tNonSecretResults = aLayerTemplate["nonSecretResults"];
+
+		if tNonSecretResults then
+			for tCnt = 1, #tNonSecretResults do
+				tResultSlot = tNonSecretResults[tCnt];
+
+				if not VUHDO_updateSignatureValue(aState, tSignatureIdx, tResultSlot["isActive"]) then
+					tIsUnchanged = false;
+				end
+
+				tSignatureIdx = tSignatureIdx + 1;
+
+				if not VUHDO_updateSignatureValue(aState, tSignatureIdx, tResultSlot["icon"]) then
+					tIsUnchanged = false;
+				end
+
+				tSignatureIdx = tSignatureIdx + 1;
+
+				if not VUHDO_updateSignatureValue(aState, tSignatureIdx, tResultSlot["timer"]) then
+					tIsUnchanged = false;
+				end
+
+				tSignatureIdx = tSignatureIdx + 1;
+
+				if not VUHDO_updateSignatureValue(aState, tSignatureIdx, tResultSlot["counter"]) then
+					tIsUnchanged = false;
+				end
+
+				tSignatureIdx = tSignatureIdx + 1;
+
+				if not VUHDO_updateSignatureValue(aState, tSignatureIdx, tResultSlot["duration"]) then
+					tIsUnchanged = false;
+				end
+
+				tSignatureIdx = tSignatureIdx + 1;
+
+				if not VUHDO_updateSignatureValue(aState, tSignatureIdx, tResultSlot["timer2"]) then
+					tIsUnchanged = false;
+				end
+
+				tSignatureIdx = tSignatureIdx + 1;
+
+				if not VUHDO_updateSignatureValue(aState, tSignatureIdx, tResultSlot["clipL"]) then
+					tIsUnchanged = false;
+				end
+
+				tSignatureIdx = tSignatureIdx + 1;
+
+				if not VUHDO_updateSignatureValue(aState, tSignatureIdx, tResultSlot["clipR"]) then
+					tIsUnchanged = false;
+				end
+
+				tSignatureIdx = tSignatureIdx + 1;
+
+				if not VUHDO_updateSignatureValue(aState, tSignatureIdx, tResultSlot["clipT"]) then
+					tIsUnchanged = false;
+				end
+
+				tSignatureIdx = tSignatureIdx + 1;
+
+				if not VUHDO_updateSignatureValue(aState, tSignatureIdx, tResultSlot["clipB"]) then
+					tIsUnchanged = false;
+				end
+
+				tSignatureIdx = tSignatureIdx + 1;
+
+				tColorHash = tResultSlot["color"] and VUHDO_getColorHash(tResultSlot["color"]) or 0;
+
+				if not VUHDO_updateSignatureValue(aState, tSignatureIdx, tColorHash) then
+					tIsUnchanged = false;
+				end
+
+				tSignatureIdx = tSignatureIdx + 1;
+			end
+		end
+
+		tDispelResults = aLayerTemplate["dispelResults"];
+
+		if tDispelResults then
+			for tCnt = 1, #tDispelResults do
+				tResultSlot = tDispelResults[tCnt];
+
+				if not VUHDO_updateSignatureValue(aState, tSignatureIdx, tResultSlot["isActive"]) then
+					tIsUnchanged = false;
+				end
+
+				tSignatureIdx = tSignatureIdx + 1;
+
+				if not VUHDO_updateSignatureValue(aState, tSignatureIdx, tResultSlot["auraInstanceId"]) then
+					tIsUnchanged = false;
+				end
+
+				tSignatureIdx = tSignatureIdx + 1;
+
+				if not VUHDO_updateSignatureValue(aState, tSignatureIdx, tResultSlot["r"]) then
+					tIsUnchanged = false;
+				end
+
+				tSignatureIdx = tSignatureIdx + 1;
+
+				if not VUHDO_updateSignatureValue(aState, tSignatureIdx, tResultSlot["g"]) then
+					tIsUnchanged = false;
+				end
+
+				tSignatureIdx = tSignatureIdx + 1;
+
+				if not VUHDO_updateSignatureValue(aState, tSignatureIdx, tResultSlot["b"]) then
+					tIsUnchanged = false;
+				end
+
+				tSignatureIdx = tSignatureIdx + 1;
+
+				if not VUHDO_updateSignatureValue(aState, tSignatureIdx, tResultSlot["a"]) then
+					tIsUnchanged = false;
+				end
+
+				tSignatureIdx = tSignatureIdx + 1;
+
+				if not VUHDO_updateSignatureValue(aState, tSignatureIdx, tResultSlot["tr"]) then
+					tIsUnchanged = false;
+				end
+
+				tSignatureIdx = tSignatureIdx + 1;
+
+				if not VUHDO_updateSignatureValue(aState, tSignatureIdx, tResultSlot["tg"]) then
+					tIsUnchanged = false;
+				end
+
+				tSignatureIdx = tSignatureIdx + 1;
+
+				if not VUHDO_updateSignatureValue(aState, tSignatureIdx, tResultSlot["tb"]) then
+					tIsUnchanged = false;
+				end
+
+				tSignatureIdx = tSignatureIdx + 1;
+
+				if not VUHDO_updateSignatureValue(aState, tSignatureIdx, tResultSlot["ta"]) then
+					tIsUnchanged = false;
+				end
+
+				tSignatureIdx = tSignatureIdx + 1;
+
+				if not VUHDO_updateSignatureValue(aState, tSignatureIdx, tResultSlot["useBackground"]) then
+					tIsUnchanged = false;
+				end
+
+				tSignatureIdx = tSignatureIdx + 1;
+
+				if not VUHDO_updateSignatureValue(aState, tSignatureIdx, tResultSlot["useText"]) then
+					tIsUnchanged = false;
+				end
+
+				tSignatureIdx = tSignatureIdx + 1;
+
+				tBarColorHash = tResultSlot["barColor"] and VUHDO_getColorHash(tResultSlot["barColor"]) or 0;
+
+				if not VUHDO_updateSignatureValue(aState, tSignatureIdx, tBarColorHash) then
+					tIsUnchanged = false;
+				end
+
+				tSignatureIdx = tSignatureIdx + 1;
+			end
+		end
+
+		tBooleanResults = aLayerTemplate["booleanResults"];
+
+		if tBooleanResults then
+			for tCnt = 1, #tBooleanResults do
+				if not VUHDO_updateSignatureBoolean(aState, tSignatureIdx, tBooleanResults[tCnt]["secretBool"]) then
+					tIsUnchanged = false;
+				end
+
+				tSignatureIdx = tSignatureIdx + 1;
+			end
+		end
+
+		return tIsUnchanged;
+
+	end
+
+
+
+	--
+	local function VUHDO_hasEventInterestOverlap(anEventType, aQueuedEventTypes, aInterestSet)
+
+		if not aInterestSet then
+			return false;
+		end
+
+		if aQueuedEventTypes then
+			for tEventType in pairs(aQueuedEventTypes) do
+				if aInterestSet[tEventType] then
+					return true;
+				end
+			end
+
+			return false;
+		end
+
+		if anEventType and aInterestSet[anEventType] then
+			return true;
+		end
+
+		return false;
+
+	end
+
+
+
+	--
+	local tForcedEventTypes;
+	local tInterestSet;
+	local tBooleanValidators;
+	local function VUHDO_isSecretRepaintForced(anEventType, aQueuedEventTypes, aLayerTemplate)
+
+		if not aLayerTemplate then
+			return false;
+		end
+
+		tForcedEventTypes = aLayerTemplate["forcedEventTypes"];
+
+		if VUHDO_hasEventInterestOverlap(anEventType, aQueuedEventTypes, tForcedEventTypes) then
+			return true;
+		end
+
+		tBooleanValidators = aLayerTemplate["booleanValidators"];
+		tBooleanResults = aLayerTemplate["booleanResults"];
+
+		if not tBooleanValidators or not tBooleanResults then
+			return false;
+		end
+
+		for tCnt = 1, #tBooleanResults do
+			if issecretvalue(tBooleanResults[tCnt]["secretBool"]) then
+				tInterestSet = tBooleanValidators[tCnt] and tBooleanValidators[tCnt]["interestSet"];
+
+				if VUHDO_hasEventInterestOverlap(anEventType, aQueuedEventTypes, tInterestSet) then
+					return true;
+				end
+			end
+		end
+
+		return false;
+
+	end
+
+
+
+	--
+	local tClearStates;
+	local tClearState;
+	function VUHDO_clearSecretBouquetSignature(aUnit, aBouquetName)
+
+		tClearStates = VUHDO_LAST_EVALUATED_BOUQUETS[aBouquetName];
+
+		if not tClearStates then
+			return;
+		end
+
+		tClearState = tClearStates[aUnit];
+
+		if tClearState then
+			tClearState[VUHDO_BOUQUET_SIGNATURE_TEMPLATE_IDX] = nil;
+		end
+
+		return;
+
+	end
+
+
+
+	--
+	local tEvalStates;
+	local tEvalState;
+	local function VUHDO_getOrCreateBouquetEvalState(aUnit, aBouquetName)
+
+		tEvalStates = VUHDO_LAST_EVALUATED_BOUQUETS[aBouquetName];
+
+		if not tEvalStates then
+			return nil;
+		end
+
+		tEvalState = tEvalStates[aUnit];
+
+		if not tEvalState then
+			tEvalState = sBouquetStatePool:get();
+			tEvalStates[aUnit] = tEvalState;
+		end
+
+		return tEvalState;
+
+	end
+
+
+
+	--
+	local function VUHDO_forceSecretBouquetChanged(aUnit, aBouquetName)
+
+		VUHDO_invalidateBouquetChangeState(aUnit, aBouquetName);
+
+		if VUHDO_BOUQUET_PROFILING_ENABLED then
+			VUHDO_recordBouquetSecretForced();
+		end
+
+		return true;
+
+	end
+
+
+
+	--
+	local tSecretEvalState;
+	function VUHDO_hasSecretBouquetChanged(aUnit, aBouquetName, aLayerTemplate, anEventType, aQueuedEventTypes)
+
+		if not anEventType then
+			VUHDO_clearSecretBouquetSignature(aUnit, aBouquetName);
+
+			return VUHDO_forceSecretBouquetChanged(aUnit, aBouquetName);
+		end
+
+		tSecretEvalState = VUHDO_getOrCreateBouquetEvalState(aUnit, aBouquetName);
+
+		if not aLayerTemplate or not aLayerTemplate["isSecretSkippable"] or anEventType == VUHDO_UPDATE_ALL
+			or VUHDO_isSecretRepaintForced(anEventType, aQueuedEventTypes, aLayerTemplate) then
+
+			if tSecretEvalState then
+				VUHDO_updateSecretSignature(tSecretEvalState, aLayerTemplate);
+			end
+
+			return VUHDO_forceSecretBouquetChanged(aUnit, aBouquetName);
+		end
+
+		if not tSecretEvalState then
+			return VUHDO_forceSecretBouquetChanged(aUnit, aBouquetName);
+		end
+
+		if VUHDO_updateSecretSignature(tSecretEvalState, aLayerTemplate) then
+			if VUHDO_BOUQUET_PROFILING_ENABLED then
+				VUHDO_recordBouquetSecretSkipped();
+			end
+
+			return false;
+		end
+
+		return VUHDO_forceSecretBouquetChanged(aUnit, aBouquetName);
+
+	end
+
+end
+
+
+
+do
 	--
 	local tEmptyInfo = { };
 	local tUnit;
@@ -3658,7 +4159,7 @@ do
 	local tHasSecretResults;
 	local tEvalColorHash;
 	local tHasChanged;
-	function VUHDO_evaluateBouquet(aUnit, aBouquetName, anInfo)
+	function VUHDO_evaluateBouquet(aUnit, aBouquetName, anInfo, anEventType, aQueuedEventTypes)
 
 		tUnit = (VUHDO_RAID[aUnit] or tEmptyInfo)["isVehicle"] and VUHDO_RAID[aUnit]["petUnit"] or aUnit;
 		tInfo = anInfo or VUHDO_RAID[tUnit];
@@ -3721,15 +4222,13 @@ do
 			end
 
 			if tHasSecretResults then
-				VUHDO_invalidateBouquetChangeState(aUnit, aBouquetName);
-
-				if VUHDO_BOUQUET_PROFILING_ENABLED then
-					VUHDO_recordBouquetSecretForced();
-				end
-
-				tHasChanged = true;
+				tHasChanged = VUHDO_hasSecretBouquetChanged(aUnit, aBouquetName, tLayerTemplate, anEventType, aQueuedEventTypes);
 			else
 				tHasChanged = VUHDO_hasBouquetChanged(aUnit, aBouquetName, true, txState["icon"], txState["timer"], txState["counter"], txState["duration"], tEvalColorHash, txState["clipL"], txState["clipR"], txState["clipT"], txState["clipB"]);
+
+				if tHasChanged then
+					VUHDO_clearSecretBouquetSignature(aUnit, aBouquetName);
+				end
 			end
 
 			return true, txState["icon"], txState["timer"], txState["counter"], txState["duration"], txState["color"], txState["name"], tHasChanged,
@@ -3737,15 +4236,13 @@ do
 				tLayerTemplate, txState["isAliveTime"];
 		else
 			if tHasSecretResults then
-				VUHDO_invalidateBouquetChangeState(aUnit, aBouquetName);
-
-				if VUHDO_BOUQUET_PROFILING_ENABLED then
-					VUHDO_recordBouquetSecretForced();
-				end
-
-				tHasChanged = true;
+				tHasChanged = VUHDO_hasSecretBouquetChanged(aUnit, aBouquetName, tLayerTemplate, anEventType, aQueuedEventTypes);
 			else
 				tHasChanged = VUHDO_hasBouquetChanged(aUnit, aBouquetName, false);
+
+				if tHasChanged then
+					VUHDO_clearSecretBouquetSignature(aUnit, aBouquetName);
+				end
 			end
 
 			return false, nil, nil, nil, nil, nil, nil, tHasChanged, 0, 0, nil, nil, nil, nil, nil, tLayerTemplate, false;
@@ -5655,7 +6152,7 @@ do
 
 		tIsActive, tIcon, tTimer, tCounter, tDuration, tColor, tBuffName,
 			tHasChanged, tImpact, tTimer2, tClipL, tClipR, tClipT, tClipB, tMaxColor, tLayerTemplate, tIsAliveTime
-			= VUHDO_evaluateBouquet(aUnit, aBouquetName, nil);
+			= VUHDO_evaluateBouquet(aUnit, aBouquetName, nil, anEventType, aQueuedEventTypes);
 
 		if VUHDO_BOUQUET_PROFILING_ENABLED then
 			VUHDO_recordBouquetEvalEnd(aBouquetName, tHasChanged);
