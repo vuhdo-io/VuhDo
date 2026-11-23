@@ -14,6 +14,7 @@ local VUHDO_removeHots;
 local VUHDO_removeAllDebuffIcons;
 local VUHDO_updateTargetBars;
 local VUHDO_updateHealthBarsFor;
+local VUHDO_initHealthBarsFor;
 local VUHDO_getUnitButtonsSafe;
 local VUHDO_getPlayerTargetFrame;
 local VUHDO_cleanupSpellTraceForUnit;
@@ -39,6 +40,7 @@ function VUHDO_playerTargetEventHandlerInitLocalOverrides()
 	VUHDO_removeAllDebuffIcons = _G["VUHDO_removeAllDebuffIcons"];
 	VUHDO_updateTargetBars = _G["VUHDO_updateTargetBars"];
 	VUHDO_updateHealthBarsFor = _G["VUHDO_updateHealthBarsFor"];
+	VUHDO_initHealthBarsFor = _G["VUHDO_initHealthBarsFor"];
 	VUHDO_getUnitButtonsSafe = _G["VUHDO_getUnitButtonsSafe"];
 	VUHDO_getPlayerTargetFrame = _G["VUHDO_getPlayerTargetFrame"];
 	VUHDO_cleanupSpellTraceForUnit = _G["VUHDO_cleanupSpellTraceForUnit"];
@@ -78,7 +80,10 @@ function VUHDO_updatePlayerTarget()
 		VUHDO_updateUnitRange("target");
 
 		VUHDO_determineIncHeal("target");
-		VUHDO_updateHealth("target", 9); -- VUHDO_UPDATE_INC
+
+		if not VUHDO_INTERNAL_TOGGLES[27] then -- VUHDO_UPDATE_PLAYER_TARGET
+			VUHDO_updateHealth("target", 9); -- VUHDO_UPDATE_INC
+		end
 	end
 
 	tOldTarget = VUHDO_CURR_PLAYER_TARGET;
@@ -117,8 +122,7 @@ function VUHDO_updatePlayerTarget()
 			VUHDO_RAID["target"] = nil;
 		end
 
-		VUHDO_updateHealthBarsFor("target", 1); -- VUHDO_UPDATE_ALL
-		VUHDO_initEventBouquetsFor("target");
+		VUHDO_initHealthBarsFor("target");
 
 	end
 

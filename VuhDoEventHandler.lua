@@ -89,6 +89,7 @@ local VUHDO_updateAllRaidTargetIndices;
 local VUHDO_updateDirectionFrame;
 local VUHDO_updateHealth;
 local VUHDO_updateHealthBarsFor;
+local VUHDO_initHealthBarsFor;
 local VUHDO_setHealth;
 local VUHDO_initAllEventBouquets;
 local VUHDO_redisplayAllUnitAuras;
@@ -594,6 +595,7 @@ local function VUHDO_eventHandlerInitFunctionOverrides()
 	VUHDO_handleScaleChange = _G["VUHDO_handleScaleChange"];
 	VUHDO_updateBouquetsForEvent = _G["VUHDO_updateBouquetsForEvent"];
 	VUHDO_updateHealthBarsFor = _G["VUHDO_updateHealthBarsFor"];
+	VUHDO_initHealthBarsFor = _G["VUHDO_initHealthBarsFor"];
 	VUHDO_updateSpellTrace = _G["VUHDO_updateSpellTrace"];
 	VUHDO_setHealth = _G["VUHDO_setHealth"];
 	VUHDO_initAllEventBouquets = _G["VUHDO_initAllEventBouquets"];
@@ -649,6 +651,7 @@ local function VUHDO_eventHandlerInitLocalOverrides()
 	VUHDO_updateBouquetsForEvent = _G["VUHDO_deferUpdateBouquetsForEvent"];
 	VUHDO_updateManaBars = _G["VUHDO_deferUpdateManaBars"];
 	VUHDO_updateHealthBarsFor = _G["VUHDO_deferUpdateHealthBarsFor"];
+	VUHDO_initHealthBarsFor = _G["VUHDO_deferInitHealthBarsFor"];
 	VUHDO_updateAllHoTs = _G["VUHDO_deferUpdateAllHoTs"];
 	VUHDO_updateAllCyclicBouquets = _G["VUHDO_deferUpdateAllCyclicBouquets"];
 	VUHDO_updateAllDebuffIcons = _G["VUHDO_deferUpdateAllDebuffIcons"];
@@ -858,6 +861,7 @@ function VUHDO_initAllBurstCaches()
 	VUHDO_bouquetValidatorsStatusInitLocalOverrides();
 	VUHDO_bouquetValidatorsInitLocalOverrides();
 	VUHDO_bouquetsInitLocalOverrides();
+	VUHDO_bouquetEvalQueueInitLocalOverrides();
 	VUHDO_bouquetLayersInitLocalOverrides();
 	VUHDO_textProvidersInitLocalOverrides();
 	VUHDO_textProviderHandlersInitLocalOverrides();
@@ -1158,8 +1162,7 @@ local function VUHDO_updateBossUnits()
 
 			if tBossGuid then
 				VUHDO_setHealth(tBossUnit, 1); -- VUHDO_UPDATE_ALL
-				VUHDO_updateHealthBarsFor(tBossUnit, 1); -- VUHDO_UPDATE_ALL
-				VUHDO_initEventBouquetsFor(tBossUnit);
+				VUHDO_initHealthBarsFor(tBossUnit);
 
 				VUHDO_syncAuraContainersForUnit(tBossUnit);
 				VUHDO_syncOverlaysForUnit(tBossUnit);
@@ -1396,8 +1399,7 @@ do
 						VUHDO_RAID["focus"] = nil;
 					end
 
-					VUHDO_updateHealthBarsFor("focus", 1); -- VUHDO_UPDATE_ALL
-					VUHDO_initEventBouquetsFor("focus");
+					VUHDO_initHealthBarsFor("focus");
 				end
 
 				VUHDO_updateBouquetsForEvent("player", 23); -- VUHDO_UPDATE_PLAYER_FOCUS
@@ -1898,6 +1900,21 @@ do
 				VUHDO_printPoolMetrics();
 			end
 
+		elseif tCommandWord == "bouq" then
+			tSubCommand = strlower(tParsedTexts[2] or "");
+
+			if tSubCommand == "on" then
+				VUHDO_setBouquetProfiling(true);
+			elseif tSubCommand == "off" then
+				VUHDO_setBouquetProfiling(false);
+			elseif tSubCommand == "trace" then
+				VUHDO_setBouquetCallerTrace(not VUHDO_BOUQUET_CALLER_TRACE_ENABLED);
+			elseif strfind(tSubCommand, "res") then
+				VUHDO_resetBouquetMetrics();
+			else
+				VUHDO_printBouquetMetrics();
+			end
+
 		elseif tCommandWord == "task" then
 			tSubCommand = strlower(tParsedTexts[2] or "");
 
@@ -1965,17 +1982,20 @@ do
 				VUHDO_setDeferredTaskProfiling(true);
 				VUHDO_setPoolProfiling(true);
 				VUHDO_setSemaphoreProfiling(true);
+				VUHDO_setBouquetProfiling(true);
 			elseif tSubCommand == "off" then
 				VUHDO_setHandlerProfiling(false);
 				VUHDO_setDeferredTaskProfiling(false);
 				VUHDO_setPoolProfiling(false);
 				VUHDO_setSemaphoreProfiling(false);
+				VUHDO_setBouquetProfiling(false);
 			elseif strfind(tSubCommand, "res") then
 				VUHDO_resetHandlerMetrics();
 				VUHDO_resetDeferredTaskMetrics();
 				VUHDO_resetPoolMetrics();
 				VUHDO_resetSemaphoreMetrics();
 				VUHDO_resetAuraContainerMetrics();
+				VUHDO_resetBouquetMetrics();
 
 				VUHDO_Msg("All profiling metrics reset.");
 			elseif tSubCommand == "test" then
@@ -3866,6 +3886,7 @@ function VUHDO_showProfilingMetrics()
 		VUHDO_printPoolMetrics();
 		VUHDO_printSemaphoreMetrics();
 		VUHDO_printAuraContainerMetrics();
+		VUHDO_printBouquetMetrics();
 	end);
 
 	return;

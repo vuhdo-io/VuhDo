@@ -31,6 +31,7 @@ local VUHDO_updateAllHoTs;
 local VUHDO_removeAllHots;
 local VUHDO_getPanelButtons;
 local VUHDO_updateBouquetsForEvent;
+local VUHDO_invalidateUnitBouquetChangeStates;
 local VUHDO_resolveVehicleUnit;
 local VUHDO_getOverhealPanel;
 local VUHDO_getOverhealText;
@@ -123,6 +124,7 @@ function VUHDO_customHealthInitBurstCache()
 	VUHDO_updateAllHoTs = _G["VUHDO_updateAllHoTs"];
 	VUHDO_getPanelButtons = _G["VUHDO_getPanelButtons"];
 	VUHDO_updateBouquetsForEvent = _G["VUHDO_updateBouquetsForEvent"];
+	VUHDO_invalidateUnitBouquetChangeStates = _G["VUHDO_invalidateUnitBouquetChangeStates"];
 	VUHDO_resolveVehicleUnit = _G["VUHDO_resolveVehicleUnit"];
 	VUHDO_getOverhealPanel = _G["VUHDO_getOverhealPanel"];
 	VUHDO_getOverhealText = _G["VUHDO_getOverhealText"];
@@ -1160,6 +1162,32 @@ do
 					end
 				end
 			end
+		end
+
+		return;
+
+	end
+end
+
+
+
+do
+	--
+	local tAllButtons;
+	function VUHDO_initHealthBarsFor(aUnit)
+
+		if not aUnit then
+			return;
+		end
+
+		VUHDO_invalidateUnitBouquetChangeStates(aUnit);
+
+		tAllButtons = VUHDO_getUnitButtons(aUnit);
+
+		if tAllButtons then
+			VUHDO_updateHealthBarsFor(aUnit, 1); -- VUHDO_UPDATE_ALL
+		else
+			VUHDO_updateBouquetsForEvent(aUnit, 1); -- VUHDO_UPDATE_ALL
 		end
 
 		return;

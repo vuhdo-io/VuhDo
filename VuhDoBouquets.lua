@@ -3723,6 +3723,10 @@ do
 			if tHasSecretResults then
 				VUHDO_invalidateBouquetChangeState(aUnit, aBouquetName);
 
+				if VUHDO_BOUQUET_PROFILING_ENABLED then
+					VUHDO_recordBouquetSecretForced();
+				end
+
 				tHasChanged = true;
 			else
 				tHasChanged = VUHDO_hasBouquetChanged(aUnit, aBouquetName, true, txState["icon"], txState["timer"], txState["counter"], txState["duration"], tEvalColorHash, txState["clipL"], txState["clipR"], txState["clipT"], txState["clipB"]);
@@ -3734,6 +3738,10 @@ do
 		else
 			if tHasSecretResults then
 				VUHDO_invalidateBouquetChangeState(aUnit, aBouquetName);
+
+				if VUHDO_BOUQUET_PROFILING_ENABLED then
+					VUHDO_recordBouquetSecretForced();
+				end
 
 				tHasChanged = true;
 			else
@@ -5639,14 +5647,26 @@ do
 	local tMaxColor;
 	local tLayerTemplate;
 	local tIsAliveTime;
-	function VUHDO_updateEventBouquet(aUnit, aBouquetName, anEventType)
+	function VUHDO_updateEventBouquet(aUnit, aBouquetName, anEventType, aQueuedEventTypes)
+
+		if VUHDO_BOUQUET_PROFILING_ENABLED then
+			VUHDO_recordBouquetEvalStart(aUnit, aBouquetName, anEventType);
+		end
 
 		tIsActive, tIcon, tTimer, tCounter, tDuration, tColor, tBuffName,
 			tHasChanged, tImpact, tTimer2, tClipL, tClipR, tClipT, tClipB, tMaxColor, tLayerTemplate, tIsAliveTime
 			= VUHDO_evaluateBouquet(aUnit, aBouquetName, nil);
 
+		if VUHDO_BOUQUET_PROFILING_ENABLED then
+			VUHDO_recordBouquetEvalEnd(aBouquetName, tHasChanged);
+		end
+
 		if not tHasChanged then
 			return;
+		end
+
+		if VUHDO_BOUQUET_PROFILING_ENABLED then
+			VUHDO_recordBouquetDelegatesStart();
 		end
 
 		for _, tDelegate in pairs(VUHDO_REGISTERED_BOUQUETS[aBouquetName]) do
@@ -5656,7 +5676,19 @@ do
 
 		VUHDO_ACTIVE_BOUQUETS[aUnit][aBouquetName] = tIsActive;
 
-		VUHDO_updateAllTextIndicatorsForEvent(aUnit, anEventType, aBouquetName, tIsActive);
+		if aQueuedEventTypes then
+			for tQueuedEventType = 1, 50 do
+				if aQueuedEventTypes[tQueuedEventType] then
+					VUHDO_updateAllTextIndicatorsForEvent(aUnit, tQueuedEventType, aBouquetName, tIsActive);
+				end
+			end
+		else
+			VUHDO_updateAllTextIndicatorsForEvent(aUnit, anEventType, aBouquetName, tIsActive);
+		end
+
+		if VUHDO_BOUQUET_PROFILING_ENABLED then
+			VUHDO_recordBouquetDelegatesEnd(aBouquetName);
+		end
 
 		return;
 
@@ -5703,17 +5735,31 @@ end
 
 --
 local tInterestedBouquets;
+local tIsQueueing;
 function VUHDO_updateBouquetsForEvent(aUnit, anEventType)
+
+	if VUHDO_BOUQUET_PROFILING_ENABLED then
+		VUHDO_recordBouquetEventStart(anEventType);
+	end
 
 	if aUnit then
 		tInterestedBouquets = VUHDO_EVENT_INTEREST_CACHE[anEventType];
+		tIsQueueing = VUHDO_shouldQueueBouquetEval(anEventType);
 
-		for tName, _ in pairs(tInterestedBouquets) do
-			VUHDO_updateEventBouquet(aUnit, tName, anEventType);
+		for tBouquetName, _ in pairs(tInterestedBouquets) do
+			if tIsQueueing then
+				VUHDO_queueBouquetEval(aUnit, tBouquetName, anEventType);
+			else
+				VUHDO_updateEventBouquet(aUnit, tBouquetName, anEventType);
+			end
 		end
 	end
 
 	VUHDO_updateAllTextIndicatorsForEvent(aUnit, anEventType);
+
+	if VUHDO_BOUQUET_PROFILING_ENABLED then
+		VUHDO_recordBouquetEventEnd(anEventType, aUnit and VUHDO_EVENT_INTEREST_CACHE[anEventType]);
+	end
 
 	return;
 
@@ -5727,14 +5773,14 @@ function VUHDO_initAllEventBouquets()
 
 	VUHDO_releaseAndWipeLastEvaluatedBouquets();
 
+	VUHDO_registerAllTextIndicators();
+
 	for tUnit, _ in pairs(VUHDO_RAID) do
 		VUHDO_updateBouquetsForEvent(tUnit, 1); -- VUHDO_UPDATE_ALL
 	end
 
 	VUHDO_updateBouquetsForEvent("focus", 1); -- VUHDO_UPDATE_ALL
 	VUHDO_updateBouquetsForEvent("target", 1); -- VUHDO_UPDATE_ALL
-
-	VUHDO_registerAllTextIndicators();
 
 	return;
 
@@ -5747,14 +5793,14 @@ function VUHDO_deferInitAllEventBouquetsDelegate()
 
 	VUHDO_releaseAndWipeLastEvaluatedBouquets();
 
+	VUHDO_registerAllTextIndicators();
+
 	for tUnit, _ in pairs(VUHDO_RAID) do
 		VUHDO_deferUpdateBouquetsForEvent(tUnit, 1); -- VUHDO_UPDATE_ALL
 	end
 
 	VUHDO_deferUpdateBouquetsForEvent("focus", 1); -- VUHDO_UPDATE_ALL
 	VUHDO_deferUpdateBouquetsForEvent("target", 1); -- VUHDO_UPDATE_ALL
-
-	VUHDO_registerAllTextIndicators();
 
 	return;
 
@@ -5773,6 +5819,26 @@ end
 
 
 
+do
+	--
+	local tUnitChangeState;
+	function VUHDO_invalidateUnitBouquetChangeStates(aUnit)
+
+		for _, tUnitStates in pairs(VUHDO_LAST_EVALUATED_BOUQUETS) do
+			tUnitChangeState = tUnitStates[aUnit];
+
+			if tUnitChangeState then
+				tUnitChangeState[1] = nil; -- Change "active" flag to enforce re-evaluation
+			end
+		end
+
+		return;
+
+	end
+end
+
+
+
 --
 local tUnitToInit;
 function VUHDO_initEventBouquetsFor(...)
@@ -5780,13 +5846,7 @@ function VUHDO_initEventBouquetsFor(...)
 	for tCnt = 1, select('#', ...) do
 		tUnitToInit = select(tCnt, ...);
 
-		for _, tAllBouquetUnits in pairs(VUHDO_LAST_EVALUATED_BOUQUETS) do
-			for tUnit, tAllResults in pairs(tAllBouquetUnits) do
-				if tUnit == tUnitToInit then
-					tAllResults[1] = nil; -- Change "active" flag to enforce re-evaluation
-				end
-			end
-		end
+		VUHDO_invalidateUnitBouquetChangeStates(tUnitToInit);
 
 		VUHDO_updateBouquetsForEvent(tUnitToInit, 1); -- VUHDO_UPDATE_ALL
 	end

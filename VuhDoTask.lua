@@ -66,6 +66,7 @@ VUHDO_DEFER_ACQUIRE_OVERLAY_CONTAINER = 42;
 VUHDO_DEFER_FLUSH_PENDING_OVERLAY_REBUILD = 43;
 VUHDO_DEFER_VOLATILE_PASS_FOR_BUTTON = 44;
 VUHDO_DEFER_SYNC_SWIFTMEND_OVERLAY_GATES = 45;
+VUHDO_DEFER_INIT_HEALTH_BARS_FOR = 46;
 
 local VUHDO_DEFERRED_TASK_TYPES = {
 	VUHDO_DEFER_UPDATE_HEALTH,
@@ -111,6 +112,7 @@ local VUHDO_DEFERRED_TASK_TYPES = {
 	VUHDO_DEFER_FLUSH_PENDING_OVERLAY_REBUILD,
 	VUHDO_DEFER_VOLATILE_PASS_FOR_BUTTON,
 	VUHDO_DEFER_SYNC_SWIFTMEND_OVERLAY_GATES,
+	VUHDO_DEFER_INIT_HEALTH_BARS_FOR,
 };
 
 local VUHDO_COMBAT_UNSAFE_TASKS = {
@@ -260,6 +262,9 @@ local VUHDO_TASK_QUEUE_MAP = { };
 
 local VUHDO_processPendingAuraContainerBuilds;
 local VUHDO_processPendingNativeAuraSounds;
+local VUHDO_setBouquetEvalQueueing;
+local VUHDO_getPendingBouquetEvalCost;
+local VUHDO_processPendingBouquetEvals;
 
 local VUHDO_argToString = VUHDO_argToString;
 
@@ -377,6 +382,17 @@ end
 function VUHDO_deferUpdateHealthBarsFor(aUnit, aMode, aPriority)
 
 	VUHDO_deferTask(VUHDO_DEFER_UPDATE_HEALTH_BARS_FOR, aPriority or VUHDO_DEFERRED_TASK_PRIORITY_HIGH, aUnit, aMode);
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_deferInitHealthBarsFor(aUnit, aPriority)
+
+	VUHDO_deferTask(VUHDO_DEFER_INIT_HEALTH_BARS_FOR, aPriority or VUHDO_DEFERRED_TASK_PRIORITY_HIGH, aUnit);
 
 	return;
 
@@ -1070,7 +1086,7 @@ do
 		tMetrics["totalTimeUsByTypeSession"][aTaskType] = tMetrics["totalTimeUsByTypeSession"][aTaskType] + aTaskDurationUs;
 		tMetrics["queueTimeUsByTypeSession"][aTaskType] = tMetrics["queueTimeUsByTypeSession"][aTaskType] + (aQueueTimeUs or 0);
 
-		if aQueueTimeUs and aQueueTimeUs > 0 then
+		if aQueueTimeUs then
 			if not tMetrics["queueTimeTailMeanTrackerByType"] then
 				tMetrics["queueTimeTailMeanTrackerByType"] = { };
 			end
@@ -1187,7 +1203,7 @@ do
 			tNewTask["taskKey"] = VUHDO_getTaskKey(aType, tNewTask["args"]);
 
 			if VUHDO_DEFERRED_TASK_PROFILING_ENABLED then
-				tNewTask["enqueueTime"] = GetTime();
+				tNewTask["enqueueTime"] = debugprofilestop();
 			end
 
 			tTaskKey = tNewTask["taskKey"];
@@ -1528,7 +1544,7 @@ do
 			tQueueTimeUs = 0;
 
 			if tTask["enqueueTime"] then
-				tQueueTimeUs = (GetTime() - tTask["enqueueTime"]) * 1000000;
+				tQueueTimeUs = (debugprofilestop() - tTask["enqueueTime"]) * 1000;
 			end
 
 			VUHDO_DEFERRED_TASK_STATE["invocationCountByType"][tTaskType] = (VUHDO_DEFERRED_TASK_STATE["invocationCountByType"][tTaskType] or 0) + 1;
@@ -1637,7 +1653,7 @@ do
 		tQueueTimeUs = 0;
 
 		if aTask["enqueueTime"] then
-			tQueueTimeUs = (GetTime() - aTask["enqueueTime"]) * 1000000;
+			tQueueTimeUs = (debugprofilestop() - aTask["enqueueTime"]) * 1000;
 		end
 
 		VUHDO_updateDeferredTaskIndividualMetrics(aTaskType, aTaskDurationUs, tArgsSummary, #aTask["args"] or 0, tQueueTimeUs);
@@ -1759,7 +1775,7 @@ do
 				break;
 			end
 
-			if (debugprofilestop() * 1000) > tHardStopTime and tTasksCompleted >= tTaskConfig["MIN_TASKS_PER_FRAME"] then
+			if (debugprofilestop() * 1000) + VUHDO_getPendingBouquetEvalCost() > tHardStopTime and tTasksCompleted >= tTaskConfig["MIN_TASKS_PER_FRAME"] then
 				VUHDO_incrementDeferredTaskHardStops();
 
 				break;
@@ -1782,7 +1798,7 @@ do
 				if tTasksCompleted >= tTaskConfig["MIN_TASKS_PER_FRAME"] then
 					tNowUs = debugprofilestop() * 1000;
 
-					if tNowUs > tSoftStopTime or tNowUs + VUHDO_getTaskBudgetEstimate(tTaskType) > tHardStopTime then
+					if tNowUs > tSoftStopTime or tNowUs + VUHDO_getTaskBudgetEstimate(tTaskType) + VUHDO_getPendingBouquetEvalCost() > tHardStopTime then
 						break;
 					end
 				end
@@ -1824,7 +1840,7 @@ do
 				tNowUs = debugprofilestop() * 1000;
 				tBudgetUs = VUHDO_getTaskBudgetEstimate(tTaskType);
 
-				if tNowUs + tBudgetUs <= tHardStopTime then
+				if tNowUs + tBudgetUs + VUHDO_getPendingBouquetEvalCost() <= tHardStopTime then
 					_, _, tTaskDurationUs = VUHDO_executeSingleTask(tStarvationTask);
 
 					VUHDO_recordExecutedTaskMetrics(tStarvationTask, tTaskType, tTaskDurationUs, tBudgetUs, tTaskMetricsForSnapshot);
@@ -1875,6 +1891,8 @@ do
 			return;
 		end
 
+		VUHDO_setBouquetEvalQueueing(true);
+
 		if #VUHDO_TASK_PRIORITY_QUEUE > 0 or #sCombatHeldTasks > 0 then
 			if VUHDO_DEFERRED_TASK_PROFILING_ENABLED then
 				if MeasureCall then
@@ -1901,6 +1919,14 @@ do
 			else
 				tNumTasksProcessed = VUHDO_executeDeferredTaskChunk();
 			end
+		end
+
+		VUHDO_setBouquetEvalQueueing(false);
+
+		tDrainSuccess, tDrainError = xpcall(VUHDO_processPendingBouquetEvals, VUHDO_deferredTaskErrorHandler);
+
+		if not tDrainSuccess then
+			VUHDO_Msg(format("Pending bouquet eval failure:\nError: %s", tostring(tDrainError)));
 		end
 
 		if GetTime() - tTaskState["lastAdjustTime"] >= tTaskConfig["ADJUST_INTERVAL_SECS"] then
@@ -2067,6 +2093,7 @@ do
 	local tTasksPerSecond;
 	local tTasksPerCentumMs;
 	local tTotalQueueTimeUsForType;
+	local tAvgQueueTimeUsForType;
 	local tQueueTailMeans;
 	local tBudgetStats;
 	local tBudgetNowUs;
@@ -2200,13 +2227,15 @@ do
 					tQueueTailMeanValues[tIndex] = VUHDO_formatTime(tQueueTailMeans[tTailMeanKey] or 0) or "0 us";
 				end
 
-				tQueueFormatArgs = { VUHDO_formatTime(tTotalQueueTimeUsForType) };
+				tAvgQueueTimeUsForType = tProcessed > 0 and (tTotalQueueTimeUsForType / tProcessed) or 0;
+
+				tQueueFormatArgs = { VUHDO_formatTime(tTotalQueueTimeUsForType), VUHDO_formatTime(tAvgQueueTimeUsForType) };
 
 				for tIndex = 1, #tQueueTailMeanValues do
 					tinsert(tQueueFormatArgs, tQueueTailMeanValues[tIndex]);
 				end
 
-				VUHDO_Msg(format("    |cff98FB98Queue:|r Total=%s, " .. tTailMeanFormat, unpack(tQueueFormatArgs)));
+				VUHDO_Msg(format("    |cff98FB98Queue:|r Total=%s, Avg=%s, " .. tTailMeanFormat, unpack(tQueueFormatArgs)));
 
 				tBudgetStats = VUHDO_DEFERRED_TASK_STATE["budgetStatsByType"] and VUHDO_DEFERRED_TASK_STATE["budgetStatsByType"][tTaskType];
 
@@ -2411,6 +2440,7 @@ function VUHDO_initTaskSystem()
 		sDeferredTaskDelegates = {
 			[VUHDO_DEFER_UPDATE_HEALTH] = _G["VUHDO_updateHealth"],
 			[VUHDO_DEFER_UPDATE_HEALTH_BARS_FOR] = _G["VUHDO_updateHealthBarsFor"],
+			[VUHDO_DEFER_INIT_HEALTH_BARS_FOR] = _G["VUHDO_initHealthBarsFor"],
 			[VUHDO_DEFER_SET_HEALTH] = _G["VUHDO_setHealth"],
 			[VUHDO_DEFER_UPDATE_SHIELD_BAR] = _G["VUHDO_updateShieldBar"],
 			[VUHDO_DEFER_UPDATE_HEAL_ABSORB_BAR] = _G["VUHDO_updateHealAbsorbBar"],
@@ -2490,6 +2520,9 @@ function VUHDO_initTaskSystem()
 
 		VUHDO_processPendingAuraContainerBuilds = _G["VUHDO_processPendingAuraContainerBuilds"];
 		VUHDO_processPendingNativeAuraSounds = _G["VUHDO_processPendingNativeAuraSounds"];
+		VUHDO_setBouquetEvalQueueing = _G["VUHDO_setBouquetEvalQueueing"];
+		VUHDO_getPendingBouquetEvalCost = _G["VUHDO_getPendingBouquetEvalCost"];
+		VUHDO_processPendingBouquetEvals = _G["VUHDO_processPendingBouquetEvals"];
 
 		VUHDO_DEFERRED_TASK_STATE["isInit"] = true;
 	end

@@ -109,6 +109,7 @@ local VUHDO_getUnitGroup;
 local VUHDO_tableUniqueAdd;
 local VUHDO_getTargetUnit;
 local VUHDO_updateHealthBarsFor;
+local VUHDO_initHealthBarsFor;
 local VUHDO_trimInspected;
 
 local VUHDO_getPlayerRaidUnit;
@@ -198,6 +199,7 @@ function VUHDO_vuhdoInitLocalOverrides()
 	VUHDO_determineAura = _G["VUHDO_determineAura"];
 	VUHDO_getUnitGroup = _G["VUHDO_getUnitGroup"];
 	VUHDO_updateHealthBarsFor = _G["VUHDO_updateHealthBarsFor"];
+	VUHDO_initHealthBarsFor = _G["VUHDO_initHealthBarsFor"];
 	VUHDO_tableUniqueAdd = _G["VUHDO_tableUniqueAdd"];
 	VUHDO_trimInspected = _G["VUHDO_trimInspected"];
 	VUHDO_getTargetUnit = _G["VUHDO_getTargetUnit"];
@@ -1574,8 +1576,7 @@ function VUHDO_reloadRaidMembers()
 
 				VUHDO_RAID[tBossUnitId] = nil;
 
-				VUHDO_updateHealthBarsFor(tBossUnitId, 1); -- VUHDO_UPDATE_ALL
-				VUHDO_initEventBouquetsFor(tBossUnitId);
+				VUHDO_initHealthBarsFor(tBossUnitId);
 			end
 		end
 
@@ -1730,8 +1731,7 @@ function VUHDO_refreshRaidMembers()
 
 			VUHDO_RAID[tBossUnitId] = nil;
 
-			VUHDO_updateHealthBarsFor(tBossUnitId, 1); -- VUHDO_UPDATE_ALL
-			VUHDO_initEventBouquetsFor(tBossUnitId);
+			VUHDO_initHealthBarsFor(tBossUnitId);
 		end
 	end
 

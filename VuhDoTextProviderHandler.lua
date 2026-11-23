@@ -441,10 +441,6 @@ function VUHDO_registerAllTextIndicators()
 		end
 	end
 
-	for tUnit, _ in pairs(VUHDO_RAID) do
-		VUHDO_updateBouquetsForEvent(tUnit, 1); -- VUHDO_UPDATE_ALL
-	end
-
 	VUHDO_initTextProviderSourceComboModel();
 
 	VUHDO_buildProviderInterestCache();
