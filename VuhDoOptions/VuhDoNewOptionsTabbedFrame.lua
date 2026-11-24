@@ -120,6 +120,9 @@ function VUHDO_tabbedPanelOkayClicked(aButton)
 	VUHDO_initFromSpellbook();
 	VUHDO_registerAllBouquets(false);
 
+	VUHDO_clearUndefinedModelEntries();
+	VUHDO_rewritePanelModels();
+
 	local _, tProfile = VUHDO_getProfileNamedCompressed(VUHDO_CONFIG["CURRENT_PROFILE"]);
 	if (VUHDO_CURRENT_PROFILE == "") then
 		VUHDO_CONFIG["CURRENT_PROFILE"] = "";
