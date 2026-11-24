@@ -146,6 +146,9 @@ local sCombatHeldTaskMap = { };
 local sSortedCostHistory = { };
 local sSkippedHighPriorityTasks = { };
 local sIsStarvationTaskDue = false;
+local sTaskDedupNilSentinel = { };
+local sTaskDedupRoots = { };
+local sTaskDedupNoArgLeaves = { };
 
 local VUHDO_DEFERRED_TASK_PROFILING_ENABLED = false;
 
@@ -662,12 +665,9 @@ end
 
 do
 	--
-	local sTaskDedupNilSentinel = { };
-	local sTaskDedupRoots = { };
-	local sTaskDedupNoArgLeaves = { };
 	local tDedupNode;
 	local tDedupArg;
-	local function VUHDO_getTaskKey(aType, aArgs)
+	function VUHDO_getTaskKey(aType, aArgs)
 
 		if #aArgs == 0 then
 			tDedupNode = sTaskDedupNoArgLeaves[aType];
@@ -712,56 +712,34 @@ do
 
 
 	--
-	local function VUHDO_heapCompare(aTaskA, aTaskB)
-
-		if aTaskA["priority"] ~= aTaskB["priority"] then
-			return aTaskA["priority"] > aTaskB["priority"];
-		end
-
-		if aTaskA["enqueueOrder"] ~= aTaskB["enqueueOrder"] then
-			return aTaskA["enqueueOrder"] < aTaskB["enqueueOrder"];
-		end
-
-		return aTaskA["heapIndex"] < aTaskB["heapIndex"];
-
-	end
-
-
-
-	--
-	local tTaskA;
-	local tTaskB;
-	local function VUHDO_heapSwap(aHeap, anIndexA, anIndexB)
-
-		tTaskA = aHeap[anIndexA];
-		tTaskB = aHeap[anIndexB];
-
-		aHeap[anIndexA] = tTaskB;
-		aHeap[anIndexB] = tTaskA;
-
-		tTaskA["heapIndex"] = anIndexB;
-		tTaskB["heapIndex"] = anIndexA;
-
-		return;
-
-	end
-
-
-
-	--
+	local tMovingTask;
+	local tMovingPriority;
+	local tMovingEnqueueOrder;
 	local tChildIndex;
 	local tParentIndex;
+	local tParentTask;
 	local function VUHDO_heapSiftUp(aHeap, anIndex)
 
+		tMovingTask = aHeap[anIndex];
+		tMovingPriority = tMovingTask["priority"];
+		tMovingEnqueueOrder = tMovingTask["enqueueOrder"];
 		tChildIndex = anIndex;
-		tParentIndex = floor(tChildIndex / 2);
 
-		while tChildIndex > 1 and VUHDO_heapCompare(aHeap[tChildIndex], aHeap[tParentIndex]) do
-			VUHDO_heapSwap(aHeap, tChildIndex, tParentIndex);
-
-			tChildIndex = tParentIndex;
+		while tChildIndex > 1 do
 			tParentIndex = floor(tChildIndex / 2);
+			tParentTask = aHeap[tParentIndex];
+
+			if tMovingPriority < tParentTask["priority"] or (tMovingPriority == tParentTask["priority"] and tMovingEnqueueOrder > tParentTask["enqueueOrder"]) then
+				break;
+			end
+
+			aHeap[tChildIndex] = tParentTask;
+			tParentTask["heapIndex"] = tChildIndex;
+			tChildIndex = tParentIndex;
 		end
+
+		aHeap[tChildIndex] = tMovingTask;
+		tMovingTask["heapIndex"] = tChildIndex;
 
 		return;
 
@@ -770,36 +748,63 @@ do
 
 
 	--
+	local tMovingTask;
+	local tMovingPriority;
+	local tMovingEnqueueOrder;
 	local tParentIndex;
 	local tLeftChildIndex;
 	local tRightChildIndex;
-	local tSwapIndex;
+	local tChildIndex;
+	local tChildTask;
+	local tChildPriority;
+	local tChildEnqueueOrder;
+	local tRightChildTask;
+	local tRightChildPriority;
+	local tRightChildEnqueueOrder;
 	local function VUHDO_heapSiftDown(aHeap, anIndex, aNumElements)
 
+		tMovingTask = aHeap[anIndex];
+		tMovingPriority = tMovingTask["priority"];
+		tMovingEnqueueOrder = tMovingTask["enqueueOrder"];
 		tParentIndex = anIndex;
 
 		while true do
 			tLeftChildIndex = tParentIndex * 2;
 			tRightChildIndex = tLeftChildIndex + 1;
 
-			tSwapIndex = tParentIndex;
-
-			if tLeftChildIndex <= aNumElements and VUHDO_heapCompare(aHeap[tLeftChildIndex], aHeap[tSwapIndex]) then
-				tSwapIndex = tLeftChildIndex;
-			end
-
-			if tRightChildIndex <= aNumElements and VUHDO_heapCompare(aHeap[tRightChildIndex], aHeap[tSwapIndex]) then
-				tSwapIndex = tRightChildIndex;
-			end
-
-			if tSwapIndex == tParentIndex then
+			if tLeftChildIndex > aNumElements then
 				break;
 			end
 
-			VUHDO_heapSwap(aHeap, tParentIndex, tSwapIndex);
+			tChildIndex = tLeftChildIndex;
+			tChildTask = aHeap[tChildIndex];
+			tChildPriority = tChildTask["priority"];
+			tChildEnqueueOrder = tChildTask["enqueueOrder"];
 
-			tParentIndex = tSwapIndex;
+			if tRightChildIndex <= aNumElements then
+				tRightChildTask = aHeap[tRightChildIndex];
+				tRightChildPriority = tRightChildTask["priority"];
+				tRightChildEnqueueOrder = tRightChildTask["enqueueOrder"];
+
+				if tChildPriority < tRightChildPriority or (tChildPriority == tRightChildPriority and tChildEnqueueOrder > tRightChildEnqueueOrder) then
+					tChildIndex = tRightChildIndex;
+					tChildTask = tRightChildTask;
+					tChildPriority = tRightChildPriority;
+					tChildEnqueueOrder = tRightChildEnqueueOrder;
+				end
+			end
+
+			if tMovingPriority > tChildPriority or (tMovingPriority == tChildPriority and tMovingEnqueueOrder < tChildEnqueueOrder) then
+				break;
+			end
+
+			aHeap[tParentIndex] = tChildTask;
+			tChildTask["heapIndex"] = tParentIndex;
+			tParentIndex = tChildIndex;
 		end
+
+		aHeap[tParentIndex] = tMovingTask;
+		tMovingTask["heapIndex"] = tParentIndex;
 
 		return;
 
@@ -864,7 +869,7 @@ do
 
 	--
 	local tOldPriority;
-	local function VUHDO_heapUpdateTask(aHeap, aTask, aNewPriority)
+	function VUHDO_heapUpdateTask(aHeap, aTask, aNewPriority)
 
 		tOldPriority = aTask["priority"];
 
@@ -879,9 +884,11 @@ do
 		return;
 
 	end
+end
 
 
 
+do
 	--
 	local tTaskChunkSnapshots;
 	local tNewSnapshot;

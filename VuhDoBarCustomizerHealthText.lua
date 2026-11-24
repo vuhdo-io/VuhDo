@@ -7,9 +7,7 @@ local UnitHealthMax = UnitHealthMax;
 local UnitHealthMissing = UnitHealthMissing;
 local UnitHealthPercent = UnitHealthPercent;
 local AbbreviateNumbers = AbbreviateNumbers;
-local CreateColorCurve =C_CurveUtil and C_CurveUtil.CreateColorCurve;
 local CreateCurve = C_CurveUtil and C_CurveUtil.CreateCurve;
-local CreateColor = CreateColor;
 local TruncateWhenZero = C_StringUtil and C_StringUtil.TruncateWhenZero;
 local WrapString = C_StringUtil and C_StringUtil.WrapString;
 local UnitGetDetailedHealPrediction = UnitGetDetailedHealPrediction;
@@ -65,16 +63,16 @@ local function VUHDO_buildHideIrrelevantCurve()
 		return nil;
 	end
 
-	tCurve = CreateColorCurve();
+	tCurve = CreateCurve();
 	tCurve:SetType(Enum.LuaCurveType.Step);
 
 	-- FIXME: operation modes other than neutral with 100% trigger are bugged
 	--tThresholdDecimal = VUHDO_CONFIG["EMERGENCY_TRIGGER"] / 100;
 	tThresholdDecimal = 1;
 
-	tCurve:AddPoint(0.0, CreateColor(1, 1, 1, 1));
-	tCurve:AddPoint(tThresholdDecimal, CreateColor(1, 1, 1, 0));
-	tCurve:AddPoint(1.0, CreateColor(1, 1, 1, 0));
+	tCurve:AddPoint(0.0, 1);
+	tCurve:AddPoint(tThresholdDecimal, 0);
+	tCurve:AddPoint(1.0, 0);
 
 	return tCurve;
 
@@ -89,11 +87,11 @@ local function VUHDO_buildHideMissingZeroCurve()
 		return nil;
 	end
 
-	tCurve = CreateColorCurve();
+	tCurve = CreateCurve();
 	tCurve:SetType(Enum.LuaCurveType.Step);
 
-	tCurve:AddPoint(0.0, CreateColor(1, 1, 1, 1));
-	tCurve:AddPoint(1.0, CreateColor(1, 1, 1, 0));
+	tCurve:AddPoint(0.0, 1);
+	tCurve:AddPoint(1.0, 0);
 
 	return tCurve;
 
@@ -108,11 +106,11 @@ local function VUHDO_buildShowWhenFullCurve()
 		return nil;
 	end
 
-	tCurve = CreateColorCurve();
+	tCurve = CreateCurve();
 	tCurve:SetType(Enum.LuaCurveType.Step);
 
-	tCurve:AddPoint(0.0, CreateColor(1, 1, 1, 0));
-	tCurve:AddPoint(1.0, CreateColor(1, 1, 1, 1));
+	tCurve:AddPoint(0.0, 0);
+	tCurve:AddPoint(1.0, 1);
 
 	return tCurve;
 
@@ -127,16 +125,16 @@ local function VUHDO_buildShowWhenIrrelevantCurve()
 		return nil;
 	end
 
-	tCurve = CreateColorCurve();
+	tCurve = CreateCurve();
 	tCurve:SetType(Enum.LuaCurveType.Step);
 
 	-- FIXME: operation modes other than neutral with 100% trigger are bugged
 	--tThresholdDecimal = VUHDO_CONFIG["EMERGENCY_TRIGGER"] / 100;
 	tThresholdDecimal = 1;
 
-	tCurve:AddPoint(0.0, CreateColor(1, 1, 1, 0));
-	tCurve:AddPoint(tThresholdDecimal, CreateColor(1, 1, 1, 1));
-	tCurve:AddPoint(1.0, CreateColor(1, 1, 1, 1));
+	tCurve:AddPoint(0.0, 0);
+	tCurve:AddPoint(tThresholdDecimal, 1);
+	tCurve:AddPoint(1.0, 1);
 
 	return tCurve;
 
@@ -192,14 +190,12 @@ function VUHDO_customHealthTextInitLocalOverrides()
 			sHealthTextCalculator:SetMaximumHealthMode(Enum.UnitMaximumHealthMode.Default);
 		end
 
-		sScaleTo100CeilCurve = CreateCurve and CreateCurve();
+		sScaleTo100CeilCurve = CreateCurve();
 
-		if sScaleTo100CeilCurve then
-			sScaleTo100CeilCurve:SetType(Enum.LuaCurveType.Linear);
+		sScaleTo100CeilCurve:SetType(Enum.LuaCurveType.Linear);
 
-			sScaleTo100CeilCurve:AddPoint(0.0, 0.99999);
-			sScaleTo100CeilCurve:AddPoint(1.0, 100.99999);
-		end
+		sScaleTo100CeilCurve:AddPoint(0.0, 0.99999);
+		sScaleTo100CeilCurve:AddPoint(1.0, 100.99999);
 	end
 
 	sHideIrrelevantCurve = VUHDO_buildHideIrrelevantCurve();
@@ -483,8 +479,8 @@ end
 
 
 --
-local tAlphaColor;
-local tSoloAlphaColor;
+local tAlphaCurve;
+local tSoloAlphaCurve;
 local function VUHDO_applyLifeTextAlpha(aHealthBar, aUnit, aInfo, aLifeConfig)
 
 	if not sSecretsEnabled then
@@ -495,28 +491,30 @@ local function VUHDO_applyLifeTextAlpha(aHealthBar, aUnit, aInfo, aLifeConfig)
 		return;
 	end
 
-	tAlphaColor = nil;
-	tSoloAlphaColor = nil;
+	tAlphaCurve = nil;
+	tSoloAlphaCurve = nil;
 
-	if aLifeConfig["hideIrrelevant"] and aInfo["hasSecretHealth"] and sHideIrrelevantCurve then
-		tAlphaColor = UnitHealthPercent(aUnit, true, sHideIrrelevantCurve);
-		tSoloAlphaColor = sShowWhenIrrelevantCurve and UnitHealthPercent(aUnit, true, sShowWhenIrrelevantCurve);
-	elseif 3 == aLifeConfig["mode"] and not aLifeConfig["verbose"] and sHideMissingZeroCurve then
-		tAlphaColor = UnitHealthPercent(aUnit, true, sHideMissingZeroCurve);
-		tSoloAlphaColor = sShowWhenFullCurve and UnitHealthPercent(aUnit, true, sShowWhenFullCurve);
+	if aLifeConfig["hideIrrelevant"] and aInfo["hasSecretHealth"] then
+		tAlphaCurve = sHideIrrelevantCurve;
+		tSoloAlphaCurve = sShowWhenIrrelevantCurve;
+	elseif 3 == aLifeConfig["mode"] and not aLifeConfig["verbose"] then
+		tAlphaCurve = sHideMissingZeroCurve;
+		tSoloAlphaCurve = sShowWhenFullCurve;
 	end
 
-	if tAlphaColor then
-		if 1 == aLifeConfig["position"] or 2 == aLifeConfig["position"] then
-			VUHDO_setLifeTextAlpha(VUHDO_getBarText(aHealthBar), tAlphaColor["a"] or 1);
-			VUHDO_setLifeTextAlpha(VUHDO_getBarTextSolo(aHealthBar), tSoloAlphaColor and tSoloAlphaColor["a"] or 1);
-		else
-			VUHDO_setLifeTextAlpha(VUHDO_getLifeText(aHealthBar), tAlphaColor["a"] or 1);
-			VUHDO_setLifeTextAlpha(VUHDO_getBarText(aHealthBar), 1);
-			VUHDO_setLifeTextAlpha(VUHDO_getBarTextSolo(aHealthBar), 0);
-		end
-	else
+	if not tAlphaCurve then
 		VUHDO_setLifeTextAlpha(VUHDO_getLifeText(aHealthBar), 1);
+		VUHDO_setLifeTextAlpha(VUHDO_getBarText(aHealthBar), 1);
+		VUHDO_setLifeTextAlpha(VUHDO_getBarTextSolo(aHealthBar), 0);
+
+		return;
+	end
+
+	if 1 == aLifeConfig["position"] or 2 == aLifeConfig["position"] then
+		VUHDO_setLifeTextAlpha(VUHDO_getBarText(aHealthBar), UnitHealthPercent(aUnit, true, tAlphaCurve));
+		VUHDO_setLifeTextAlpha(VUHDO_getBarTextSolo(aHealthBar), UnitHealthPercent(aUnit, true, tSoloAlphaCurve));
+	else
+		VUHDO_setLifeTextAlpha(VUHDO_getLifeText(aHealthBar), UnitHealthPercent(aUnit, true, tAlphaCurve));
 		VUHDO_setLifeTextAlpha(VUHDO_getBarText(aHealthBar), 1);
 		VUHDO_setLifeTextAlpha(VUHDO_getBarTextSolo(aHealthBar), 0);
 	end
