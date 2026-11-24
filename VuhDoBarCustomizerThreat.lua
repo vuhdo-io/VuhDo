@@ -293,15 +293,6 @@ function VUHDO_onUnitInRangeUpdate(aUnit, anIsInRange)
 		return;
 	end
 
-	if "player" == aUnit then
-		tUnitInfo["baseRange"] = true;
-		tUnitInfo["isEventRange"] = VUHDO_isUnitRangeEventDriven(aUnit);
-
-		VUHDO_updateUnitRange(aUnit);
-
-		return;
-	end
-
 	if not VUHDO_isUnitRangeCheckable(aUnit) then
 		tUnitInfo["isEventRange"] = VUHDO_isUnitRangeEventDriven(aUnit);
 
