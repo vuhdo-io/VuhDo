@@ -17,6 +17,8 @@ local tinsert = table.insert;
 local tremove = table.remove;
 local twipe = table.wipe;
 local floor = math.floor;
+local max = math.max;
+local min = math.min;
 local issecretvalue = issecretvalue;
 local SetCVar = SetCVar;
 local GetCVar = GetCVar;
@@ -561,6 +563,7 @@ local sLastShapeshiftTime = 0;
 local sIsKeyboardMacroRebuildPending = false;
 local sSpellbookRefreshScheduled = false;
 local sSpellbookRefreshNeedsBuffRetry = false;
+local sTimerDeadlines = { };
 
 local VuhDoGcdStatusBar;
 local VuhDoDirectionFrame;
@@ -758,6 +761,27 @@ VUHDO_TIMERS = {
 	["REFRESH_MISSING_BUFF_CONTAINERS"] = -1,
 };
 local VUHDO_TIMERS = VUHDO_TIMERS;
+
+
+
+--
+local tNow;
+local tDeadline;
+local function VUHDO_setCappedTimer(aTimerName, aDelay, aMaxWait)
+
+	tNow = GetTime();
+	tDeadline = tNow + aMaxWait;
+
+	if VUHDO_TIMERS[aTimerName] <= 0 or tDeadline < sTimerDeadlines[aTimerName] then
+		sTimerDeadlines[aTimerName] = tDeadline;
+	end
+
+	VUHDO_TIMERS[aTimerName] = max(0.01, min(aDelay, sTimerDeadlines[aTimerName] - tNow));
+
+	return;
+
+end
+
 
 
 VUHDO_CONFIG = nil;
@@ -1171,7 +1195,7 @@ local function VUHDO_updateBossUnits()
 			end
 
 			if VUHDO_TIMERS["RELOAD_ROSTER"] < 0.15 then
-				VUHDO_TIMERS["RELOAD_ROSTER"] = 0.15;
+				VUHDO_setCappedTimer("RELOAD_ROSTER", 0.15, 0.15);
 			end
 		elseif tBossGuid == sEmpty then
 			VUHDO_resetAuraContainersForUnit(tBossUnit);
@@ -1334,9 +1358,7 @@ do
 			if VUHDO_FIRST_RELOAD_UI then
 				VUHDO_normalRaidReload(true);
 
-				if VUHDO_TIMERS["RELOAD_ROSTER"] < 0.4 then
-					VUHDO_TIMERS["RELOAD_ROSTER"] = 0.6;
-				end
+				VUHDO_setCappedTimer("RELOAD_ROSTER", 0.6, 0.9);
 			end
 
 			if VUHDO_VARIABLES_LOADED then
@@ -2287,7 +2309,7 @@ function VUHDO_normalRaidReload(anIsReloadBuffs)
 		return;
 	end
 
-	VUHDO_TIMERS["RELOAD_RAID"] = 2.3;
+	VUHDO_setCappedTimer("RELOAD_RAID", 2.3, 5);
 
 	if anIsReloadBuffs then
 		VUHDO_IS_RELOAD_BUFFS = true;
@@ -2302,7 +2324,7 @@ end
 --
 function VUHDO_quickRaidReload()
 
-	VUHDO_TIMERS["RELOAD_RAID"] = 0.3;
+	VUHDO_setCappedTimer("RELOAD_RAID", 0.3, 0.3);
 
 	return;
 
@@ -2314,7 +2336,20 @@ end
 function VUHDO_lateRaidReload()
 
 	if not VUHDO_isReloadPending() then
-		VUHDO_TIMERS["RELOAD_RAID"] = 5;
+		VUHDO_setCappedTimer("RELOAD_RAID", 5, 5);
+	end
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_quickRaidReloadIfIdle()
+
+	if not VUHDO_isReloadPending() then
+		VUHDO_quickRaidReload();
 	end
 
 	return;
@@ -2440,7 +2475,7 @@ end
 
 
 --
-local function VUHDO_doReloadRoster(anIsQuick)
+local function VUHDO_doReloadRoster()
 
 	if not VUHDO_isConfigPanelShowing() then
 		if VUHDO_IS_RELOADING or VUHDO_isDeferredRefreshActive() or VUHDO_isDeferredRedrawActive() then
@@ -2466,7 +2501,7 @@ local function VUHDO_doReloadRoster(anIsQuick)
 
 				VUHDO_TIMERS["RELOAD_RAID"] = 0;
 
-				if VUHDO_IS_RELOAD_BUFFS and not anIsQuick then
+				if VUHDO_IS_RELOAD_BUFFS then
 					VUHDO_reloadBuffPanel();
 
 					VUHDO_IS_RELOAD_BUFFS = false;
@@ -2730,12 +2765,12 @@ do
 
 		-- Reload raid roster?
 		if VUHDO_checkTimer("RELOAD_RAID") and not VUHDO_loadChangedAutoProfile() then
-			VUHDO_doReloadRoster(false);
+			VUHDO_doReloadRoster();
 		end
 
 		-- Quick update after raid roster change?
 		if VUHDO_checkTimer("RELOAD_ROSTER") and not VUHDO_loadChangedAutoProfile() then
-			VUHDO_doReloadRoster(true);
+			VUHDO_doReloadRoster();
 		end
 
 		-- refresh HoTs, cyclic bouquets and custom debuffs?

@@ -43,7 +43,7 @@ Maybe later.
 ## Which Auras to track: Auras → Groups
 
  **None of the premade Groups can be edited**. 
- To still customize them, select the Aura Group you'd like to use as a base, then click "Copy".  This will copy all settings from the original, but make them editable. You may also give this group a new name. Per default, a newly copied Aura Group will have the same name as the old one, only with the suffix `(copy)` added.
+ To still customize them, select the Aura Group you'd like to use as a base, then click "Copy".  This will copy all settings from the original, but make them editable. You may also give this group a new name. Per default, a newly copied Aura Group will have the same name as the old one, only with the suffix `(Copy)` added.
 
 ### List-Type Auras: Add individual Spells/HoTs
 
@@ -53,8 +53,7 @@ First off: Because of Blizzard's restrictions, this only works for Buffs on frie
 
 This is a copy of the default `Restoration Druid HoTs` Group in WoW Forever I've created using the `Copy` Button. (This works the same in Retail, too.)
 
-Above the spell list, to the right you can see the dropdowns for `Type` and `Show On`. `Type` switches the Aura Group between being a Filter-Type or List-Type Aura. `Show On` decides if this Aura Group and its colors, when anchored, should only show up on friendly units, hostile units, or on both. 
-One use case for `Show On` is used by the NPC panel of the default profile. Here, there are two Anchors using the same exact position and style. One Anchor holds the `My Debuffs`-group to show your own DoTs, set to show on hostile NPCs, while the other Anchor holds `Relevant Debuffs`, to show things on friendly NPCs you may need to heal.
+Above the spell list, to the right you can see the dropdowns for `Type` and `Show On`. `Type` switches the Aura Group between being a Filter-Type or List-Type Aura. `Show On` decides if this Aura Group and its colors, when anchored, should only show up on friendly units, hostile units, or on both. See [Filter-Type Aura Groups](#filter-type-aura-groups) for a default-profile example.
 
 Auras will show up on your [Anchors](#how-auras-get-displayed-panels--auras) in the order you pick here. The first spell in the list will show up in the first position of your anchor. 
 
@@ -89,7 +88,9 @@ You'll likely mostly use them for debuffs on friendly units, so I'll use a copy 
 
 <img src="images/auras-filters-filters.png" alt="Circled settings for Show on, Auras, and Preset" width="650"/>
 
-With `Show on`, you can choose if you'd like this group to show up on the frames of friendly, hostile, or both types of units later. (Keep in mind that you will still need to add it to an anchor later either way.)
+With `Show On`, you can choose if you'd like this group to show up on the frames of friendly, hostile, or both types of units later. (Keep in mind that you will still need to add it to an anchor later either way.)
+
+The default profile's second panel (Private Tanks and Bosses) uses two aura anchors with the same position and icon style. One anchor is scoped only to friendlies and shows `Relevant Debuffs` (debuffs on private tanks you may need to heal). The other is scoped only to hostiles and shows `My Debuffs` (your DoTs on boss frames).
 
 In `Auras`, you can choose whether you'd like to show debuffs or buffs in this group. 
 With the `Presets` dropdown, you can decide if you'd like to base your group off an existing Aura Group, or make a custom one.  Using a preset, then making changes to it, will change this to say "Custom", but keep your settings from the preset.
@@ -336,7 +337,7 @@ What's on there for Forever? Let's find out together, this will be updated when 
 
 Bouquets still work, though some validators are no longer available due to the restrictions put in place by Blizzard. Invalid or no longer working bouquet entries shouldn't cause errors, but degrade gracefully.
 
-The Auras you can track via list-type Aura Groups can still be tracked as usual within Bouquets. Simply add them via Spell ID or name.
+Aura entries in bouquets follow the same tracking rules as list-type aura groups: only helpful auras on friendly units and harmful auras on hostile units.
 
 Aura Groups (no matter if filter-type or list-type) can be put into Bouquets using the `Flag: Aura Group Active` flag. You can then select the group from the bottom `Group`-dropdown.
 

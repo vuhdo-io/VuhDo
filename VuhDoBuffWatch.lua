@@ -35,6 +35,7 @@ local sUniqueRoleWatchMemoTime = -1;
 local sUniqueRoleWatchMemo = { };
 local sUniqueRoleWatchAll = { };
 local sDestGroupScratch = { };
+local sAppliedBuffButtonSetups = { };
 
 -- Backdrops
 BACKDROP_VUHDO_BUFF_SWATCH_PANEL_8_8_0000 = {
@@ -66,6 +67,7 @@ local VUHDO_RAID_NAMES;
 local VUHDO_RAID_FULL_NAMES;
 local VUHDO_getUnitIdentityKey;
 local VUHDO_resolveUnitByName;
+local VUHDO_quickRaidReloadIfIdle;
 local VUHDO_BOSS_UNITS;
 local VUHDO_GROUPS;
 
@@ -85,6 +87,8 @@ local GetSpellInfo = GetSpellInfo or VUHDO_getSpellInfo;
 local InCombatLockdown = InCombatLockdown;
 local GetWeaponEnchantInfo = C_Item and C_Item.GetWeaponEnchantInfo or VUHDO_getWeaponEnchantInfo;
 local UnitOnTaxi = UnitOnTaxi;
+local UnitExists = UnitExists;
+local UnitGUID = UnitGUID;
 local GetShapeshiftFormInfo = GetShapeshiftFormInfo;
 local issecretvalue = issecretvalue;
 local AbbreviateNumbers = AbbreviateNumbers;
@@ -145,10 +149,12 @@ function VUHDO_buffWatchInitLocalOverrides()
 	VUHDO_RAID = _G["VUHDO_RAID"];
 	VUHDO_RAID_NAMES = _G["VUHDO_RAID_NAMES"];
 	VUHDO_RAID_FULL_NAMES = _G["VUHDO_RAID_FULL_NAMES"];
-	VUHDO_getUnitIdentityKey = _G["VUHDO_getUnitIdentityKey"];
-	VUHDO_resolveUnitByName = _G["VUHDO_resolveUnitByName"];
 	VUHDO_BOSS_UNITS = _G["VUHDO_BOSS_UNITS"];
 	VUHDO_GROUPS = _G["VUHDO_GROUPS"];
+
+	VUHDO_getUnitIdentityKey = _G["VUHDO_getUnitIdentityKey"];
+	VUHDO_resolveUnitByName = _G["VUHDO_resolveUnitByName"];
+	VUHDO_quickRaidReloadIfIdle = _G["VUHDO_quickRaidReloadIfIdle"];
 
 	VUHDO_tableUniqueAdd = _G["VUHDO_tableUniqueAdd"];
 	VUHDO_isInSameZone = _G["VUHDO_isInSameZone"];
@@ -599,6 +605,54 @@ end
 
 do
 	--
+	local tInfo;
+	local tLiveGuid;
+	local tModelGuid;
+	function VUHDO_isBuffTargetUnitCurrent(aUnit)
+
+		if not aUnit then
+			return false;
+		end
+
+		if "player" == aUnit or "target" == aUnit or "focus" == aUnit then
+			return true;
+		end
+
+		if not UnitExists(aUnit) then
+			return false;
+		end
+
+		tInfo = VUHDO_RAID[aUnit];
+
+		if not tInfo then
+			return false;
+		end
+
+		if tInfo["hasSecretIdentity"] then
+			return true;
+		end
+
+		tModelGuid = tInfo["guid"];
+
+		if not tModelGuid or (sSecretsEnabled and issecretvalue(tModelGuid)) then
+			return true;
+		end
+
+		tLiveGuid = UnitGUID(aUnit);
+
+		if not tLiveGuid or (sSecretsEnabled and issecretvalue(tLiveGuid)) then
+			return true;
+		end
+
+		return tLiveGuid == tModelGuid;
+
+	end
+end
+
+
+
+do
+	--
 	function VUHDO_isUseSingleBuff(aSwatch)
 
 		if VUHDO_BUFF_TARGET_SINGLE ~= aSwatch:GetAttribute("buff")[2] then
@@ -639,23 +693,52 @@ do
 
 
 	--
-	function VUHDO_setupAllBuffButtonUnits(aButton, aUnit)
-		VUHDO_safeSetAttribute(aButton, "unit", aUnit or "_foo");
+	function VUHDO_isBuffButtonInitialized(aButton)
+
+		return nil ~= sAppliedBuffButtonSetups[aButton];
+
 	end
 
 
 
 	--
-	--local tModiKey, tButtonId;
+	local tSetup;
+	local tActionName;
 	function VUHDO_setupAllBuffButtonsTo(aButton, aBuffName, aUnit, aTargetType)
-		if InCombatLockdown() then return; end
 
-		VUHDO_setupAllBuffButtonUnits(aButton, aUnit);
-		for _, tWithMinus in pairs(VUHDO_MODIFIER_KEYS) do
-			for tCnt = 1, VUHDO_NUM_MOUSE_BUTTONS do
-				VUHDO_setupBuffButtonAttributes(tWithMinus, tCnt, tCnt ~= 2 and aBuffName or nil, aButton, aTargetType);
+		if InCombatLockdown() then
+			return;
+		end
+
+		tSetup = sAppliedBuffButtonSetups[aButton];
+
+		if tSetup and tSetup["unit"] == aUnit then
+			if not aUnit or (tSetup["buffName"] == aBuffName and tSetup["targetType"] == aTargetType) then
+				return;
 			end
 		end
+
+		VUHDO_safeSetAttribute(aButton, "unit", aUnit);
+
+		for _, tWithMinus in pairs(VUHDO_MODIFIER_KEYS) do
+			for tCnt = 1, VUHDO_NUM_MOUSE_BUTTONS do
+				tActionName = aUnit and tCnt ~= 2 and aBuffName or nil;
+				VUHDO_setupBuffButtonAttributes(tWithMinus, tCnt, tActionName, aButton, aTargetType);
+			end
+		end
+
+		if not tSetup then
+			tSetup = { };
+
+			sAppliedBuffButtonSetups[aButton] = tSetup;
+		end
+
+		tSetup["buffName"] = aBuffName;
+		tSetup["unit"] = aUnit;
+		tSetup["targetType"] = aTargetType;
+
+		return;
+
 	end
 end
 
@@ -697,13 +780,20 @@ do
 			VUHDO_updateBuffFilters();
 		end
 	end
+end
 
 
 
+do
 	--
+	local tSwatch;
+	local tVariant;
+	local tBuff;
+	local tTarget;
 	function VuhDoBuffPreClick(aButton, aMouseButton)
-		local tSwatch = aButton:GetParent();
-		local tVariant = tSwatch:GetAttribute("buff");
+
+		tSwatch = aButton:GetParent();
+		tVariant = tSwatch:GetAttribute("buff");
 
 		if "RightButton" == aMouseButton then
 			VUHDO_CLICKED_BUFF = tVariant;
@@ -713,32 +803,60 @@ do
 		end
 
 		VUHDO_IS_USED_SMART_BUFF = VUHDO_isUseSingleBuff(tSwatch);
-		local tBuff = tVariant[1];
+		tBuff = tVariant[1];
 
 		if 2 == VUHDO_IS_USED_SMART_BUFF and aMouseButton == "LeftButton" then
 			UIErrorsFrame:AddMessage(VUHDO_I18N_SMARTBUFF_ERR_2 .. tBuff, 1, 0.1, 0.1, 1);
-			VUHDO_setupAllBuffButtonsTo(aButton, "", "", nil);
+
+			VUHDO_setupAllBuffButtonsTo(aButton, tBuff, nil, tVariant[2]);
+
 			return;
 		end
 
-		local tTarget = VUHDO_IS_USED_SMART_BUFF
+		tTarget = VUHDO_IS_USED_SMART_BUFF
 			and tSwatch:GetAttribute("lowtarget") or tSwatch:GetAttribute("goodtarget");
+
+		if tTarget and not VUHDO_isBuffTargetUnitCurrent(tTarget) then
+			VUHDO_quickRaidReloadIfIdle();
+
+			tTarget = nil;
+		end
 
 		VUHDO_setupAllBuffButtonsTo(aButton, tBuff, tTarget, tVariant[2]);
 
 		if not tTarget and aMouseButton ~= "RightButton" then
 			UIErrorsFrame:AddMessage(VUHDO_I18N_SMARTBUFF_ERR_2 .. tBuff, 1, 0.1, 0.1, 1);
 		end
+
+		return;
+
 	end
+end
 
 
 
+do
 	--
+	local tVariant;
+	local tTarget;
 	function VuhDoBuffPostClick(aButton, aMouseButton)
+
 		if VUHDO_IS_USED_SMART_BUFF then
-			local tVariant = aButton:GetParent():GetAttribute("buff");
-			VUHDO_setupAllBuffButtonsTo(aButton, tVariant[1], aButton:GetParent():GetAttribute("goodtarget"), tVariant[2]);
+			tVariant = aButton:GetParent():GetAttribute("buff");
+
+			tTarget = aButton:GetParent():GetAttribute("goodtarget");
+
+			if tTarget and not VUHDO_isBuffTargetUnitCurrent(tTarget) then
+				VUHDO_quickRaidReloadIfIdle();
+
+				tTarget = nil;
+			end
+
+			VUHDO_setupAllBuffButtonsTo(aButton, tVariant[1], tTarget, tVariant[2]);
 		end
+
+		return;
+
 	end
 end
 
@@ -1791,37 +1909,6 @@ do
 
 
 	--
-	local tSyncBtn;
-	local tSyncG;
-	local tSyncVar;
-	function VUHDO_buffWatchUpdateGlassButton(aSwatch)
-
-		if InCombatLockdown() then
-			return;
-		end
-
-		tSyncBtn = _G[aSwatch:GetName() .. "GlassButton"];
-		tSyncVar = aSwatch:GetAttribute("buff");
-
-		if not tSyncBtn or not tSyncVar then
-			return;
-		end
-
-		if true == VUHDO_isUseSingleBuff(aSwatch) then
-			tSyncG = aSwatch:GetAttribute("lowtarget");
-		else
-			tSyncG = aSwatch:GetAttribute("goodtarget");
-		end
-
-		VUHDO_setupAllBuffButtonsTo(tSyncBtn, tSyncVar[1], tSyncG, tSyncVar[2]);
-
-		return;
-
-	end
-
-
-
-	--
 	local tMissGroup;
 	local tLowGroup;
 	local tGoodTarget;
@@ -2126,6 +2213,45 @@ do
 		VUHDO_NUM_LOWS[tSwatchName] = #(tLowGroup or sEmpty) + #(tMissGroup or sEmpty);
 
 		VUHDO_buffWatchUpdateGlassButton(aSwatch);
+
+		return;
+
+	end
+end
+
+
+
+do
+	--
+	local tButton;
+	local tVariant;
+	local tTarget;
+	function VUHDO_buffWatchUpdateGlassButton(aSwatch)
+
+		if InCombatLockdown() then
+			return;
+		end
+
+		tButton = _G[aSwatch:GetName() .. "GlassButton"];
+		tVariant = aSwatch:GetAttribute("buff");
+
+		if not tButton or not tVariant then
+			return;
+		end
+
+		if true == VUHDO_isUseSingleBuff(aSwatch) then
+			tTarget = aSwatch:GetAttribute("lowtarget");
+		else
+			tTarget = aSwatch:GetAttribute("goodtarget");
+		end
+
+		if tTarget and not VUHDO_isBuffTargetUnitCurrent(tTarget) then
+			VUHDO_quickRaidReloadIfIdle();
+
+			tTarget = nil;
+		end
+
+		VUHDO_setupAllBuffButtonsTo(tButton, tVariant[1], tTarget, tVariant[2]);
 
 		return;
 

@@ -1,5 +1,5 @@
 [VuhDo FAQ](https://github.com/vuhdo-io/VuhDo/wiki/VuhDo-FAQ)  
-[VuhDo Classic FAQ](https://github.com/vuhdo-io/VuhDo/wiki/VuhDo-Classic-FAQ)
+[VuhDo Classic FAQ](https://github.com/vuhdo-io/VuhDo/wiki/VuhDo-Classic-FAQ)  
 [VuhDo Auras Guide (Forever and Retail)](https://github.com/vuhdo-io/VuhDo/wiki/VuhDo-Auras-Midnight-and-Forever)  
 [VuhDo Slash Commands](https://github.com/vuhdo-io/VuhDo/wiki/VuhDo-Slash-Commands)  
 [VuhDo Custom Flags](https://github.com/vuhdo-io/VuhDo/wiki/VuhDo-Custom-Flag-Bouquet-Validators)  
