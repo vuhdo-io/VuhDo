@@ -3130,6 +3130,7 @@ do
 		end
 
 		tinsert(aSignatureParts, format("%d", aButtonSetup["iconType"] or 0));
+		tinsert(aSignatureParts, aButtonSetup["hideIcon"] and "1" or "0");
 		tinsert(aSignatureParts, aButtonSetup["barVertical"] and "1" or "0");
 		tinsert(aSignatureParts, aButtonSetup["barTurnAxis"] and "1" or "0");
 		tinsert(aSignatureParts, aButtonSetup["durationBar"] and "1" or "0");
