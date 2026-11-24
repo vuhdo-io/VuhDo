@@ -15,6 +15,8 @@ local VUHDO_removeAllDebuffIcons;
 local VUHDO_updateTargetBars;
 local VUHDO_updateHealthBarsFor;
 local VUHDO_initHealthBarsFor;
+local VUHDO_invalidateUnitBouquetChangeStates;
+local VUHDO_getUnitButtons;
 local VUHDO_getUnitButtonsSafe;
 local VUHDO_getPlayerTargetFrame;
 local VUHDO_cleanupSpellTraceForUnit;
@@ -41,6 +43,8 @@ function VUHDO_playerTargetEventHandlerInitLocalOverrides()
 	VUHDO_updateTargetBars = _G["VUHDO_updateTargetBars"];
 	VUHDO_updateHealthBarsFor = _G["VUHDO_updateHealthBarsFor"];
 	VUHDO_initHealthBarsFor = _G["VUHDO_initHealthBarsFor"];
+	VUHDO_invalidateUnitBouquetChangeStates = _G["VUHDO_invalidateUnitBouquetChangeStates"];
+	VUHDO_getUnitButtons = _G["VUHDO_getUnitButtons"];
 	VUHDO_getUnitButtonsSafe = _G["VUHDO_getUnitButtonsSafe"];
 	VUHDO_getPlayerTargetFrame = _G["VUHDO_getPlayerTargetFrame"];
 	VUHDO_cleanupSpellTraceForUnit = _G["VUHDO_cleanupSpellTraceForUnit"];
@@ -60,7 +64,7 @@ local VUHDO_CURR_PLAYER_TARGET = nil;
 local tTargetUnit;
 local tOldTarget;
 local tEmptyInfo = { };
-function VUHDO_updatePlayerTarget()
+function VUHDO_updatePlayerTarget(anIsFullRefreshQueued)
 
 	tTargetUnit = nil;
 
@@ -104,6 +108,12 @@ function VUHDO_updatePlayerTarget()
 
 			VUHDO_setHealth("target", 1); -- VUHDO_UPDATE_ALL
 
+			if anIsFullRefreshQueued and VUHDO_getUnitButtons("target") then
+				VUHDO_invalidateUnitBouquetChangeStates("target");
+			else
+				VUHDO_initHealthBarsFor("target");
+			end
+
 		else
 			VUHDO_clearUnitAuraCache("target");
 
@@ -120,9 +130,9 @@ function VUHDO_updatePlayerTarget()
 			VUHDO_unregisterUnitForEvents("target");
 
 			VUHDO_RAID["target"] = nil;
-		end
 
-		VUHDO_initHealthBarsFor("target");
+			VUHDO_initHealthBarsFor("target");
+		end
 
 	end
 

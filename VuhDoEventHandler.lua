@@ -1477,7 +1477,7 @@ do
 			if VUHDO_VARIABLES_LOADED then
 				VUHDO_cancelPendingTargetFocusInspect("target");
 
-				VUHDO_updatePlayerTarget();
+				VUHDO_updatePlayerTarget(true);
 
 				VUHDO_updateHealth("player", 1);
 				VUHDO_updateBouquetsForEvent("player", 22); -- VUHDO_UPDATE_UNIT_TARGET
