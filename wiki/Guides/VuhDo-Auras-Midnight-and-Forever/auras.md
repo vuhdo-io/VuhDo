@@ -43,7 +43,7 @@ Maybe later.
 ## Which Auras to track: Auras → Groups
 
  **None of the premade Groups can be edited**. 
- To still customize them, select the Aura Group you'd like to use as a base, then click "Copy".  This will copy all settings from the original, but make them editable. You may also give this group a new name.
+ To still customize them, select the Aura Group you'd like to use as a base, then click "Copy".  This will copy all settings from the original, but make them editable. You may also give this group a new name. Per default, a newly copied Aura Group will have the same name as the old one, only with the suffix `(copy)` added.
 
 ### List-Type Auras: Add individual Spells/HoTs
 
@@ -53,7 +53,8 @@ First off: Because of Blizzard's restrictions, this only works for Buffs on frie
 
 This is a copy of the default `Restoration Druid HoTs` Group in WoW Forever I've created using the `Copy` Button. (This works the same in Retail, too.)
 
-Above the spell list, to the right you can see the dropdowns for `Type` and `Scope`. `Type` switches the Aura Group between being a Filter-Type or List-Type Aura. `Scope` decides if this Aura Group and its colors, when anchored, should only show up on friendly units, hostile units, or on both. This is helpful on focus or target frames in PvP, for example.
+Above the spell list, to the right you can see the dropdowns for `Type` and `Show On`. `Type` switches the Aura Group between being a Filter-Type or List-Type Aura. `Show On` decides if this Aura Group and its colors, when anchored, should only show up on friendly units, hostile units, or on both. 
+One use case for `Show On` is used by the NPC panel of the default profile. Here, there are two Anchors using the same exact position and style. One Anchor holds the `My Debuffs`-group to show your own DoTs, set to show on hostile NPCs, while the other Anchor holds `Relevant Debuffs`, to show things on friendly NPCs you may need to heal.
 
 Auras will show up on your [Anchors](#how-auras-get-displayed-panels--auras) in the order you pick here. The first spell in the list will show up in the first position of your anchor. 
 
@@ -118,14 +119,18 @@ With `Exclude Dispel Type`, you can, for example, hide Bleeds specifically, if y
 
 ### Bar Colors (Custom, Dispel, Glow)
 
-You can then set a `Color Type` for an Aura Group. The choices here are `Custom` and `Debuff`. Additionally, you can configure a bar glow, or a sound that plays, when any of the Auras in this Group are applied.
+Changing the Color settings of an Aura Group applies the colors **regardless** of whether or not the Aura Group is anchored to any Panels (Anchors will be explained [here](#how-Auras-get-displayed-panels--Auras)). This is useful for when you want your frames to turn certain colors, but not show any icons.
 
-**Custom:** You may set a custom color for when **any** of the Auras in this Group are active on the player. You can click the example bar shown to change the Colors for both Text and the bar itself for this Aura Group. 
- 
-**Dispel:** This uses the Colors configured under Colors>States. The best use for it is on a debuff-based Group, like "Relevant Debuffs".
- 
-Changing these Color settings applies the colors **regardless** of whether or not the Aura Group is anchored to any Panels (Anchors will be explained [here](#how-Auras-get-displayed-panels--Auras)). This is useful for when you want your frames to turn certain colors, but not show any icons.
+*Note that the main default Aura Group a lot of people will be using to track Debuffs, **"Dispellable Debuffs", already has its bar colors configured** to the "Dispel"-colors, so **you won't need to do this manually.***
 
+The choices for color types are `Custom`, `My Dispels` and `All Dispels`. Additionally, you can configure a bar glow, or a sound that plays, when any of the Auras in this Group are applied.
+
+**<u>Custom:</u>** You may set a custom color for when **any** of the Auras in this Group are active on the player. You can click the example bar shown to change the Colors for both Text and the bar itself for this Aura Group. 
+ 
+**<u>My Dispels:</u>** This shows the colors configured in Colors → States when an aura **you can dispel or purge** is active.
+
+**<u>All Dispels:</u>** This uses the colors configured in Colors → States when an aura **that can be dispelled/purged, no matter if your class can dispel/purge it** is active. Make sure you use this on a group that isn't limited to auras only you can dispel/purge.
+ 
 The priority slider controls which Aura Group's color settings take precedence over other Aura Groups. The lower the number, the higher the priority.
 
 Example:
@@ -133,10 +138,8 @@ Example:
 - Aura Group 2 has custom colors enabled and a priority of 10
 
 When Auras from both Groups are present, the custom color of Aura Group 2 takes priority
- 
-*Note that the main default Aura a lot of people will be using to track Debuffs, **"Dispellable Debuffs", already has its bar colors configured** to the "Dispel"-Colors, so **you won't need to do this manually.***
- 
-If you'd like the color settings of a built-in Group to not apply anymore, simply uncheck the "Enable" Box at the top of the Aura Group. This will also disable this group for selection in Panels → Auras. If you'd like to keep icons without colors, create a copy, disable colors for this copy and anchor it instead.
+  
+If you'd like the color settings of a built-in Group to not apply anymore, simply uncheck the `Enable` Box at the top of the Aura Group. This will also disable this group for selection in Panels → Auras. If you'd like to keep icons without colors, create a copy, disable colors for this copy and anchor it instead.
 
 If you check `Show Dispel Overlay` in Colors → States, the VuhDo-style dispel overlay will be *replaced* by a Blizzard-style one. If your dispel color overlay looks strange all of a sudden, check if turning this off fixes things for you.
 
@@ -147,7 +150,7 @@ This is where you can configure which Aura Groups actually show up on your frame
 
 These settings are per-panel, so to apply them to all of your panels, use the `apply all`-button on the bottom right. Otherwise, only your selected panel  will be impacted by the changes you make here. 
 
-If you're not sure which panel is currently selected, you can see the panel number above the VuhDo Options, e.g. Panel #1. Additionally, if you look at the frames you've set up, each panel will have its label above it, e.g. PANEL 1. The currently selected one will be flashing. You can select a different panel by clicking its label.
+If you're not sure which panel is currently selected, you can see the panel number above the VuhDo Options, e.g. `Panel #1`. Additionally, if you look at the frames you've set up, each panel will have its label above it, e.g. `PANEL 1`. The currently selected one will be flashing. You can select a different panel by clicking its label.
 
 
 <img src="images/panel-number-panel.png" alt="Panel number displayed on the panel" width="100"/>
@@ -301,7 +304,7 @@ In Colors → Auras, you can set the defaults for your Anchors.
 
 <u>Aura Bar Color:</u> Changes the default color and opacity for [bar-style anchors](#aura-bar-setup). This can be overwritten in the [spell-specific settings](#list-type-auras-add-individual-spellshots).
 
-<u>Triangle Color:</u> Changes the default color for the triangle-style stack display.
+<u>Triangle Color:</u> Changes the default color for the triangle-style stack display. 
 
 <u>**Pandemic settings** apply to Retail only, since this isn't a mechanic in Forever, so Blizzard doesn't give addons the tools for this. </u>
 
@@ -327,11 +330,13 @@ A relic of worse times shaped by guess-based dispels.
 
 Jokes aside, the only things that show up on there as of S2 of Midnight are some fixates and the soak at the last boss of AoF. Make sure it's set to a reasonable size so you don't get jumpscared by giant fixate icons, or feel free to disable it outright.
 
-What's on there for Forever? You tell me, lol.
+What's on there for Forever? Let's find out together, this will be updated when we know more!
 
 ## What about Bouquets? 
 
-The Auras you can track via list-type Aura Groups can also be tracked as usual in the form of Bouquets. Simply add them via Spell ID or name.
+Bouquets still work, though some validators are no longer available due to the restrictions put in place by Blizzard. Invalid or no longer working bouquet entries shouldn't cause errors, but degrade gracefully.
+
+The Auras you can track via list-type Aura Groups can still be tracked as usual within Bouquets. Simply add them via Spell ID or name.
 
 Aura Groups (no matter if filter-type or list-type) can be put into Bouquets using the `Flag: Aura Group Active` flag. You can then select the group from the bottom `Group`-dropdown.
 
@@ -339,4 +344,4 @@ Aura Groups (no matter if filter-type or list-type) can be put into Bouquets usi
 
 These are some examples of groups/common setups for you to just copy the settings from. -->
 
-<!--wieso tu ich mir das an-->
+<!--wieso tu ich mir das an lmao-->
