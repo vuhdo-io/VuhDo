@@ -54,6 +54,7 @@ local VUHDO_getDisplayUnit;
 local VUHDO_textColor;
 local VUHDO_isInRange;
 local VUHDO_unitIsUnit;
+local VUHDO_isSpecialUnit;
 local VUHDO_setStatusBarVuhDoColor;
 local VUHDO_applyAllLayersToBar;
 local VUHDO_getBarText;
@@ -85,6 +86,7 @@ function VUHDO_customTargetInitLocalOverrides()
 	VUHDO_textColor = _G["VUHDO_textColor"];
 	VUHDO_isInRange = _G["VUHDO_isInRange"];
 	VUHDO_unitIsUnit = _G["VUHDO_unitIsUnit"];
+	VUHDO_isSpecialUnit = _G["VUHDO_isSpecialUnit"];
 	VUHDO_setStatusBarVuhDoColor = _G["VUHDO_setStatusBarVuhDoColor"];
 	VUHDO_applyAllLayersToBar = _G["VUHDO_applyAllLayersToBar"];
 	VUHDO_getBarText = _G["VUHDO_getBarText"];
@@ -339,7 +341,7 @@ local function VUHDO_rememberTargetButton(aTargetUnit, aButton)
 	end
 
 	for tUnit, tInfo in pairs(VUHDO_RAID) do
-		if VUHDO_unitIsUnit(tUnit, aTargetUnit) then
+		if not VUHDO_isSpecialUnit(tUnit) and VUHDO_unitIsUnit(tUnit, aTargetUnit) then
 			if tInfo["hasSecretIdentity"] then
 				break;
 			end
