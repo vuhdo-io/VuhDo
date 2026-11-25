@@ -115,7 +115,7 @@ function VUHDO_keyLayoutInitSpecCheckButton(aCheckButton, aSpecId)
 		local _, tSpecName = GetSpecializationInfo(tSpecId);
 
 		if tSpecName then
-			_G[aCheckButton:GetName() .. "Label"]:SetText(tIndexName .. "\n(" .. string.sub(tSpecName,1,4) .. ")");
+			_G[aCheckButton:GetName() .. "Label"]:SetText(tIndexName .. "\n(" .. VUHDO_utf8Cut(tSpecName, 4) .. ")");
 		end
 	end
 

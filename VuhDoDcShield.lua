@@ -16,12 +16,14 @@ local VUHDO_RAID;
 
 local VUHDO_getOrCreateUnitInfo;
 local VUHDO_unregisterAllUnitEventFrames;
+local VUHDO_utf8Cut;
 
 function VUHDO_dcShieldInitLocalOverrides()
 	VUHDO_RAID = _G["VUHDO_RAID"];
 
 	VUHDO_getOrCreateUnitInfo = _G["VUHDO_getOrCreateUnitInfo"];
 	VUHDO_unregisterAllUnitEventFrames = _G["VUHDO_unregisterAllUnitEventFrames"];
+	VUHDO_utf8Cut = _G["VUHDO_utf8Cut"];
 end
 
 -----------------------------------------------------------------------------------
@@ -92,6 +94,9 @@ local VUHDO_NAME_SNIPPETS = { };
 
 --
 local tMacroIndex;
+local tName;
+local tNumChars;
+local tNameSnippet;
 local function VUHDO_buildSnippetArray()
 	for tUnit, tInfo in pairs(VUHDO_RAID) do
 		tMacroIndex = ("player" == tUnit or "pet" == tUnit) and 41 or tInfo["number"];
@@ -105,7 +110,20 @@ local function VUHDO_buildSnippetArray()
 				VUHDO_ROLE_TO_MACRO[tInfo["role"]] or "_");
 
 			if not tInfo["hasSecretName"] then
-				VUHDO_NAME_SNIPPETS[tMacroIndex] = string.utf8sub(tInfo["name"] or "", 1, 3);
+				tName = tInfo["name"] or "";
+				tNumChars = 3;
+				tNameSnippet = VUHDO_utf8Cut(tName, tNumChars);
+
+				while #tNameSnippet > 3 and tNumChars > 0 do
+					tNumChars = tNumChars - 1;
+					tNameSnippet = VUHDO_utf8Cut(tName, tNumChars);
+				end
+
+				while #tNameSnippet < 3 do
+					tNameSnippet = tNameSnippet .. "_";
+				end
+
+				VUHDO_NAME_SNIPPETS[tMacroIndex] = tNameSnippet;
 			end
 		end
 	end
@@ -250,6 +268,7 @@ function VUHDO_buildRaidFromMacro()
 				or tPrefix .. tCnt;
 
 			tName = strsub(tMacroNames, tStrIdx, tStrIdx + 2);
+			tName = (tName or ""):gsub("_+$", "");
 			VUHDO_buildInfoFromSnippet(tUnit, tSnippet, tName);
 		end
 	end

@@ -126,7 +126,7 @@ function VUHDO_newOptionsSpellEditBoxCheckId(anEditBox)
 	tTextById = VUHDO_resolveSpellId(tText);
 
 	if tText ~= tTextById then
-		tTextById = strsub(tTextById, 1, 20);
+		tTextById = VUHDO_utf8Cut(tTextById, 20);
 		tLabel:SetText(tTextById);
 	else
 		tLabel:SetText("");
