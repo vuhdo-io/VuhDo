@@ -35,7 +35,8 @@ local function VUHDO_addBuffSwatch(aBuffPanel, aGroupName, aBuffInfo, aTargetMod
 	tSwatch:Show();
 
 	local tButton = _G[tSwatch:GetName() .. "GlassButton"];
-	if not tButton:GetAttribute("unit") then
+
+	if not VUHDO_isBuffButtonInitialized(tButton) then
 		VUHDO_setupAllBuffButtonsTo(tButton, tBuffName, "player", aBuffInfo[2]);
 	end
 
@@ -47,7 +48,7 @@ local function VUHDO_addBuffSwatch(aBuffPanel, aGroupName, aBuffInfo, aTargetMod
 		if tIsSingle then
 			VUHDO_setupAllBuffButtonsTo(tButton, tBuffName, tSwatch:GetAttribute("lowtarget"), aBuffInfo[2]);
 		else
-			VUHDO_setupAllBuffButtonUnits(tButton, tSwatch:GetAttribute("goodtarget"));
+			VUHDO_setupAllBuffButtonsTo(tButton, tBuffName, tSwatch:GetAttribute("goodtarget"), aBuffInfo[2]);
 		end
 	end
 

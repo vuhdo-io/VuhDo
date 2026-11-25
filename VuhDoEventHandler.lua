@@ -2343,6 +2343,19 @@ end
 
 
 --
+function VUHDO_quickRaidReloadIfIdle()
+
+	if not VUHDO_isReloadPending() then
+		VUHDO_quickRaidReload();
+	end
+
+	return;
+
+end
+
+
+
+--
 function VUHDO_isReloadPending()
 
 	return VUHDO_TIMERS["RELOAD_RAID"] > 0
