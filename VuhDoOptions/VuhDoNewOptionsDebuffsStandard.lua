@@ -91,7 +91,7 @@ local function VUHDO_showIgnoreListCustomDebuffWarning(aSpellName, aConflicts)
 	if #aConflicts > 0 then
 		tDisplayName = VUHDO_formatSpellDisplayName(aSpellName);
 
-		VUHDO_Msg("[WARNING] " .. string.format(VUHDO_I18N_IGNORE_LIST_CUSTOM_DEBUFF_WARNING, tDisplayName), 1, 0, 0);
+		VUHDO_Msg(VUHDO_I18N_WARNING_TAG .. string.format(VUHDO_I18N_IGNORE_LIST_CUSTOM_DEBUFF_WARNING, tDisplayName), 1, 0, 0);
 	end
 
 	return;
@@ -217,7 +217,7 @@ function VUHDO_deleteDebuffIgnoreClicked(aButton)
 			VUHDO_Msg(string.format(VUHDO_I18N_DEBUFF_REMOVED_FROM_IGNORE_LIST, tDisplayName));
 
 			if #tConflicts > 0 then
-				VUHDO_Msg("[WARNING] " .. string.format(VUHDO_I18N_IGNORE_LIST_CUSTOM_DEBUFF_REMOVED_WARNING, tDisplayName), 1, 0, 0);
+				VUHDO_Msg(VUHDO_I18N_WARNING_TAG .. string.format(VUHDO_I18N_IGNORE_LIST_CUSTOM_DEBUFF_REMOVED_WARNING, tDisplayName), 1, 0, 0);
 			end
 		else
 			tSpellId = string.match(tText, '([^%]%[]+)');
@@ -228,7 +228,7 @@ function VUHDO_deleteDebuffIgnoreClicked(aButton)
 				VUHDO_Msg(string.format(VUHDO_I18N_DEBUFF_REMOVED_FROM_IGNORE_LIST, tDisplayName));
 
 				if #tConflicts > 0 then
-					VUHDO_Msg("[WARNING] " .. string.format(VUHDO_I18N_IGNORE_LIST_CUSTOM_DEBUFF_REMOVED_WARNING, tDisplayName), 1, 0, 0);
+					VUHDO_Msg(VUHDO_I18N_WARNING_TAG .. string.format(VUHDO_I18N_IGNORE_LIST_CUSTOM_DEBUFF_REMOVED_WARNING, tDisplayName), 1, 0, 0);
 				end
 			else
 				VUHDO_Msg(string.format(VUHDO_I18N_DEBUFF_DOES_NOT_EXIST, tDisplayName));
@@ -275,7 +275,7 @@ function VUHDO_addDebuffToBlacklist(aCuDeIconFrame)
 			tConflicts = VUHDO_getConflictingCustomDebuffs(tDebuffSpellId);
 
 			if #tConflicts > 0 then
-				VUHDO_Msg("[WARNING] " .. string.format(VUHDO_I18N_IGNORE_LIST_CUSTOM_DEBUFF_WARNING, tDisplayName), 1, 0, 0);
+				VUHDO_Msg(VUHDO_I18N_WARNING_TAG .. string.format(VUHDO_I18N_IGNORE_LIST_CUSTOM_DEBUFF_WARNING, tDisplayName), 1, 0, 0);
 			end
 		end
 	end

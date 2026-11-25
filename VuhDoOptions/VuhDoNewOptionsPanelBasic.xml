@@ -441,11 +441,11 @@
 										{ 2, VUHDO_I18N_CLASS },
 										{ 3, VUHDO_I18N_MAX_HP },
 										{ 4, VUHDO_I18N_PANEL_MODEL },
-										{ 5, "Tank => DD => Healer" },
-										{ 6, "Tank => Healer => DD" },
-										{ 7, "Healer => Tank => DD" },
-										{ 8, "Tank => MDPS => RDPS => Healer" },
-										{ 9, "Tank => Healer => MDPS => RDPS" },
+										{ 5, VUHDO_I18N_SORT_TANK_DD_HEALER },
+										{ 6, VUHDO_I18N_SORT_TANK_HEALER_DD },
+										{ 7, VUHDO_I18N_SORT_HEALER_TANK_DD },
+										{ 8, VUHDO_I18N_SORT_TANK_MDPS_RDPS_HEALER },
+										{ 9, VUHDO_I18N_SORT_TANK_HEALER_MDPS_RDPS },
 									}
 								);
 								VUHDO_lnfSetTooltip(self, nil);

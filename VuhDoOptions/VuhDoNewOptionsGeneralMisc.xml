@@ -242,7 +242,7 @@
 						<Scripts>
 							<OnLoad>
 								VUHDO_lnfSetModel(self, "VUHDO_CONFIG.IS_READY_CHECK_DISABLED");
-								VUHDO_lnfSetTooltip(self, "Check to enable ready check icons. You need to be at least assistant in order to see ready checks anyway.");
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K914);
 							</OnLoad>
 						</Scripts>
 					</CheckButton>

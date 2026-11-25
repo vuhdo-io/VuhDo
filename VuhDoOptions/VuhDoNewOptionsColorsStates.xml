@@ -242,7 +242,7 @@
 						<Scripts>
 							<OnLoad>
 								VUHDO_lnfSetModel(self, "VUHDO_PANEL_SETUP.BAR_COLORS.DEBUFF3.useText");
-								VUHDO_lnfSetTooltip(self, "Per-type filtering not available in 12.x");
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K919);
 								self:Disable();
 								self:SetAlpha(0.5);
 							</OnLoad>
@@ -290,7 +290,7 @@
 						<Scripts>
 							<OnLoad>
 								VUHDO_lnfSetModel(self, "VUHDO_PANEL_SETUP.BAR_COLORS.DEBUFF4.useText");
-								VUHDO_lnfSetTooltip(self, "Per-type filtering not available in 12.x");
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K919);
 								self:Disable();
 								self:SetAlpha(0.5);
 							</OnLoad>
@@ -338,7 +338,7 @@
 						<Scripts>
 							<OnLoad>
 								VUHDO_lnfSetModel(self, "VUHDO_PANEL_SETUP.BAR_COLORS.DEBUFF2.useText");
-								VUHDO_lnfSetTooltip(self, "Per-type filtering not available in 12.x");
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K919);
 								self:Disable();
 								self:SetAlpha(0.5);
 							</OnLoad>
@@ -386,7 +386,7 @@
 						<Scripts>
 							<OnLoad>
 								VUHDO_lnfSetModel(self, "VUHDO_PANEL_SETUP.BAR_COLORS.DEBUFF6.useText");
-								VUHDO_lnfSetTooltip(self, "Per-type filtering not available in 12.x");
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K919);
 								self:Disable();
 								self:SetAlpha(0.5);
 							</OnLoad>
@@ -434,7 +434,7 @@
 						<Scripts>
 							<OnLoad>
 								VUHDO_lnfSetModel(self, "VUHDO_PANEL_SETUP.BAR_COLORS.DEBUFF8.useText");
-								VUHDO_lnfSetTooltip(self, "Per-type filtering not available in 12.x");
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K919);
 								self:Disable();
 								self:SetAlpha(0.5);
 							</OnLoad>
@@ -497,7 +497,7 @@
 						<Scripts>
 							<OnLoad>
 								VUHDO_lnfSetModel(self, "VUHDO_PANEL_SETUP.BAR_COLORS.DEBUFF9.useText");
-								VUHDO_lnfSetTooltip(self, "Per-type filtering not available in 12.x");
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K919);
 								self:Disable();
 								self:SetAlpha(0.5);
 							</OnLoad>
@@ -530,7 +530,7 @@
 						<Scripts>
 							<OnLoad>
 								VUHDO_lnfSetModel(self, "VUHDO_PANEL_SETUP.BAR_COLORS.DEBUFF1.useText");
-								VUHDO_lnfSetTooltip(self, "Per-type filtering not available in 12.x");
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K919);
 								self:Disable();
 								self:SetAlpha(0.5);
 							</OnLoad>
@@ -1013,7 +1013,7 @@
 						<Scripts>
 							<OnLoad>
 								VUHDO_lnfSetModel(self, "VUHDO_PANEL_SETUP.BAR_COLORS.DIRECTION");
-								VUHDO_lnfInitColorSwatch(self, "Direction Arrow", "Direction Arrow");
+								VUHDO_lnfInitColorSwatch(self, VUHDO_I18N_DIRECTION_ARROW, VUHDO_I18N_DIRECTION_ARROW);
 								VUHDO_lnfSetTooltip(self, nil);
 							</OnLoad>
 						</Scripts>

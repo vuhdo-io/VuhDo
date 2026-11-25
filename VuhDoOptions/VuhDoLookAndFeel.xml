@@ -1342,7 +1342,7 @@
 	</Scripts>
 </Button>
 
-<Button name="VuhDoShareButtonTemplate" text="Share..." inherits="VuhDoIconButtonTemplate" virtual="true">
+<Button name="VuhDoShareButtonTemplate" text="VUHDO_I18N_SHARE_ELLIPSIS" inherits="VuhDoIconButtonTemplate" virtual="true">
 	<KeyValues>
 		<KeyValue key="skinIconKey" value="icon_share" type="string"/>
 	</KeyValues>
@@ -3122,7 +3122,7 @@
 <StatusBar name="VuhDoProgressBar" virtual="true" inherits="VuhDoStatusBar">
 	<Layers>
 		<Layer>
-			<FontString name="$parentText" text="Please wait" inherits="VuDoDarkTitleFontTemplate">
+			<FontString name="$parentText" text="VUHDO_I18N_PLEASE_WAIT" inherits="VuDoDarkTitleFontTemplate">
 			</FontString>
 		</Layer>
 	</Layers>

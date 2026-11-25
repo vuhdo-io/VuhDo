@@ -40,7 +40,7 @@ local function VUHDO_showCustomDebuffIgnoreListWarning(aSpellName, aConflicts)
 			tStatusText:SetTextColor(1, 0, 0, 1);
 		end
 
-		tStatusText:SetText("[IGNORED]");
+		tStatusText:SetText(VUHDO_I18N_DEBUFF_IGNORED_TAG);
 		tStatusText:Show();
 	end
 
@@ -437,7 +437,7 @@ function VUHDO_saveCustomDebuffOnClick(aButton)
 		VUHDO_Msg(string.format(VUHDO_I18N_DEBUFF_ADDED_TO_CUSTOM, tDisplayName));
 
 		if #tConflicts > 0 then
-			VUHDO_Msg("[WARNING] " .. string.format(VUHDO_I18N_CUSTOM_DEBUFF_IGNORE_LIST_CONFLICT, tDisplayName), 1, 0, 0);
+			VUHDO_Msg(VUHDO_I18N_WARNING_TAG .. string.format(VUHDO_I18N_CUSTOM_DEBUFF_IGNORE_LIST_CONFLICT, tDisplayName), 1, 0, 0);
 		end
 	end
 
@@ -567,7 +567,7 @@ function VUHDO_deleteCustomDebuffOnClick(aButton)
 		VUHDO_Msg(string.format(VUHDO_I18N_DEBUFF_REMOVED_FROM_CUSTOM, tDisplayName));
 
 		if #tConflicts > 0 then
-			VUHDO_Msg("[WARNING] " .. string.format(VUHDO_I18N_CUSTOM_DEBUFF_IGNORE_LIST_REMOVED, tDisplayName), 1, 0, 0);
+			VUHDO_Msg(VUHDO_I18N_WARNING_TAG .. string.format(VUHDO_I18N_CUSTOM_DEBUFF_IGNORE_LIST_REMOVED, tDisplayName), 1, 0, 0);
 		end
 
 		VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED_SETTINGS"][tValue] = nil;

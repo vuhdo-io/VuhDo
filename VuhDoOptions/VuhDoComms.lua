@@ -212,7 +212,7 @@ end
 
 --
 local function VUHDO_allDataSentCallback()
-	VUHDO_Msg("Done. You may now send again to this player.");
+	VUHDO_Msg(VUHDO_I18N_COMMS_ALL_SENT);
 	VuhDoLnfShareDialog:Hide();
 end
 
@@ -235,7 +235,7 @@ local function VUHDO_sendPacketedMessage(aUnitName, someData, aDataCommand, anEn
 	local tMaxLength = sMaxPacketSize - #VUHDO_COMMS_PREFIX - #aDataCommand - #sCommandSeparator;
 
 	tPackets = floor(#someData / (tMaxLength + 1));
-	VUHDO_Msg("Sending " .. tPackets .. " packets to " .. aUnitName .. ".");
+	VUHDO_Msg(format(VUHDO_I18N_COMMS_SENDING_PACKETS, tPackets, aUnitName));
 
 	while (tIndex < #someData) do
 		if (tIndex + tMaxLength < #someData) then
@@ -268,12 +268,12 @@ local function VUHDO_isVersionCompatible(aUnitName)
 	local tCommsVersion, tVuhDoVersion, tLocale = VUHDO_getFieldsFromReply(aUnitName, sCmdVersionReply);
 
 	if (tCommsVersion == nil or tVuhDoVersion == nil or tLocale == nil) then
-		VUHDO_Msg("Aborting: Version check failed.", 1, 0.4, 0.4);
+		VUHDO_Msg(VUHDO_I18N_COMMS_VERSION_CHECK_FAILED, 1, 0.4, 0.4);
 		return false;
 	end
 
 	if (VUHDO_COMMS_VERSION ~= tonumber(tCommsVersion)) then
-		VUHDO_Msg("Aborting: VuhDo comms version mismatch! Please align VuhDo versions.", 1, 0.4, 0.4);
+		VUHDO_Msg(VUHDO_I18N_COMMS_PROTOCOL_MISMATCH, 1, 0.4, 0.4);
 		tIsCompatible = false;
 	end
 
@@ -285,17 +285,17 @@ local function VUHDO_isVersionCompatible(aUnitName)
 	end
 
 	if (tMyVersion ~= tOtherVersion) then
-		VUHDO_Msg("Aborting: VuhDo version mismatch. Please align VuhDo versions! (my: " .. tMyVersion .. " / receiver:" .. tOtherVersion .. ")", 1, 0.4, 0.4);
+		VUHDO_Msg(format(VUHDO_I18N_COMMS_VERSION_MISMATCH, tMyVersion, tOtherVersion), 1, 0.4, 0.4);
 		tIsCompatible = false;
 	end
 
 	if (GetLocale() ~= tLocale) then
-		VUHDO_Msg("Aborting: Language mismatch. Sender has locale " .. tLocale, 1, 0.4, 0.4);
+		VUHDO_Msg(format(VUHDO_I18N_COMMS_LOCALE_MISMATCH, tLocale), 1, 0.4, 0.4);
 		tIsCompatible = false;
 	end
 
 	if (tIsCompatible) then
-		VUHDO_Msg("-- VuhDo Version of " .. aUnitName .. " is compatible.");
+		VUHDO_Msg(format(VUHDO_I18N_COMMS_VERSION_COMPATIBLE, aUnitName));
 	else
 		VuhDoLnfShareDialog:Hide();
 	end
@@ -317,10 +317,10 @@ end
 local function VUHDO_confirmedUserYesNoQuestion(aUnitName)
 	local tAnswer = VUHDO_getFieldsFromReply(aUnitName, sCmdUserYesNoReply);
 	if (tostring(VUHDO_YES) == tAnswer) then
-		VUHDO_Msg("-- User " .. aUnitName .. " confirmed transaction.");
+		VUHDO_Msg(format(VUHDO_I18N_COMMS_USER_CONFIRMED, aUnitName));
 		return true;
 	else
-		VUHDO_Msg("Aborting: User " .. aUnitName .. " declined transaction.", 1, 0.4, 0.4);
+		VUHDO_Msg(format(VUHDO_I18N_COMMS_USER_DECLINED, aUnitName), 1, 0.4, 0.4);
 		VuhDoLnfShareDialog:Hide();
 		return false;
 	end
@@ -393,7 +393,7 @@ local function VUHDO_addReplyData(aUnitName, aType, someNewData)
 	tReplyData = tReplyData .. someNewData;
 
 	if (#tReplyData > sMaxReceiveSize) then
-		VUHDO_Msg("Aborting: Received amount of data from " .. aUnitName .. " exceeds max allowed!", 1, 0.4, 0.4);
+		VUHDO_Msg(format(VUHDO_I18N_COMMS_DATA_TOO_LARGE, aUnitName), 1, 0.4, 0.4);
 		sBlockedSenders[aUnitName] = true;
 		VUHDO_sendMessage(aUnitName, sCmdAbortComms, nil);
 		VUHDO_removeCommsData(aUnitName);
@@ -411,12 +411,12 @@ local function VUHDO_handleCommandReceived(aSenderName, aCommand)
 	if (sCmdAbortComms == tCommandType) then
 		VUHDO_removeCommsData(aSenderName);
 		VuhDoYesNoFrame:Hide();
-		VUHDO_Msg("Transaction aborted by " .. aSenderName);
+		VUHDO_Msg(format(VUHDO_I18N_COMMS_ABORTED_BY, aSenderName));
 	else
 		if(VUHDO_sCmdProfileDataChunk == tCommandType) then
 			VUHDO_addReplyData(aSenderName, VUHDO_sCmdProfileDataChunk, tData);
 			if (sNumChunks % 20 == 0) then
-				VUHDO_Msg("Receiving profile data: " .. strrep(".", sNumChunks / 20 + 1));
+				VUHDO_Msg(format(VUHDO_I18N_COMMS_RECEIVING_PROFILE, strrep(".", sNumChunks / 20 + 1)));
 			end
 			sNumChunks = sNumChunks + 1;
 
@@ -434,7 +434,7 @@ local function VUHDO_handleCommandReceived(aSenderName, aCommand)
 			end
 			tinsert(VUHDO_PROFILES, tProfile);
 
-			VUHDO_Msg("Transmission complete. Profile \"" .. tProfile["NAME"] .. "\" has been added.");
+			VUHDO_Msg(format(VUHDO_I18N_COMMS_PROFILE_ADDED, tProfile["NAME"]));
 			VUHDO_removeCommsData(aSenderName);
 
 		elseif(VUHDO_sCmdKeyLayoutDataChunk == tCommandType) then
@@ -444,11 +444,11 @@ local function VUHDO_handleCommandReceived(aSenderName, aCommand)
 			while (VUHDO_SPELL_LAYOUTS[tKeyLayout[1]] ~= nil) do
 				tKeyLayout[1] = aSenderName .. ": " .. tKeyLayout[1];
 			end
-			VUHDO_Msg("Transmission complete. Key Layout \"" .. tKeyLayout[1] .. "\" has been added.");
+			VUHDO_Msg(format(VUHDO_I18N_COMMS_KEY_LAYOUT_ADDED, tKeyLayout[1]));
 			VUHDO_SPELL_LAYOUTS[tKeyLayout[1]] = tKeyLayout[2];
 			VUHDO_removeCommsData(aSenderName);
 		else
-			VUHDO_Msg("Invalid VuhDo command received from " .. aSenderName .. ". Blocking.");
+			VUHDO_Msg(format(VUHDO_I18N_COMMS_INVALID_COMMAND, aSenderName));
 			sBlockedSenders[aSenderName] = true;
 		end
 	end
@@ -512,7 +512,7 @@ function VUHDO_parseVuhDoMessage(aSenderName, aMessage)
 
 	if (sBlockedSenders[aSenderName]) then
 		if (sReceiveMode < 4) then
-			VUHDO_Msg("Blocking comms from " .. aSenderName .. ". /reload to reset.", 1, 0.4, 0.4);
+			VUHDO_Msg(format(VUHDO_I18N_COMMS_BLOCKING_SENDER, aSenderName), 1, 0.4, 0.4);
 			sReceiveMode = 4;
 		end
 
@@ -521,7 +521,7 @@ function VUHDO_parseVuhDoMessage(aSenderName, aMessage)
 
 	if (not VUHDO_CONFIG["IS_SHARE"]) then
 		if (sReceiveMode > 0 and sReceiveMode < 4) then
-			VUHDO_Msg("Blocked comms from " .. aSenderName .. ". VuhDo options => Tools => Share is disabled.");
+			VUHDO_Msg(format(VUHDO_I18N_COMMS_BLOCKED_SHARE_DISABLED, aSenderName));
 			sReceiveMode = sReceiveMode + 1;
 		end
 
@@ -529,7 +529,7 @@ function VUHDO_parseVuhDoMessage(aSenderName, aMessage)
 	end
 
 	if (sReceiveMode > 0 and sReceiveMode < 4) then
-		VUHDO_Msg("Blocked comms from " .. aSenderName .. ". VuhDo options screen must be opened.");
+		VUHDO_Msg(format(VUHDO_I18N_COMMS_BLOCKED_OPTIONS_CLOSED, aSenderName));
 		sReceiveMode = sReceiveMode + 1;
 		return;
 	elseif(sReceiveMode > 0) then
@@ -568,7 +568,7 @@ function VUHDO_updateRequestsInProgress()
 			if (GetTime() > tSomeReplyInfos[1]) then
 				VUHDO_sendMessage(tReceiverName, sCmdAbortComms, nil);
 				VUHDO_removeCommsData(tReceiverName);
-				VUHDO_Msg("Aborting: Request to " .. tReceiverName .. " timed out.", 1, 0.4, 0.4);
+				VUHDO_Msg(format(VUHDO_I18N_COMMS_REQUEST_TIMEOUT, tReceiverName), 1, 0.4, 0.4);
 				VuhDoLnfShareDialog:Hide();
 			end
 		end

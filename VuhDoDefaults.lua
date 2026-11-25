@@ -2,6 +2,7 @@ local _;
 
 local pairs = pairs;
 local twipe = table.wipe;
+local format = string.format;
 
 local GetSpellName = C_Spell.GetSpellName;
 
@@ -151,7 +152,7 @@ function VUHDO_ensureSanity(aName, aValue, aSaneValue)
 	tRepairedArray = _VUHDO_ensureSanity(aName, aValue, tSaneValue);
 
 	if tCreated + tRepaired > 0 then
-		VUHDO_Msg("auto model sanity: " .. aName .. ": created " .. tCreated .. ", repaired " .. tRepaired .. " values.");
+		VUHDO_Msg(format("auto model sanity: %s: created %d, repaired %d values.", aName, tCreated, tRepaired));
 	end
 
 	return tRepairedArray;

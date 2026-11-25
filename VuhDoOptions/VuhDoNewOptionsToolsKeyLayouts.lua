@@ -413,11 +413,11 @@ end
 function VUHDO_shareCurrentKeyLayout(aUnitName, aKeyLayoutName)
 	local tLayout = VUHDO_SPELL_LAYOUTS[aKeyLayoutName];
 	if not tLayout then
-		VUHDO_Msg("There is no key layout named \"" .. (aKeyLayoutName or "") .. "\"", 1, 0.4, 0.4);
+		VUHDO_Msg(format(VUHDO_I18N_NO_KEY_LAYOUT_NAMED, aKeyLayoutName or ""), 1, 0.4, 0.4);
 		return;
 	end
 
-	local tQuestion = VUHDO_PLAYER_NAME .. " requests to transmit\nKey Layout " .. aKeyLayoutName .. " to you.\nProceed?"
+	local tQuestion = format(VUHDO_I18N_SHARE_INCOMING_KEY_LAYOUT, VUHDO_PLAYER_NAME, aKeyLayoutName);
 	VUHDO_startShare(aUnitName, { aKeyLayoutName, tLayout }, VUHDO_sCmdKeyLayoutDataChunk, VUHDO_sCmdKeyLayoutDataEnd, tQuestion);
 end
 

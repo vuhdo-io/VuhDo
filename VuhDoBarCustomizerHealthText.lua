@@ -230,7 +230,7 @@ local function VUHDO_getTagText(anInfo)
 	elseif anInfo["dead"] then
 		return UnitIsGhost(anInfo["unit"]) and format("|cffff0000%s|r", VUHDO_I18N_GHOST) or VUHDO_I18N_RIP;
 	elseif anInfo["afk"] then
-		return "afk";
+		return VUHDO_I18N_AFK;
 	end
 
 	return "";

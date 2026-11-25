@@ -2177,7 +2177,7 @@ function VUHDO_auraGroupsOnCloneGroup(aSourceId)
 		return;
 	end
 
-	tNewId = VUHDO_cloneAuraGroup(aSourceId, VUHDO_ensureUniqueAuraGroupDisplayName(VUHDO_getAuraGroupDisplayName(aSourceId) .. " (Copy)"));
+	tNewId = VUHDO_cloneAuraGroup(aSourceId, VUHDO_ensureUniqueAuraGroupDisplayName(VUHDO_getAuraGroupDisplayName(aSourceId) .. " (" .. VUHDO_I18N_COPY .. ")"));
 
 	if tNewId then
 		VUHDO_resolveAuraGroupFilter(VUHDO_CONFIG["AURA_GROUPS"][tNewId]);

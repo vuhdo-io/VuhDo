@@ -17,7 +17,7 @@
 					<Frame name="$parentTitleLabel" inherits="VuhDoLabelFrameTemplate">
 						<Layers>
 							<Layer>
-								<FontString name="$parentLabel" text="Share with..." inherits="VuDoDefaultTitleFontTemplate">
+								<FontString name="$parentLabel" text="VUHDO_I18N_SHARE_WITH" inherits="VuDoDefaultTitleFontTemplate">
 								</FontString>
 							</Layer>
 						</Layers>
@@ -101,7 +101,7 @@
 					<Frame name="$parentTitleLabel" inherits="VuhDoLabelFrameTemplate">
 						<Layers>
 							<Layer>
-								<FontString name="$parentLabel" text="Sending..." inherits="VuDoDefaultTitleFontTemplate">
+								<FontString name="$parentLabel" text="VUHDO_I18N_SENDING" inherits="VuDoDefaultTitleFontTemplate">
 								</FontString>
 							</Layer>
 						</Layers>
@@ -136,7 +136,7 @@
 							<OnClick>
 								VUHDO_sendAbortMessage(VUHDO_SELECTED_COMBO_BUDDY);
 								VUHDO_removeCommsData(VUHDO_SELECTED_COMBO_BUDDY);
-								VUHDO_Msg("Transmission aborted. Next retry in about 60 sec.");
+								VUHDO_Msg(VUHDO_I18N_COMMS_SEND_CANCELLED);
 								self:GetParent():Hide();
 								_G[self:GetParent():GetParent():GetName() .. "RootPane"]:Show();
 							</OnClick>
@@ -156,7 +156,7 @@
 			</OnLoad>
 			<OnShow>
 				_G[self:GetName() .. "RootPane"]:Show();
-				_G[self:GetName() .. "RootPaneTitleLabelLabel"]:SetText("Share " .. (VUHDO_CURRENT_PROFILE or ""));
+				_G[self:GetName() .. "RootPaneTitleLabelLabel"]:SetText(VUHDO_I18N_SHARE .. " " .. (VUHDO_CURRENT_PROFILE or ""));
 				_G[self:GetName() .. "TransmitPane"]:Hide();
 			</OnShow>
 		</Scripts>

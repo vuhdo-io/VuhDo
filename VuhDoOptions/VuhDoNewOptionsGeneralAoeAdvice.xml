@@ -165,7 +165,7 @@
 						</Scripts>
 					</CheckButton>
 
-					<CheckButton name="$parentGroupWiseCheckButton" text="per Group" inherits="VuhDoCheckButtonTemplate">
+					<CheckButton name="$parentGroupWiseCheckButton" text="VUHDO_I18N_PER_GROUP" inherits="VuhDoCheckButtonTemplate">
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
@@ -176,7 +176,7 @@
 						<Scripts>
 							<OnLoad>
 								VUHDO_lnfSetModel(self, "VUHDO_CONFIG.AOE_ADVISOR.isGroupWise");
-								VUHDO_lnfSetTooltip(self, "Spells directed the target's group (instead of the raid = Prayer of Healing) will be shown per group.");
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K915);
 							</OnLoad>
 						</Scripts>
 					</CheckButton>

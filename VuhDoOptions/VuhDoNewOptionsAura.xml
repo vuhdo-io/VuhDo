@@ -26,7 +26,7 @@
 							<OnLoad>
 								self.tabPanel = "VuhDoNewOptionsAuraGroups";
 								VUHDO_lnfCheckButtonOnLoad(self);
-								VUHDO_lnfSetTooltip(self, "Configure aura groups");
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K920);
 							</OnLoad>
 						</Scripts>
 					</CheckButton>
@@ -43,7 +43,7 @@
 								self.tabPanel = "VuhDoNewOptionsAuraIgnore";
 
 								VUHDO_lnfCheckButtonOnLoad(self);
-								VUHDO_lnfSetTooltip(self, "Global aura ignore list");
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K921);
 							</OnLoad>
 						</Scripts>
 					</CheckButton>

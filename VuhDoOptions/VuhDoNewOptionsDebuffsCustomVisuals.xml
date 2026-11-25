@@ -276,7 +276,7 @@
 				</Anchors>
 				<Frames>
 
-					<CheckButton name="$parentFadeCheckButton" text="No Fade" inherits="VuhDoCheckButtonTemplate">
+					<CheckButton name="$parentFadeCheckButton" text="VUHDO_I18N_NO_FADE" inherits="VuhDoCheckButtonTemplate">
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
@@ -287,14 +287,14 @@
 						<Scripts>
 							<OnLoad>
 								VUHDO_lnfSetModel(self, "VUHDO_CONFIG.CUSTOM_DEBUFF.isNoRangeFade");
-								VUHDO_lnfSetTooltip(self, "Disable fading debuff icons when player is out of range");
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K916);
 							</OnLoad>
 						</Scripts>
 					</CheckButton>
 					<Frame name="$parentTitleLabel" inherits="VuhDoLabelFrameTemplate">
 						<Layers>
 							<Layer>
-								<FontString name="$parentLabel" text="Misc" inherits="VuDoDefaultTitleFontTemplate">
+								<FontString name="$parentLabel" text="VUHDO_I18N_MISC" inherits="VuDoDefaultTitleFontTemplate">
 								</FontString>
 							</Layer>
 						</Layers>

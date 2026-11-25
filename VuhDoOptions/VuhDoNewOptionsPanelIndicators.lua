@@ -22,19 +22,19 @@ local sIndicatorMetaModel = {
 			{
 				["name"] = VUHDO_I18N_BORDER_WIDTH,
 				["type"] = VUHDO_MIN_MAX_CONSTRAINTS,
-				["min"] = 1, ["max"] = 20, ["step"] = 1, ["unit"] = " Pt.",
+				["min"] = 1, ["max"] = 20, ["step"] = 1, ["unit"] = VUHDO_I18N_UNIT_POINTS,
 				["model"] = "VUHDO_INDICATOR_CONFIG.#PNUM#.CUSTOM.BAR_BORDER.WIDTH",
 				["tooltip"] = nil,
 			},
 			{
-				["name"] = "Texture",
+				["name"] = VUHDO_I18N_TEXTURE,
 				["type"] = VUHDO_ENUMERATOR_CONSTRAINTS,
 				["enumerator"] = VUHDO_BORDERS,
 				["model"] = "VUHDO_INDICATOR_CONFIG.#PNUM#.CUSTOM.BAR_BORDER.FILE",
 				["tooltip"] = nil,
 			},
 			{
-				["name"] = "Adjust",
+				["name"] = VUHDO_I18N_ADJUST,
 				["type"] = VUHDO_MIN_MAX_CONSTRAINTS,
 				["min"] = -20, ["max"] = 0, ["step"] = 1, ["unit"] = "",
 				["model"] = "VUHDO_INDICATOR_CONFIG.#PNUM#.CUSTOM.BAR_BORDER.ADJUST",
@@ -51,12 +51,12 @@ local sIndicatorMetaModel = {
 			{
 				["name"] = VUHDO_I18N_BORDER_WIDTH,
 				["type"] = VUHDO_MIN_MAX_CONSTRAINTS,
-				["min"] = 1, ["max"] = 20, ["step"] = 1, ["unit"] = " Pt.",
+				["min"] = 1, ["max"] = 20, ["step"] = 1, ["unit"] = VUHDO_I18N_UNIT_POINTS,
 				["model"] = "VUHDO_INDICATOR_CONFIG.#PNUM#.CUSTOM.CLUSTER_BORDER.WIDTH",
 				["tooltip"] = nil,
 			},
 			{
-				["name"] = "Texture",
+				["name"] = VUHDO_I18N_TEXTURE,
 				["type"] = VUHDO_ENUMERATOR_CONSTRAINTS,
 				["enumerator"] = VUHDO_BORDERS,
 				["model"] = "VUHDO_INDICATOR_CONFIG.#PNUM#.CUSTOM.CLUSTER_BORDER.FILE",
@@ -99,7 +99,7 @@ local sIndicatorMetaModel = {
 			{
 				["name"] = VUHDO_I18N_SCALE,
 				["type"] = VUHDO_MIN_MAX_CONSTRAINTS,
-				["min"] = 0.1, ["max"] = 4, ["step"] = 0.05, ["unit"] = " x",
+				["min"] = 0.1, ["max"] = 4, ["step"] = 0.05, ["unit"] = VUHDO_I18N_UNIT_MULTIPLIER,
 				["model"] = "VUHDO_INDICATOR_CONFIG.#PNUM#.CUSTOM.SWIFTMEND_INDICATOR.SCALE",
 				["tooltip"] = nil,
 			},
@@ -454,7 +454,7 @@ function VUHDO_initBouquetSlotsComboModel()
 		end
 	);
 
-	tinsert(VUHDO_BOUQUET_SLOTS_COMBO_MODEL, 1, {"", " -- off / empty --" });
+	tinsert(VUHDO_BOUQUET_SLOTS_COMBO_MODEL, 1, { "", VUHDO_I18N_BOUQUET_OFF_EMPTY });
 
 	VUHDO_newOptionsIndicatorsInvalidate();
 

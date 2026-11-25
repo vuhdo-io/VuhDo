@@ -1189,7 +1189,7 @@
 					<Frame name="$parentTitleLabel" inherits="VuhDoLabelFrameTemplate">
 						<Layers>
 							<Layer>
-								<FontString name="$parentLabel" text="Scaling" inherits="VuDoDefaultTitleFontTemplate">
+								<FontString name="$parentLabel" text="VUHDO_I18N_SCALING" inherits="VuDoDefaultTitleFontTemplate">
 								</FontString>
 							</Layer>
 						</Layers>

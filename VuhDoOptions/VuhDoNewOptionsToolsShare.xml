@@ -19,7 +19,7 @@
 					<Frame name="$parentTitleLabel" inherits="VuhDoLabelFrameTemplate">
 						<Layers>
 							<Layer>
-								<FontString name="$parentLabel" text="Receive Data" inherits="VuDoDefaultTitleFontTemplate">
+								<FontString name="$parentLabel" text="VUHDO_I18N_RECEIVE_DATA" inherits="VuDoDefaultTitleFontTemplate">
 								</FontString>
 							</Layer>
 						</Layers>
@@ -36,7 +36,7 @@
 						<Scripts>
 							<OnLoad>
 								VUHDO_lnfSetModel(self, "VUHDO_CONFIG.IS_SHARE");
-								VUHDO_lnfSetTooltip(self, "Enable data sharing to be able to receive profile etc. data from other VuhDo users.");
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K924);
 							</OnLoad>
 						</Scripts>
 					</CheckButton>

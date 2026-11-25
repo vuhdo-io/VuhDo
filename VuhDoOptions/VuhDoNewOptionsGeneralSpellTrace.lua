@@ -183,9 +183,9 @@ function VUHDO_deleteSpellTraceOnClick(aButton)
 		VUHDO_CONFIG["SPELL_TRACE"]["STORED_SETTINGS"][tValue] = nil;
 		VUHDO_CONFIG["SPELL_TRACE"]["SELECTED"] = "";
 
-		VUHDO_Msg(VUHDO_I18N_SPELL_TRACE .. " on spell \"" .. tValue .. "\" removed.", 1, 0.4, 0.4);
+		VUHDO_Msg(format(VUHDO_I18N_SPELL_TRACE_REMOVED, tValue), 1, 0.4, 0.4);
 	else
-		VUHDO_Msg(VUHDO_I18N_SPELL_TRACE .. " on spell \"" .. tValue .. "\" doesn't exist.", 1, 0.4, 0.4);
+		VUHDO_Msg(format(VUHDO_I18N_SPELL_TRACE_DOES_NOT_EXIST, tValue), 1, 0.4, 0.4);
 	end
 
 	VUHDO_initSpellTraceComboModel();

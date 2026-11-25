@@ -162,7 +162,7 @@
 						</Scripts>
 					</CheckButton>
 
-					<CheckButton name="$parentPetBattleCheckButton" text="Pet Battle" inherits="VuhDoCheckButtonTemplate">
+					<CheckButton name="$parentPetBattleCheckButton" text="VUHDO_I18N_PET_BATTLE" inherits="VuhDoCheckButtonTemplate">
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
@@ -173,7 +173,7 @@
 						<Scripts>
 							<OnLoad>
 								VUHDO_lnfSetModel(self, "VUHDO_CONFIG.HIDE_PANELS_PET_BATTLE");
-								VUHDO_lnfSetTooltip(self, "Hide panels in a pet battle.");
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K913);
 							</OnLoad>
 						</Scripts>
 					</CheckButton>

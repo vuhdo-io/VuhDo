@@ -18,7 +18,7 @@
 				</Anchors>
 				<Layers>
 					<Layer>
-						<FontString name="$parentLabel" inherits="VuDoDefaultFontTemplate" text="NOTE: Spell assignments won't be saved into profiles. Use Tools=>Key Layouts instead.">
+						<FontString name="$parentLabel" inherits="VuDoDefaultFontTemplate" text="VUHDO_I18N_PROFILE_SPELL_ASSIGN_NOTE">
 							<Anchors>
 								<Anchor point="TOPLEFT" />
 								<Anchor point="BOTTOMRIGHT" />
@@ -699,7 +699,7 @@
 					<Frame name="$parentTitleLabel" inherits="VuhDoLabelFrameTemplate">
 						<Layers>
 							<Layer>
-								<FontString name="$parentLabel" text="Send Profile" inherits="VuDoDefaultTitleFontTemplate">
+								<FontString name="$parentLabel" text="VUHDO_I18N_SEND_PROFILE" inherits="VuDoDefaultTitleFontTemplate">
 								</FontString>
 							</Layer>
 						</Layers>

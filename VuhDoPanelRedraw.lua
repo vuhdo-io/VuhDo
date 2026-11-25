@@ -3,8 +3,10 @@ local _;
 local ipairs = ipairs;
 local pairs = pairs;
 local strfind = strfind;
+local strupper = string.upper;
 local twipe = table.wipe;
 local tinsert = table.insert;
+local format = string.format;
 local floor = math.floor;
 local ceil = math.ceil;
 local min = math.min;
@@ -2647,7 +2649,7 @@ do
 		aPanel:SetBackdropBorderColor(tBorderR, tBorderG, tBorderB, aPanel.backdropBorderColorAlpha);
 
 		if VUHDO_IS_PANEL_CONFIG then
-			tLabel:SetText("[PANEL "  .. aPanelNum .. "]");
+			tLabel:SetText(format("[%s %d]", strupper(VUHDO_I18N_PANEL), aPanelNum));
 			VUHDO_PixelUtil.SetPoint(tLabel:GetParent(), "BOTTOM", aPanel:GetName(), "TOP", 0, 3);
 			VUHDO_PixelUtil.Show(tLabel:GetParent());
 
@@ -2671,7 +2673,7 @@ do
 				aPanel:SetBackdropBorderColor(VUHDO_backColor(tPanelColor["BORDER"]));
 
 				tLabel:SetTextColor(0.4,  0.4, 0.4, 1);
-				VUHDO_UIFrameFlashStop(tLabel);			
+				VUHDO_UIFrameFlashStop(tLabel);
 			end
 
 			if DESIGN_MISC_PANEL_NUM then

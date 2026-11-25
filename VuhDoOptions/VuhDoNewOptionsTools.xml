@@ -85,7 +85,7 @@
 						</Scripts>
 					</CheckButton>
 
-					<CheckButton name="$parentShareRadioButton" text="Share" inherits="VuhDoTabRadioButtonTemplate">
+					<CheckButton name="$parentShareRadioButton" text="VUHDO_I18N_SHARE" inherits="VuhDoTabRadioButtonTemplate">
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
@@ -97,7 +97,7 @@
 							<OnLoad>
 								self.tabPanel = "VuhDoNewOptionsToolsShare";
 								VUHDO_lnfCheckButtonOnLoad(self);
-								VUHDO_lnfSetTooltip(self, "Setup sharing / communication properties for transmitting data from other VuhDo users.");
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K923);
 							</OnLoad>
 						</Scripts>
 					</CheckButton>

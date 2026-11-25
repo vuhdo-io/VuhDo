@@ -77,7 +77,7 @@
 							<OnLoad>
 								self.tabPanel = "VuhDoNewOptionsColorsAuras";
 								VUHDO_lnfCheckButtonOnLoad(self);
-								VUHDO_lnfSetTooltip(self, "Global aura display defaults");
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K918);
 							</OnLoad>
 						</Scripts>
 					</CheckButton>

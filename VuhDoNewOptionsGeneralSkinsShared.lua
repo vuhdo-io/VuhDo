@@ -1,5 +1,6 @@
 local GetNumGroupMembers = GetNumGroupMembers;
 local twipe = table.wipe;
+local format = string.format;
 local tonumber = tonumber;
 local pairs = pairs;
 local ipairs = ipairs;
@@ -2720,7 +2721,7 @@ local function VUHDO_smartLoadFromProfile(aDestArray, aSourceArray, aProfileMode
 				if "table" == type(tDestValue) then
 					aDestArray[tKey] = VUHDO_smartLoadFromProfile(aDestArray[tKey], aSourceArray[tKey], tSubModel, tRootRule or aDerivedRule);
 				else
-					VUHDO_Msg("Data structures incompatible in field: " .. tKey);
+					VUHDO_Msg(format("Data structures incompatible in field: %s", tKey));
 				end
 			else -- Flacher Wert
 				local tRule = tSubModel or tRootRule or aDerivedRule;

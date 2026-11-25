@@ -369,7 +369,7 @@ local function VUHDO_initTextProviderSourceComboModel()
 		end
 	);
 
-	tinsert(VUHDO_TEXT_PROVIDER_SOURCE_COMBO_MODEL, 1, { "", "- empty / nothing -" });
+	tinsert(VUHDO_TEXT_PROVIDER_SOURCE_COMBO_MODEL, 1, { "", VUHDO_I18N_TEXT_PROVIDER_EMPTY });
 
 	return;
 
@@ -386,7 +386,7 @@ function VUHDO_getFormatComboModelForSource(aSourceKey)
 	if not sFormatModelCache[aSourceKey] then
 		sFormatModelCache[aSourceKey] = { };
 
-		tinsert(sFormatModelCache[aSourceKey], { "", "- empty / nothing -" });
+		tinsert(sFormatModelCache[aSourceKey], { "", VUHDO_I18N_TEXT_PROVIDER_EMPTY });
 
 		if aSourceKey ~= "" and VUHDO_TEXT_PROVIDER_SOURCES[aSourceKey] then
 			for tFormatCnt = 1, #VUHDO_TEXT_PROVIDER_SOURCES[aSourceKey]["supportedFormats"] do

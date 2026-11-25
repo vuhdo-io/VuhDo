@@ -912,7 +912,7 @@
 						<Scripts>
 							<OnLoad>
 								VUHDO_lnfSetModel(self, "VUHDO_PANEL_SETUP.BAR_COLORS.SHIELD");
-								VUHDO_lnfInitColorSwatch(self, "Shield Bar", "Shield Bar");
+								VUHDO_lnfInitColorSwatch(self, VUHDO_I18N_SHIELD_BAR, VUHDO_I18N_SHIELD_BAR);
 								VUHDO_lnfSetTooltip(self, nil);
 							</OnLoad>
 						</Scripts>

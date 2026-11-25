@@ -929,14 +929,14 @@ function VUHDO_loadCurrentProfile()
 
 		if tProfile then
 			if tProfile["LOCKED"] then
-				VUHDO_Msg("Profile " .. tProfile["NAME"] .. " is currently locked and has NOT been loaded.");
+				VUHDO_Msg(format("Profile %s is currently locked and has NOT been loaded.", tProfile["NAME"]));
 
 				return;
 			end
 
 			VUHDO_loadProfileNoInit(tName);
 		else
-			VUHDO_Msg("Error: Currently selected profile \"" .. tName .. "\" doesn't exist.", 1, 0.4, 0.4);
+			VUHDO_Msg(format("Error: Currently selected profile \"%s\" doesn't exist.", tName), 1, 0.4, 0.4);
 		end
 	end
 
@@ -960,7 +960,7 @@ local function VUHDO_loadCurrentKeyLayout()
 		if VUHDO_SPELL_LAYOUTS and VUHDO_SPELL_LAYOUTS[tName] then
 			VUHDO_activateLayoutNoInit(tName);
 		else
-			VUHDO_Msg("Error: Currently selected key layout \"" .. tName .. "\" doesn't exist.", 1, 0.4, 0.4);
+			VUHDO_Msg(format("Error: Currently selected key layout \"%s\" doesn't exist.", tName), 1, 0.4, 0.4);
 		end
 	end
 
@@ -983,14 +983,14 @@ local function VUHDO_loadDefaultProfile()
 
 		if tProfile then
 			if tProfile["LOCKED"] then
-				VUHDO_Msg("Profile " .. tProfile["NAME"] .. " is currently locked and has NOT been loaded.");
+				VUHDO_Msg(format("Profile %s is currently locked and has NOT been loaded.", tProfile["NAME"]));
 
 				return;
 			end
 
 			VUHDO_loadProfile(VUHDO_DEFAULT_PROFILE);
 		else
-			VUHDO_Msg("Error: Default profile \"" .. VUHDO_DEFAULT_PROFILE .. "\" doesn't exist.", 1, 0.4, 0.4);
+			VUHDO_Msg(format("Error: Default profile \"%s\" doesn't exist.", VUHDO_DEFAULT_PROFILE), 1, 0.4, 0.4);
 		end
 	end
 
@@ -1637,7 +1637,7 @@ do
 			end
 
 		else
-			VUHDO_Msg("Error: Unexpected event: " .. anEvent);
+			VUHDO_Msg(format("Error: Unexpected event: %s", anEvent));
 		end
 
 		if VUHDO_HANDLER_PROFILING_ENABLED and anEvent then
@@ -2128,9 +2128,9 @@ do
 					VUHDO_Msg("Aura mode auto - reloading UI...");
 					ReloadUI();
 				else
-					VUHDO_Msg("Aura mode: " .. (VUHDO_isAuraModeContainers() and "on" or "off"));
-					VUHDO_Msg("Aura data restricted: " .. (VUHDO_isAuraDataRestricted() and "yes" or "no"));
-					VUHDO_Msg("Force aura mode: " .. (VUHDO_FORCE_AURA_MODE == nil and "auto" or tostring(VUHDO_FORCE_AURA_MODE)));
+					VUHDO_Msg(format("Aura mode: %s", VUHDO_isAuraModeContainers() and "on" or "off"));
+					VUHDO_Msg(format("Aura data restricted: %s", VUHDO_isAuraDataRestricted() and "yes" or "no"));
+					VUHDO_Msg(format("Force aura mode: %s", VUHDO_FORCE_AURA_MODE == nil and "auto" or tostring(VUHDO_FORCE_AURA_MODE)));
 				end
 			else
 				VUHDO_auraHelp();

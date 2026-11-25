@@ -97,7 +97,7 @@
 							<OnLoad>
 								self.tabPanel = "VuhDoNewOptionsPanelAuras";
 								VUHDO_lnfCheckButtonOnLoad(self);
-								VUHDO_lnfSetTooltip(self, "Configure aura anchors for this panel");
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K922);
 							</OnLoad>
 						</Scripts>
 					</CheckButton>

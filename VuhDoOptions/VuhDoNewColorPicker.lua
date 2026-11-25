@@ -114,9 +114,9 @@ function VUHDO_newColorPickerOnShow(aPanel)
 	end
 
 	if (tDescription ~= nil) then
-		_G[aPanel:GetName() .. "TitleLabelLabel"]:SetText("Select " .. tDescription .. " [Drag here]");
+		_G[aPanel:GetName() .. "TitleLabelLabel"]:SetText(format(VUHDO_I18N_COLOR_PICKER_TITLE_FOR, tDescription));
 	else
-		_G[aPanel:GetName() .. "TitleLabelLabel"]:SetText("Color Select [Drag here]");
+		_G[aPanel:GetName() .. "TitleLabelLabel"]:SetText(VUHDO_I18N_COLOR_PICKER_TITLE);
 	end
 
 	if (VUHDO_mayEditBackground() and VUHDO_mayEditText()) then

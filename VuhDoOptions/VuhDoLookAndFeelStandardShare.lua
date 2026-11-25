@@ -2,7 +2,7 @@ local _;
 
 VUHDO_BUDDY_NAME_MODEL = { };
 VUHDO_SELECTED_COMBO_BUDDY = "";
-VUHDO_NONE_SELECTED_BUDDY = "Enter Player Name";
+VUHDO_NONE_SELECTED_BUDDY = VUHDO_I18N_ENTER_PLAYER_NAME;
 
 
 --
@@ -86,18 +86,18 @@ end
 function VUHDO_optionsExecShare(aPanel)
 	local tSelection = _G[aPanel:GetAttribute("model")[2]];
 	if (VUHDO_strempty(tSelection)) then
-		VUHDO_Msg("You must select an item to share.", 1, 0.4, 0.4);
+		VUHDO_Msg(VUHDO_I18N_SHARE_MUST_SELECT_ITEM, 1, 0.4, 0.4);
 		return false;
 	end
 
 	if (VUHDO_strempty(VUHDO_SELECTED_COMBO_BUDDY)
 		or VUHDO_SELECTED_COMBO_BUDDY == VUHDO_NONE_SELECTED_BUDDY) then
-		VUHDO_Msg("You must select a player name.", 1, 0.4, 0.4);
+		VUHDO_Msg(VUHDO_I18N_SHARE_MUST_SELECT_PLAYER, 1, 0.4, 0.4);
 		return false;
 	end
 
 	if (VUHDO_SELECTED_COMBO_BUDDY == VUHDO_PLAYER_NAME) then
-		VUHDO_Msg("You can't share stuff with yourself.", 1, 0.4, 0.4);
+		VUHDO_Msg(VUHDO_I18N_SHARE_CANNOT_WITH_SELF, 1, 0.4, 0.4);
 		return false;
 	end
 

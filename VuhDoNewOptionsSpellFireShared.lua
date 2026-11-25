@@ -1,3 +1,9 @@
+local _;
+
+local format = string.format;
+
+
+
 --
 local tLayoutAnchors;
 local tLayout;
@@ -68,7 +74,7 @@ function VUHDO_activateLayoutNoInit(aName)
 	end
 
 	VUHDO_SPEC_LAYOUTS["selected"] = aName;
-	VUHDO_Msg("Key layout \"" .. aName .. "\" loaded.");
+	VUHDO_Msg(format("Key layout \"%s\" loaded.", aName));
 
 end
 

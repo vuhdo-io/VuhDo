@@ -95,7 +95,7 @@ end
 --
 function VUHDO_tabbedPanelOkayClicked(aButton)
 	if InCombatLockdown() then
-		VUHDO_Msg("Options cannot be saved in combat!", 1, 0.4, 0.4);
+		VUHDO_Msg(VUHDO_I18N_OPTIONS_CANNOT_SAVE_IN_COMBAT, 1, 0.4, 0.4);
 
 		return;
 	end
@@ -127,7 +127,7 @@ function VUHDO_tabbedPanelOkayClicked(aButton)
 	if (VUHDO_CURRENT_PROFILE == "") then
 		VUHDO_CONFIG["CURRENT_PROFILE"] = "";
 	elseif (tProfile ~= nil and tProfile["LOCKED"]) then
-		VUHDO_Msg("Profile locked: Settings have NOT been saved to " .. tProfile["NAME"]);
+		VUHDO_Msg(format(VUHDO_I18N_PROFILE_LOCKED_NOT_SAVED, tProfile["NAME"]));
 	else
 		local tSkinsPanel = _G["VuhDoNewOptionsToolsSkins"];
 

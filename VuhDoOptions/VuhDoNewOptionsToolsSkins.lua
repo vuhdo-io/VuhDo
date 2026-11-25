@@ -474,7 +474,7 @@ function VUHDO_saveProfileClicked(aButton)
 
 	local _, tProfile = VUHDO_getProfileNamedCompressed(VUHDO_CURRENT_PROFILE);
 	if (tProfile ~= nil and tProfile["LOCKED"]) then
-		VUHDO_Msg("Profile " .. VUHDO_CURRENT_PROFILE .. " is currently locked. Please unlock before saving.");
+		VUHDO_Msg(format(VUHDO_I18N_PROFILE_LOCKED_UNLOCK_TO_SAVE, VUHDO_CURRENT_PROFILE));
 		return;
 	end
 	VUHDO_CONFIG["CURRENT_PROFILE"] = VUHDO_CURRENT_PROFILE;
@@ -619,7 +619,7 @@ function VUHDO_exportProfileClicked(aButton)
 	end
 
 	if (tProfile["HARDLOCKED"]) then
-		VUHDO_Msg("You cannot share hardlocked profiles. Please make a copy before.", 1, 0.4, 0.4);
+		VUHDO_Msg(VUHDO_I18N_CANNOT_SHARE_HARDLOCKED_PROFILE, 1, 0.4, 0.4);
 		return;
 	end
 
@@ -651,7 +651,7 @@ function VUHDO_profileExportButtonShown(aEditBox)
 	end
 
 	if (tProfile["HARDLOCKED"]) then
-		VUHDO_Msg("You cannot share hardlocked profiles. Please make a copy before.", 1, 0.4, 0.4);
+		VUHDO_Msg(VUHDO_I18N_CANNOT_SHARE_HARDLOCKED_PROFILE, 1, 0.4, 0.4);
 		return;
 	end
 
@@ -685,10 +685,10 @@ function VUHDO_shareCurrentProfile(aUnitName, aProfileName)
 		return;
 	end
 	if (tProfile["HARDLOCKED"]) then
-		VUHDO_Msg("You cannot share hardlocked profiles. Please make a copy before.", 1, 0.4, 0.4);
+		VUHDO_Msg(VUHDO_I18N_CANNOT_SHARE_HARDLOCKED_PROFILE, 1, 0.4, 0.4);
 		return;
 	end
-	local tQuestion = VUHDO_PLAYER_NAME .. " requests to transmit\nProfile " .. aProfileName .. " to you.\nThis will take about 60 secs. Proceed?"
+	local tQuestion = format(VUHDO_I18N_SHARE_INCOMING_PROFILE, VUHDO_PLAYER_NAME, aProfileName);
 	VUHDO_startShare(aUnitName, tProfile, VUHDO_sCmdProfileDataChunk, VUHDO_sCmdProfileDataEnd, tQuestion);
 end
 

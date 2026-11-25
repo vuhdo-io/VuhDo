@@ -21,7 +21,7 @@
 				</Anchors>
 				<Layers>
 					<Layer>
-						<FontString name="$parentLabel" text="Textomat" justifyH="LEFT" inherits="VuDoDefaultFontTemplate">
+						<FontString name="$parentLabel" text="" justifyH="LEFT" inherits="VuDoDefaultFontTemplate">
 						</FontString>
 					</Layer>
 				</Layers>
