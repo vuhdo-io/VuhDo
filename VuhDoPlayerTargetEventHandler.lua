@@ -92,7 +92,11 @@ function VUHDO_updatePlayerTarget(anIsFullRefreshPending)
 
 	tOldTarget = VUHDO_CURR_PLAYER_TARGET;
 	VUHDO_CURR_PLAYER_TARGET = tTargetUnit; -- Wg. callback erst umkopieren
-	VUHDO_updateBouquetsForEvent(tOldTarget, 8); -- VUHDO_UPDATE_TARGET
+
+	if tOldTarget ~= tTargetUnit then
+		VUHDO_updateBouquetsForEvent(tOldTarget, 8); -- VUHDO_UPDATE_TARGET
+	end
+
 	VUHDO_updateBouquetsForEvent(tTargetUnit, 8); -- VUHDO_UPDATE_TARGET
 	VUHDO_clParserSetCurrentTarget(tTargetUnit);
 
