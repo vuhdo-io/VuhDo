@@ -4,6 +4,8 @@ end
 -- @EXACT = true: Translation has to be the exact(!) match in the clients language,
 --                beacause it carries technical semantics
 -- @EXACT = false: Translation can be done freely, because text is only descriptive
+-- @STABLE = true: Translate freely the first time, but never change once released,
+--                 because the text is saved in players' settings as a name (bouquets, skins, buff categories)
 -- Class Names
 -- @EXACT = false
 VUHDO_I18N_WARRIORS = "战士";
@@ -97,28 +99,36 @@ VUHDO_I18N_BROADCAST_MTS = "主坦克同步";
 -- @EXACT = false
 -- Priest
 -- Shaman
+-- @STABLE = true
 VUHDO_I18N_BUFFC_FIRE_TOTEM = "快焰图腾";
 VUHDO_I18N_BUFFC_AIR_TOTEM = "风之图腾";
 VUHDO_I18N_BUFFC_EARTH_TOTEM = "大地图腾";
 VUHDO_I18N_BUFFC_WATER_TOTEM = "水之图腾";
 VUHDO_I18N_BUFFC_WEAPON_ENCHANT = "武器附魔";
+-- @STABLE = false
 VUHDO_I18N_BUFFC_WEAPON_ENCHANT_2 = "武器附魔 2";
+-- @STABLE = true
 VUHDO_I18N_BUFFC_SHIELDS = "盾";
 -- Paladin
+-- @STABLE = false
 VUHDO_I18N_BUFFC_BLESSING = "祝福";
 VUHDO_I18N_BUFFC_SEAL = "圣印";
 -- Druids
 -- Warlock
+-- @STABLE = true
 VUHDO_I18N_BUFFC_SKIN = "皮肤";
 -- Mage
 VUHDO_I18N_BUFFC_ARMOR_MAGE = "护甲";
 -- Death Knight
 VUHDO_BUFFC_PRESENCE    = "领域";
 -- Warrior
+-- @STABLE = false
 VUHDO_I18N_BUFFC_SHOUT = "怒气";
 -- Hunter
+-- @STABLE = true
 VUHDO_I18N_BUFFC_ASPECT = "守护";
 -- Monk
+-- @STABLE = false
 VUHDO_I18N_BUFFC_STANCE = "姿态";
 -- Key Binding Headers/Names
 -- @EXACT = false
@@ -242,6 +252,7 @@ VUHDO_I18N_BOUQUET_STATUS_MANA = "状态列: 法力值 %";
 VUHDO_I18N_BOUQUET_STATUS_OTHER_POWERS = "状态列: 非法力值 %";
 VUHDO_I18N_BOUQUET_STATUS_INCOMING = "状态列: 治疗输入 %";
 VUHDO_I18N_BOUQUET_STATUS_THREAT = "状态列: 仇恨 %";
+-- @STABLE = true
 VUHDO_I18N_BOUQUET_NEW_ITEM_NAME = "-- 在此输入增益或减益 --";
 VUHDO_I18N_DEF_BOUQUET_TANK_COOLDOWNS = "坦克冷却";
 VUHDO_I18N_DEF_BOUQUET_PW_S_WEAKENED_SOUL = "真言盾 & 虚弱灵魂";
@@ -258,6 +269,7 @@ VUHDO_I18N_DEF_BOUQUET_THREAT_MARKS = "仇恨: 标记";
 VUHDO_I18N_DEF_BOUQUET_BAR_MANA_ALL = "法力条: 全部能量";
 VUHDO_I18N_DEF_BOUQUET_BAR_MANA_ONLY = "法力条: 只有法力值";
 VUHDO_I18N_DEF_BOUQUET_BAR_THREAT = "仇恨: 状态列";
+-- @STABLE = false
 VUHDO_I18N_CUSTOM_ICON_NONE = "- 没有 / 预设 -";
 VUHDO_I18N_CUSTOM_ICON_GLOSSY = "光滑";
 VUHDO_I18N_CUSTOM_ICON_MOSAIC = "马塞克";
@@ -277,12 +289,16 @@ VUHDO_I18N_COPY = "复制";
 VUHDO_I18N_OVERWRITE = "覆盖";
 VUHDO_I18N_DISCARD = "取消";
 -- 2.0, alpha #2
+-- @STABLE = true
 VUHDO_I18N_DEF_BAR_BACKGROUND_SOLID = "背景: 固定颜色";
 VUHDO_I18N_DEF_BAR_BACKGROUND_CLASS_COLOR = "背景: 职业颜色";
 -- 2.0 alpha #9
+-- @STABLE = false
 VUHDO_I18N_BOUQUET_DEBUFF_BAR_COLOR = "标志: 减益, 已设定";
 -- 2.0 alpha #11
+-- @STABLE = true
 VUHDO_I18N_DEF_BOUQUET_BAR_HEALTH = "血量条: (自动)";
+-- @STABLE = false
 VUHDO_I18N_UPDATE_RAID_TARGET = "标志: 团队目标颜色";
 VUHDO_I18N_BOUQUET_OVERHEAL_HIGHLIGHT = "颜色: 过量治疗标示";
 VUHDO_I18N_BOUQUET_EMERGENCY_COLOR = "颜色: 紧急";
@@ -290,9 +306,11 @@ VUHDO_I18N_BOUQUET_HEALTH_ABOVE = "标志: 血量 > %";
 VUHDO_I18N_BOUQUET_RESURRECTION = "标志: 复活";
 VUHDO_I18N_BOUQUET_STACKS_COLOR = "颜色: 层数";
 -- 2.1
+-- @STABLE = true
 VUHDO_I18N_DEF_BOUQUET_BAR_HEALTH_SOLID = "血量: (通用, 固定颜色)";
 VUHDO_I18N_DEF_BOUQUET_BAR_HEALTH_CLASS_COLOR = "血量: (通用, 职业颜色)";
 -- 2.9
+-- @STABLE = false
 VUHDO_I18N_NO_TARGET = "[没有目标]";
 VUHDO_I18N_TT_LEFT = " 左点击: ";
 VUHDO_I18N_TT_RIGHT = " 右点击: ";
@@ -327,7 +345,9 @@ VUHDO_I18N_TAR = "目标";
 VUHDO_I18N_VEHICLE = "载具";
 -- 2.67
 VUHDO_I18N_BUFF_WATCH = "增益监视";
+-- @STABLE = true
 VUHDO_I18N_HOTS = "HoTs";
+-- @STABLE = false
 VUHDO_I18N_DEBUFFS = "减益效果";
 VUHDO_I18N_BOUQUET_PLAYER_FOCUS = "标志: 玩家焦点";
 -- 2.69
@@ -354,17 +374,23 @@ VUHDO_I18N_DISABLE_BY_MAX_VERSION = "!!! VUHDO 已禁用 !!! 此版本 (%s) 仅�
 
 VUHDO_I18N_BOUQUET_STATUS_ALTERNATE_POWERS = "状态列: 特殊能量 %"
 VUHDO_I18N_BOUQUET_ALTERNATE_POWERS_ABOVE = "标志: 特殊能量 > %";
+-- @STABLE = true
 VUHDO_I18N_DEF_ALTERNATE_POWERS = "职业特殊能量";
 VUHDO_I18N_DEF_TANK_CDS_EXTENDED = "Tank Cooldowns extd";
+-- @STABLE = false
 VUHDO_I18N_BOUQUET_HOLY_POWER_EQUALS = "标志: 我的圣能 ==";
+-- @STABLE = true
 VUHDO_I18N_DEF_PLAYER_HOLY_POWER = "玩家圣能";
+-- @STABLE = false
 VUHDO_I18N_CUSTOM_ICON_ONE_THIRD = "三份: 一";
 VUHDO_I18N_CUSTOM_ICON_TWO_THIRDS = "三份: 二"
 VUHDO_I18N_CUSTOM_ICON_THREE_THIRDS = "三份: 三";
+-- @STABLE = true
 VUHDO_I18N_DEF_ROLE_ICON = "角色图标";
 
 VUHDO_I18N_DEF_BOUQUET_TARGET_HEALTH = "血量 (通用，目标)";
 
+-- @STABLE = false
 VUHDO_I18N_TAPPED_COLOR = "标志: 无效目标";
 VUHDO_I18N_ENEMY_STATE_COLOR = "颜色: 友方/敌方";
 VUHDO_I18N_FRIEND_STATUS = "标志: 友方";
@@ -372,19 +398,24 @@ VUHDO_I18N_FOE_STATUS = "标志: 敌方";
 VUHDO_I18N_BOUQUET_STATUS_ALWAYS_FULL = "状态列: 永远满的";
 VUHDO_I18N_BOUQUET_STATUS_FULL_IF_ACTIVE = "状态列: 启动时满的";
 VUHDO_I18N_AOE_ADVICE = "图标: 辅助建议";
+-- @STABLE = true
 VUHDO_I18N_DEF_AOE_ADVICE = "辅助建议";
 
+-- @STABLE = false
 VUHDO_I18N_BOUQUET_DURATION_ABOVE = "标志: 持续时间 > 秒";
 VUHDO_I18N_BOUQUET_DURATION_BELOW = "标志: 持续时间 < 秒";
 VUHDO_I18N_DEF_WRACK = "希奈丝特拉：痛苦折磨";
 
+-- @STABLE = true
 VUHDO_I18N_DEF_DIRECTION_ARROW = "方向箭头";
 VUHDO_I18N_BOUQUET_DIRECTION_ARROW = "方向箭头";
+-- @STABLE = false
 VUHDO_I18N_DEF_RAID_LEADER = "图标: 团队队长";
 VUHDO_I18N_DEF_RAID_ASSIST = "图标: 团队助理";
 VUHDO_I18N_DEF_MASTER_LOOTER = "图标: 主要分装";
 VUHDO_I18N_DEF_PVP_STATUS = "图标: PvP 状态";
 
+-- @STABLE = true
 VUHDO_I18N_GRID_MOUSEOVER_SINGLE = "团队框架: 鼠标指向单一";
 VUHDO_I18N_GRID_BACKGROUND_BAR = "团队框架: 背景条";
 VUHDO_I18N_DEF_BIT_O_GRID = "Bit'o'Grid";
@@ -392,26 +423,35 @@ VUHDO_I18N_DEF_VUHDO_ESQUE = "Vuhdo'esque";
 
 
 VUHDO_I18N_DEF_ROLE_COLOR = "角色颜色";
+-- @STABLE = false
 VUHDO_I18N_BOUQUET_ROLE_TANK = "标志: 坦克角色";
 VUHDO_I18N_BOUQUET_ROLE_DAMAGE = "标志: 伤害输出角色";
 VUHDO_I18N_BOUQUET_ROLE_HEALER = "标志: 治疗者角色";
 
 VUHDO_I18N_BOUQUET_STACKS = "标志: 层数 >";
+-- @STABLE = true
 VUHDO_I18N_DEF_PLAYER_CHI = "Player Chi";
 
+-- @STABLE = false
 VUHDO_I18N_BOUQUET_TARGET_RAID_ICON = "图标: 目标的团队标记";
 VUHDO_I18N_BOUQUET_OWN_CHI_EQUALS = "标志: 我的真气 ==";
 VUHDO_I18N_CUSTOM_ICON_FOUR_THIRDS = "三份: 四";
 VUHDO_I18N_CUSTOM_ICON_FIVE_THIRDS = "三份: 五";
+-- @STABLE = true
 VUHDO_I18N_DEF_RAID_CDS = "团队冷却";
+-- @STABLE = false
 VUHDO_I18N_BOUQUET_STATUS_CLASS_COLOR_IF_ACTIVE = "标志: 启动时使用职业颜色";
 
+-- @STABLE = true
 VUHDO_I18N_LETHAL_POISONS = "Lethal Poisons";
 VUHDO_I18N_NON_LETHAL_POISONS = "Non-lethal Poisons";
+-- @STABLE = false
 VUHDO_I18N_DEF_COUNTER_SHIELD_ABSORB = "计数器：所有护盾吸收量 #k"
+-- @STABLE = true
 VUHDO_I18N_BUFFC_WEAPON_ENCHANT_OFF = "Weapon Enchant (offhand)";
 
 VUHDO_I18N_DEF_PVP_FLAGS="PvP 标志";
+-- @STABLE = false
 VUHDO_I18N_DEF_STATUS_SHIELD = "状态列: 盾";
 
 VUHDO_I18N_TARGET = "目标";
@@ -428,7 +468,9 @@ VUHDO_I18N_BOUQUET_MONK_TANK = "标志: 坦克角色，武僧";
 VUHDO_I18N_BOUQUET_DRUID_TANK = "标志: 坦克角色，德鲁伊";
 
 -- 3.66
+-- @STABLE = true
 VUHDO_I18N_BOUQUET_PALADIN_BEACON = "圣骑士道标";
+-- @STABLE = false
 VUHDO_I18N_BOUQUET_STATUS_EXCESS_ABSORB = "状态列: 过量吸收 %";
 VUHDO_I18N_BOUQUET_STATUS_TOTAL_ABSORB = "状态列: 总吸收 %";
 
@@ -454,36 +496,54 @@ VUHDO_I18N_DEF_COUNTER_OVERFLOW_ABSORB = "计数器: 大秘境 过量吸收 #k";
 VUHDO_I18N_DEFAULT_RES_ANNOUNCE_MASS = "正在群体复活!";
 
 -- 3.81
+-- @STABLE = true
 VUHDO_I18N_BOUQUET_OVERFLOW_COUNTER = "大秘境词缀 溢出";
 
 -- 3.82
+-- @STABLE = false
 VUHDO_I18N_SPELL_TRACE = "图标: 法术追踪";
+-- @STABLE = true
 VUHDO_I18N_DEF_SPELL_TRACE = "法术追踪";
+-- @STABLE = false
 VUHDO_I18N_TRAIL_OF_LIGHT = "图标: 光明尾迹";
+-- @STABLE = true
 VUHDO_I18N_DEF_TRAIL_OF_LIGHT = "光明尾迹";
 
 -- 3.83
+-- @STABLE = false
 VUHDO_I18N_BOUQUET_STATUS_MANA_HEALER_ONLY = "状态列: 法力 % (治疗者专用)";
+-- @STABLE = true
 VUHDO_I18N_DEF_BOUQUET_BAR_MANA_HEALER_ONLY = "法力条: 法力 (治疗者专用)";
 
 -- 3.98
+-- @STABLE = false
 VUHDO_I18N_BOUQUET_HAS_SUMMON_ICON = "图标: 已召唤";
+-- @STABLE = true
 VUHDO_I18N_DEF_BOUQUET_HAS_SUMMON = "召唤状态图标";
 VUHDO_I18N_DEF_BOUQUET_ROLE_AND_SUMMON = "角色 & 召唤状态图标";
 
 -- 3.99
+-- @STABLE = false
 VUHDO_I18N_BOUQUET_IS_PHASED = "图标：阶段性";
 VUHDO_I18N_BOUQUET_IS_WAR_MODE_PHASED = "图标：战争模式阶段";
+-- @STABLE = true
 VUHDO_I18N_DEF_BOUQUET_IS_PHASED = "阶段性图标";
 
 -- 3.101
 VUHDO_I18N_DEF_PLAYER_COMBO_POINTS = "玩家组合点";
+-- @STABLE = false
 VUHDO_I18N_BOUQUET_OWN_COMBO_POINTS_EQUALS = "标志: 自己的组合点 ==";
+-- @STABLE = true
 VUHDO_I18N_DEF_PLAYER_SOUL_SHARDS = "玩家灵魂碎片";
+-- @STABLE = false
 VUHDO_I18N_BOUQUET_OWN_SOUL_SHARDS_EQUALS = "标志: 自己的灵魂碎片 ==";
+-- @STABLE = true
 VUHDO_I18N_DEF_PLAYER_RUNES = "玩家符文";
+-- @STABLE = false
 VUHDO_I18N_BOUQUET_OWN_RUNES_EQUALS = "标志: 自己的符文 ==";
+-- @STABLE = true
 VUHDO_I18N_DEF_PLAYER_ARCANE_CHARGES = "玩家的奥术冲击";
+-- @STABLE = false
 VUHDO_I18N_BOUQUET_OWN_ARCANE_CHARGES_EQUALS = "标志: 自己的奥术冲击 ==";
 VUHDO_I18N_DEBUFF_BLACKLIST_ADDED = "添加 \"[%s] %s\" 到debuff的候选名单.";
 
@@ -494,10 +554,12 @@ VUHDO_I18N_PLAY_SOUND_FILE_CUSTOM_DEBUFF_ERR = "无法为自定义的减益效�
 
 -- 3.122
 VUHDO_I18N_BOUQUET_STATUS_POWER_TANK_ONLY = "状态条：能量 % (仅限坦克)";
+-- @STABLE = true
 VUHDO_I18N_DEF_BOUQUET_BAR_MANA_TANK_ONLY = "Manabars: Power (Tank Only)";
 
 -- 3.131
 VUHDO_I18N_DEF_COUNTER_HEAL_ABSORB = "Counter: All Heal Absorb #k";
+-- @STABLE = false
 VUHDO_I18N_DEF_STATUS_HEAL_ABSORB = "状态条：治疗吸收量";
 
 -- 3.135
@@ -523,6 +585,7 @@ VUHDO_I18N_SPELL_TRACE_HEAL = "图标：法术追踪（治疗）";
 -- 3.157
 VUHDO_I18N_BOUQUET_STATUS_HEALTH_IF_ACTIVE = "状态条：激活时显示生命值百分比";
 
+-- @STABLE = true
 VUHDO_I18N_DEF_COUNTER_ACTIVE_AURAS = "Counter: Active Bouquet Auras #k";
 
 VUHDO_I18N_BOUQUET_EVOKER_REVERSION = "Evoker Reversion (non-echo)";
@@ -531,10 +594,14 @@ VUHDO_I18N_BOUQUET_EVOKER_DREAM_BREATH = "Evoker Dream Breath (non-echo)";
 VUHDO_I18N_BOUQUET_EVOKER_DREAM_BREATH_ECHO = "Evoker Dream Breath (echo)";
 VUHDO_I18N_BOUQUET_EVOKER_ALL_ECHO = "Evoker All HoT Echoes";
 
+-- @STABLE = false
 VUHDO_I18N_TRAIL_OF_LIGHT_NEXT = "标志：光明尾迹（下一个目标）";
+-- @STABLE = true
 VUHDO_I18N_DEF_TRAIL_OF_LIGHT_NEXT = "Trail of Light (Next)";
+-- @STABLE = false
 VUHDO_I18N_BOUQUET_DEBUFF_BLEED = "标记：流血类减益效果";
 
+-- @STABLE = true
 VUHDO_I18N_DEF_SPELL_TRACE_INCOMING = "Spell Trace (Incoming)";
 
 VUHDO_I18N_BOUQUET_CHI_HARMONY_ICON_MINE = "Icon: Chi Harmony (Mine)";
@@ -544,6 +611,7 @@ VUHDO_I18N_DEF_BOUQUET_CHI_HARMONY_ICON_OTHERS = "Chi Harmony (Others)";
 VUHDO_I18N_BOUQUET_CHI_HARMONY_ICON_BOTH = "Icon: Chi Harmony (Both)";
 VUHDO_I18N_DEF_BOUQUET_CHI_HARMONY_ICON_BOTH = "Chi Harmony (Both)";
 
+-- @STABLE = false
 VUHDO_I18N_BOUQUET_DEBUFF_ENRAGE = "标记：激怒类减益效果";
 
 VUHDO_I18N_AURA_GROUP_MY_HOTS = "我的持续治疗效果（战斗光环）";
@@ -657,9 +725,11 @@ VUHDO_I18N_BW_OFF_HAND = "副手";
 VUHDO_I18N_ERROR_NO_LIST_GROUP_BOUQUET = "光环组 \"%s\" 包含不存在的组合 \"%s\"!";
 
 VUHDO_I18N_BOUQUET_STATUS_POWER_HEALER_ONLY = "状态条：能量 % (仅限治疗)";
+-- @STABLE = true
 VUHDO_I18N_DEF_BOUQUET_BAR_POWER_HEALER_ONLY = "Manabars: Power (Healer Only)";
 VUHDO_I18N_DEF_BOUQUET_PW_S_WEAKENED_SOUL_ICONS = "PW:S & Weakened Soul (Icons)";
 
+-- @STABLE = false
 VUHDO_I18N_CLICK_BINDING_CONFLICT = "WARNING: Blizzard Click Casting binds |cffffffff\"%s\"|r to |cffffffff%s|r and overrides VuhDo's binding for that click! Remove it under Game Menu > Options > Gameplay > Keybindings > Click Casting.";
 
 VUHDO_I18N_AFK = "afk";

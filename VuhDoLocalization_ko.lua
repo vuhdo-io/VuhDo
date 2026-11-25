@@ -5,6 +5,8 @@ end
 -- @EXACT = true: Translation has to be the exact(!) match in the clients language,
 --                beacause it carries technical semantics
 -- @EXACT = false: Translation can be done freely, because text is only descriptive
+-- @STABLE = true: Translate freely the first time, but never change once released,
+--                 because the text is saved in players' settings as a name (bouquets, skins, buff categories)
 -- Class Names
 -- @EXACT = false
 VUHDO_I18N_WARRIORS = "전사";
@@ -98,28 +100,36 @@ VUHDO_I18N_BROADCAST_MTS = "메인탱커 알림";
 -- @EXACT = false
 -- Priest
 -- Shaman
+-- @STABLE = true
 VUHDO_I18N_BUFFC_FIRE_TOTEM = "불의 토템";
 VUHDO_I18N_BUFFC_AIR_TOTEM = "바람의 토템";
 VUHDO_I18N_BUFFC_EARTH_TOTEM = "대지의 토템";
 VUHDO_I18N_BUFFC_WATER_TOTEM = "물의 토템";
 VUHDO_I18N_BUFFC_WEAPON_ENCHANT = "무기 마법 부여";
+-- @STABLE = false
 VUHDO_I18N_BUFFC_WEAPON_ENCHANT_2 = "보조 무기 마법 부여";
+-- @STABLE = true
 VUHDO_I18N_BUFFC_SHIELDS = "보호막";
 -- Paladin
+-- @STABLE = false
 VUHDO_I18N_BUFFC_BLESSING = "축복";
 VUHDO_I18N_BUFFC_SEAL = "문장";
 -- Druids
 -- Warlock
+-- @STABLE = true
 VUHDO_I18N_BUFFC_SKIN = "SKIN";
 -- Mage
 VUHDO_I18N_BUFFC_ARMOR_MAGE = "갑옷";
 -- Death Knight
 VUHDO_BUFFC_PRESENCE    = "형상";
 -- Warrior
+-- @STABLE = false
 VUHDO_I18N_BUFFC_SHOUT = "외침";
 -- Hunter
+-- @STABLE = true
 VUHDO_I18N_BUFFC_ASPECT = "상";
 -- Monk
+-- @STABLE = false
 VUHDO_I18N_BUFFC_STANCE = "태세";
 
 -- Key Binding Headers/Names
@@ -244,6 +254,7 @@ VUHDO_I18N_BOUQUET_STATUS_MANA = "상태바: 마나 %";
 VUHDO_I18N_BOUQUET_STATUS_OTHER_POWERS = "상태바: 마나 이외 %"; -- 임의 수정
 VUHDO_I18N_BOUQUET_STATUS_INCOMING = "상태바: 예정 치유 %";
 VUHDO_I18N_BOUQUET_STATUS_THREAT = "상태바: 위협 %";
+-- @STABLE = true
 VUHDO_I18N_BOUQUET_NEW_ITEM_NAME = "-- 여기 (디)버프 입력 --";
 VUHDO_I18N_DEF_BOUQUET_TANK_COOLDOWNS = "탱커 쿨다운";
 VUHDO_I18N_DEF_BOUQUET_PW_S_WEAKENED_SOUL = "PW:S & 약화된 영혼";
@@ -260,6 +271,7 @@ VUHDO_I18N_DEF_BOUQUET_THREAT_MARKS = "위협: 징표";
 VUHDO_I18N_DEF_BOUQUET_BAR_MANA_ALL = "마나바: 모든 능력";
 VUHDO_I18N_DEF_BOUQUET_BAR_MANA_ONLY = "마나바: 마나 만";
 VUHDO_I18N_DEF_BOUQUET_BAR_THREAT = "위협: 상태 바";
+-- @STABLE = false
 VUHDO_I18N_CUSTOM_ICON_NONE = "- 없음/기본 -";
 VUHDO_I18N_CUSTOM_ICON_GLOSSY = "광택";
 VUHDO_I18N_CUSTOM_ICON_MOSAIC = "격자";
@@ -279,12 +291,16 @@ VUHDO_I18N_COPY = "복사";
 VUHDO_I18N_OVERWRITE = "덮어쓰기";
 VUHDO_I18N_DISCARD = "취소";
 -- 2.0, alpha #2
+-- @STABLE = true
 VUHDO_I18N_DEF_BAR_BACKGROUND_SOLID = "배경: 혼합";
 VUHDO_I18N_DEF_BAR_BACKGROUND_CLASS_COLOR = "배경: 직업 색상"; -- 임의 수정
 -- 2.0 alpha #9
+-- @STABLE = false
 VUHDO_I18N_BOUQUET_DEBUFF_BAR_COLOR = "Flag: 디버프, 구성됨";
 -- 2.0 alpha #11
+-- @STABLE = true
 VUHDO_I18N_DEF_BOUQUET_BAR_HEALTH = "Health Bar: (일반적, 기울기)";
+-- @STABLE = false
 VUHDO_I18N_UPDATE_RAID_TARGET = "Flag: 공격대 대상 색상";
 VUHDO_I18N_BOUQUET_OVERHEAL_HIGHLIGHT = "Color: 오버힐 강조";
 VUHDO_I18N_BOUQUET_EMERGENCY_COLOR = "Color: 긴급";
@@ -292,9 +308,11 @@ VUHDO_I18N_BOUQUET_HEALTH_ABOVE = "Flag: 체력 > %";
 VUHDO_I18N_BOUQUET_RESURRECTION = "Flag: 부활";
 VUHDO_I18N_BOUQUET_STACKS_COLOR = "색상: #Stacks";
 -- 2.1
+-- @STABLE = true
 VUHDO_I18N_DEF_BOUQUET_BAR_HEALTH_SOLID = "체력(일반적, 딱딱함)";
 VUHDO_I18N_DEF_BOUQUET_BAR_HEALTH_CLASS_COLOR = "체력(일반적, 직업별)";
 -- 2.9
+-- @STABLE = false
 VUHDO_I18N_NO_TARGET = "[대상 없음]";
 VUHDO_I18N_TT_LEFT = " 좌측: ";
 VUHDO_I18N_TT_RIGHT = " 우측: ";
@@ -329,7 +347,9 @@ VUHDO_I18N_TAR = "대상";
 VUHDO_I18N_VEHICLE = "탈것";
 -- 2.67
 VUHDO_I18N_BUFF_WATCH = "버프 주시";
+-- @STABLE = true
 VUHDO_I18N_HOTS = "HoT";
+-- @STABLE = false
 VUHDO_I18N_DEBUFFS = "디버프";
 VUHDO_I18N_BOUQUET_PLAYER_FOCUS = "Flag: 플레이어 주시대상";
 -- 2.69
@@ -356,17 +376,23 @@ VUHDO_I18N_DISABLE_BY_MAX_VERSION = "!!! VUHDO IS DISABLED !!! This version (%s)
 
 VUHDO_I18N_BOUQUET_STATUS_ALTERNATE_POWERS = "Statusbar: Altern. Power %";
 VUHDO_I18N_BOUQUET_ALTERNATE_POWERS_ABOVE = "Flag: 대체 능력 > %";
+-- @STABLE = true
 VUHDO_I18N_DEF_ALTERNATE_POWERS = "대체 능력";
 VUHDO_I18N_DEF_TANK_CDS_EXTENDED = "탱커 재사용 대기시간 연장";
+-- @STABLE = false
 VUHDO_I18N_BOUQUET_HOLY_POWER_EQUALS = "Flag: 내 신성 마법 강화 ==";
+-- @STABLE = true
 VUHDO_I18N_DEF_PLAYER_HOLY_POWER = "플레이어 신성 마법 강화";
+-- @STABLE = false
 VUHDO_I18N_CUSTOM_ICON_ONE_THIRD = "3번째: 하나";
 VUHDO_I18N_CUSTOM_ICON_TWO_THIRDS = "3번째: 둘"
 VUHDO_I18N_CUSTOM_ICON_THREE_THIRDS = "3번째: 셋";
+-- @STABLE = true
 VUHDO_I18N_DEF_ROLE_ICON = "역할 아이콘";
 
 VUHDO_I18N_DEF_BOUQUET_TARGET_HEALTH = "체력 (일반, 대상)";
 
+-- @STABLE = false
 VUHDO_I18N_TAPPED_COLOR = "Flag: 선택";
 VUHDO_I18N_ENEMY_STATE_COLOR = "색상: 우호적/적대적";
 VUHDO_I18N_FRIEND_STATUS = "Flag: 우호적";
@@ -374,19 +400,24 @@ VUHDO_I18N_FOE_STATUS = "Flag: 적대적";
 VUHDO_I18N_BOUQUET_STATUS_ALWAYS_FULL = "상태바: 항상 전체";
 VUHDO_I18N_BOUQUET_STATUS_FULL_IF_ACTIVE = "상태바: 활성화 시 전체";
 VUHDO_I18N_AOE_ADVICE = "Icon: AOE 주의";
+-- @STABLE = true
 VUHDO_I18N_DEF_AOE_ADVICE = "AOE 주의";
 
+-- @STABLE = false
 VUHDO_I18N_BOUQUET_DURATION_ABOVE = "Flag: 지속시간 > sec";
 VUHDO_I18N_BOUQUET_DURATION_BELOW = "Flag: 지속시간 < sec";
 VUHDO_I18N_DEF_WRACK = "Sinestra: Wrack";
 
+-- @STABLE = true
 VUHDO_I18N_DEF_DIRECTION_ARROW = "방향 화살표";
 VUHDO_I18N_BOUQUET_DIRECTION_ARROW = "방향 화살표";
+-- @STABLE = false
 VUHDO_I18N_DEF_RAID_LEADER = "Icon: 공격대장";
 VUHDO_I18N_DEF_RAID_ASSIST = "Icon: 부공격대장";
 VUHDO_I18N_DEF_MASTER_LOOTER = "Icon: 전리품 담당";
 VUHDO_I18N_DEF_PVP_STATUS = "Icon: PvP 상태";
 
+-- @STABLE = true
 VUHDO_I18N_GRID_MOUSEOVER_SINGLE = "Grid: 마우스오버 단독";
 VUHDO_I18N_GRID_BACKGROUND_BAR = "Grid: 배경 바";
 VUHDO_I18N_DEF_BIT_O_GRID = "Bit'o'Grid";
@@ -394,26 +425,35 @@ VUHDO_I18N_DEF_VUHDO_ESQUE = "Vuhdo'esque";
 
 
 VUHDO_I18N_DEF_ROLE_COLOR = "역할 색상";
+-- @STABLE = false
 VUHDO_I18N_BOUQUET_ROLE_TANK = "Flag: 탱커 역할";
 VUHDO_I18N_BOUQUET_ROLE_DAMAGE = "Flag: 딜러 역할";
 VUHDO_I18N_BOUQUET_ROLE_HEALER = "Flag: 힐러 역할";
 
 VUHDO_I18N_BOUQUET_STACKS = "Flag: 중첩 >";
+-- @STABLE = true
 VUHDO_I18N_DEF_PLAYER_CHI = "플레이어 기";
 
+-- @STABLE = false
 VUHDO_I18N_BOUQUET_TARGET_RAID_ICON = "아이콘: 대상에 공격대 아이콘";
 VUHDO_I18N_BOUQUET_OWN_CHI_EQUALS = "Flag: Own Chi ==";
 VUHDO_I18N_CUSTOM_ICON_FOUR_THIRDS = "3번째: 넷";
 VUHDO_I18N_CUSTOM_ICON_FIVE_THIRDS = "3번째: 다섯";
+-- @STABLE = true
 VUHDO_I18N_DEF_RAID_CDS = "공격대 재사용 대기시간";
+-- @STABLE = false
 VUHDO_I18N_BOUQUET_STATUS_CLASS_COLOR_IF_ACTIVE = "Flag: 활성화 시 직업 색상";
 
+-- @STABLE = true
 VUHDO_I18N_LETHAL_POISONS = "치명적인 독";
 VUHDO_I18N_NON_LETHAL_POISONS = "비-치명적인 독";
+-- @STABLE = false
 VUHDO_I18N_DEF_COUNTER_SHIELD_ABSORB = "카운터: 모든 보호막 흡수 #k"
+-- @STABLE = true
 VUHDO_I18N_BUFFC_WEAPON_ENCHANT_OFF = "무기 마법 부여(보조무기)";
 
 VUHDO_I18N_DEF_PVP_FLAGS="PvP 깃발 운반자";
+-- @STABLE = false
 VUHDO_I18N_DEF_STATUS_SHIELD = "상태바: 보호막";
 
 VUHDO_I18N_TARGET = "대상";
@@ -430,7 +470,9 @@ VUHDO_I18N_BOUQUET_MONK_TANK = "Flag: 탱커 역할, 수도";
 VUHDO_I18N_BOUQUET_DRUID_TANK = "Flag: 탱커 역할, 드루";
 
 -- 3.66
+-- @STABLE = true
 VUHDO_I18N_BOUQUET_PALADIN_BEACON = "성기사 봉화";
+-- @STABLE = false
 VUHDO_I18N_BOUQUET_STATUS_EXCESS_ABSORB = "상태바: 과한 흡수 %";
 VUHDO_I18N_BOUQUET_STATUS_TOTAL_ABSORB = "상태바: 총 흡수 %";
 
@@ -456,36 +498,54 @@ VUHDO_I18N_DEF_COUNTER_OVERFLOW_ABSORB = "카운터: 쐐기돌 넘치는 흡수 
 VUHDO_I18N_DEFAULT_RES_ANNOUNCE_MASS = "대규모 부활 시전!";
 
 -- 3.81
+-- @STABLE = true
 VUHDO_I18N_BOUQUET_OVERFLOW_COUNTER = "넘치는 쐐기돌 어픽스";
 
 -- 3.82
+-- @STABLE = false
 VUHDO_I18N_SPELL_TRACE = "Icon: 주문 추적";
+-- @STABLE = true
 VUHDO_I18N_DEF_SPELL_TRACE = "주문 추적";
+-- @STABLE = false
 VUHDO_I18N_TRAIL_OF_LIGHT = "Icon: 빛의 흔적";
+-- @STABLE = true
 VUHDO_I18N_DEF_TRAIL_OF_LIGHT = "빛의 흔적";
 
 -- 3.83
+-- @STABLE = false
 VUHDO_I18N_BOUQUET_STATUS_MANA_HEALER_ONLY = "상태바: 마나 %(힐러 만)";
+-- @STABLE = true
 VUHDO_I18N_DEF_BOUQUET_BAR_MANA_HEALER_ONLY = "마나바: 마나(힐러 만)";
 
 -- 3.98
+-- @STABLE = false
 VUHDO_I18N_BOUQUET_HAS_SUMMON_ICON = "Icon: 소환 소유";
+-- @STABLE = true
 VUHDO_I18N_DEF_BOUQUET_HAS_SUMMON = "소환 상태 아이콘";
 VUHDO_I18N_DEF_BOUQUET_ROLE_AND_SUMMON = "역할 & 소환 상태 아이콘";
 
 -- 3.99
+-- @STABLE = false
 VUHDO_I18N_BOUQUET_IS_PHASED = "Icon: 단계적";
 VUHDO_I18N_BOUQUET_IS_WAR_MODE_PHASED = "Icon: 단계적 전쟁 모드";
+-- @STABLE = true
 VUHDO_I18N_DEF_BOUQUET_IS_PHASED = "단계적 아이콘";
 
 -- 3.101
 VUHDO_I18N_DEF_PLAYER_COMBO_POINTS = "플레이어 연계 점수";
+-- @STABLE = false
 VUHDO_I18N_BOUQUET_OWN_COMBO_POINTS_EQUALS = "Flag: 내 연계 점수 ==";
+-- @STABLE = true
 VUHDO_I18N_DEF_PLAYER_SOUL_SHARDS = "플레이어 영혼 조각";
+-- @STABLE = false
 VUHDO_I18N_BOUQUET_OWN_SOUL_SHARDS_EQUALS = "Flag: 내 영혼 조각 ==";
+-- @STABLE = true
 VUHDO_I18N_DEF_PLAYER_RUNES = "플레이어 룬";
+-- @STABLE = false
 VUHDO_I18N_BOUQUET_OWN_RUNES_EQUALS = "Flag: 내 룬 ==";
+-- @STABLE = true
 VUHDO_I18N_DEF_PLAYER_ARCANE_CHARGES = "플레이어 비전 충전";
+-- @STABLE = false
 VUHDO_I18N_BOUQUET_OWN_ARCANE_CHARGES_EQUALS = "Flag: 내 비전 충전 ==";
 VUHDO_I18N_DEBUFF_BLACKLIST_ADDED = "디버프 백리스트에 \"[%s] %s\"를 추가했습니다.";
 
@@ -496,10 +556,12 @@ VUHDO_I18N_PLAY_SOUND_FILE_CUSTOM_DEBUFF_ERR = "사용자 정의 디버프 \"%s\
 
 -- 3.122
 VUHDO_I18N_BOUQUET_STATUS_POWER_TANK_ONLY = "Statusbar: Power % (Tank Only)";
+-- @STABLE = true
 VUHDO_I18N_DEF_BOUQUET_BAR_MANA_TANK_ONLY = "Manabars: Power (Tank Only)";
 
 -- 3.131
 VUHDO_I18N_DEF_COUNTER_HEAL_ABSORB = "Counter: All Heal Absorb #k";
+-- @STABLE = false
 VUHDO_I18N_DEF_STATUS_HEAL_ABSORB = "Statusbar: Heal Absorb";
 
 -- 3.135
@@ -525,6 +587,7 @@ VUHDO_I18N_SPELL_TRACE_HEAL = "Icon: Spell Trace (Heal)";
 -- 3.157
 VUHDO_I18N_BOUQUET_STATUS_HEALTH_IF_ACTIVE = "Statusbar: Health % if active";
 
+-- @STABLE = true
 VUHDO_I18N_DEF_COUNTER_ACTIVE_AURAS = "Counter: Active Bouquet Auras #k";
 
 VUHDO_I18N_BOUQUET_EVOKER_REVERSION = "Evoker Reversion (non-echo)";
@@ -533,10 +596,14 @@ VUHDO_I18N_BOUQUET_EVOKER_DREAM_BREATH = "Evoker Dream Breath (non-echo)";
 VUHDO_I18N_BOUQUET_EVOKER_DREAM_BREATH_ECHO = "Evoker Dream Breath (echo)";
 VUHDO_I18N_BOUQUET_EVOKER_ALL_ECHO = "Evoker All HoT Echoes";
 
+-- @STABLE = false
 VUHDO_I18N_TRAIL_OF_LIGHT_NEXT = "Flag: Trail of Light (Next)";
+-- @STABLE = true
 VUHDO_I18N_DEF_TRAIL_OF_LIGHT_NEXT = "Trail of Light (Next)";
+-- @STABLE = false
 VUHDO_I18N_BOUQUET_DEBUFF_BLEED = "Flag: Debuff Bleed";
 
+-- @STABLE = true
 VUHDO_I18N_DEF_SPELL_TRACE_INCOMING = "Spell Trace (Incoming)";
 
 VUHDO_I18N_BOUQUET_CHI_HARMONY_ICON_MINE = "Icon: Chi Harmony (Mine)";
@@ -546,6 +613,7 @@ VUHDO_I18N_DEF_BOUQUET_CHI_HARMONY_ICON_OTHERS = "Chi Harmony (Others)";
 VUHDO_I18N_BOUQUET_CHI_HARMONY_ICON_BOTH = "Icon: Chi Harmony (Both)";
 VUHDO_I18N_DEF_BOUQUET_CHI_HARMONY_ICON_BOTH = "Chi Harmony (Both)";
 
+-- @STABLE = false
 VUHDO_I18N_BOUQUET_DEBUFF_ENRAGE = "Flag: Debuff Enrage";
 
 VUHDO_I18N_AURA_GROUP_MY_HOTS = "My HoTs (Combat Auras)";
@@ -659,9 +727,11 @@ VUHDO_I18N_BW_OFF_HAND = "Off Hand";
 VUHDO_I18N_ERROR_NO_LIST_GROUP_BOUQUET = "Aura group \"%s\" contains bouquet \"%s\" which doesn't exist!";
 
 VUHDO_I18N_BOUQUET_STATUS_POWER_HEALER_ONLY = "Statusbar: Power % (Healer Only)";
+-- @STABLE = true
 VUHDO_I18N_DEF_BOUQUET_BAR_POWER_HEALER_ONLY = "Manabars: Power (Healer Only)";
 VUHDO_I18N_DEF_BOUQUET_PW_S_WEAKENED_SOUL_ICONS = "PW:S & Weakened Soul (Icons)";
 
+-- @STABLE = false
 VUHDO_I18N_CLICK_BINDING_CONFLICT = "WARNING: Blizzard Click Casting binds |cffffffff\"%s\"|r to |cffffffff%s|r and overrides VuhDo's binding for that click! Remove it under Game Menu > Options > Gameplay > Keybindings > Click Casting.";
 
 VUHDO_I18N_AFK = "afk";

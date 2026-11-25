@@ -1,6 +1,8 @@
 -- @EXACT = true: Translation has to be the exact(!) match in the clients language,
 --                beacause it carries technical semantics
 -- @EXACT = false: Translation can be done freely, because text is only descriptive
+-- @STABLE = true: Translate freely the first time, but never change once released,
+--                 because the text is saved in players' settings as a name (bouquets, skins, buff categories)
 -- Class Names
 -- @EXACT = false
 VUHDO_I18N_WARRIORS = "Warriors";
@@ -94,28 +96,36 @@ VUHDO_I18N_BROADCAST_MTS = "Broadcast MTs";
 -- @EXACT = false
 -- Priest
 -- Shaman
+-- @STABLE = true
 VUHDO_I18N_BUFFC_FIRE_TOTEM = "Fire Totem";
 VUHDO_I18N_BUFFC_AIR_TOTEM = "Air Totem";
 VUHDO_I18N_BUFFC_EARTH_TOTEM = "Earth Totem";
 VUHDO_I18N_BUFFC_WATER_TOTEM = "Water Totem";
 VUHDO_I18N_BUFFC_WEAPON_ENCHANT = "Weapon Enchant";
+-- @STABLE = false
 VUHDO_I18N_BUFFC_WEAPON_ENCHANT_2 = "2nd Weapon Enchant";
+-- @STABLE = true
 VUHDO_I18N_BUFFC_SHIELDS = "Shields";
 -- Paladin
+-- @STABLE = false
 VUHDO_I18N_BUFFC_BLESSING = "Blessing";
 VUHDO_I18N_BUFFC_SEAL = "Seal";
 -- Druids
 -- Warlock
+-- @STABLE = true
 VUHDO_I18N_BUFFC_SKIN = "Skin";
 -- Mage
 VUHDO_I18N_BUFFC_ARMOR_MAGE = "Armor";
 -- Death Knight
 VUHDO_BUFFC_PRESENCE    = "Presence";
 -- Warrior
+-- @STABLE = false
 VUHDO_I18N_BUFFC_SHOUT = "Shout";
 -- Hunter
+-- @STABLE = true
 VUHDO_I18N_BUFFC_ASPECT = "Aspect";
 -- Monk
+-- @STABLE = false
 VUHDO_I18N_BUFFC_STANCE = "Stance";
 
 -- Key Binding Headers/Names
@@ -240,6 +250,7 @@ VUHDO_I18N_BOUQUET_STATUS_MANA = "Statusbar: Mana %";
 VUHDO_I18N_BOUQUET_STATUS_OTHER_POWERS = "Statusbar: non-Mana %";
 VUHDO_I18N_BOUQUET_STATUS_INCOMING = "Statusbar: Inc. Heals %";
 VUHDO_I18N_BOUQUET_STATUS_THREAT = "Statusbar: Threat %";
+-- @STABLE = true
 VUHDO_I18N_BOUQUET_NEW_ITEM_NAME = "-- enter (de)buff here --";
 VUHDO_I18N_DEF_BOUQUET_TANK_COOLDOWNS = "Tank Cooldowns";
 VUHDO_I18N_DEF_BOUQUET_PW_S_WEAKENED_SOUL = "PW:S & Weakened Soul";
@@ -256,6 +267,7 @@ VUHDO_I18N_DEF_BOUQUET_THREAT_MARKS = "Threat: Marks";
 VUHDO_I18N_DEF_BOUQUET_BAR_MANA_ALL = "Manabars: All Powers";
 VUHDO_I18N_DEF_BOUQUET_BAR_MANA_ONLY = "Manabars: Mana only";
 VUHDO_I18N_DEF_BOUQUET_BAR_THREAT = "Threat: Status Bar";
+-- @STABLE = false
 VUHDO_I18N_CUSTOM_ICON_NONE = "- None / Default -";
 VUHDO_I18N_CUSTOM_ICON_GLOSSY = "Glossy";
 VUHDO_I18N_CUSTOM_ICON_MOSAIC = "Mosaic";
@@ -275,12 +287,16 @@ VUHDO_I18N_COPY = "Copy";
 VUHDO_I18N_OVERWRITE = "Overwrite";
 VUHDO_I18N_DISCARD = "Discard";
 -- 2.0, alpha #2
+-- @STABLE = true
 VUHDO_I18N_DEF_BAR_BACKGROUND_SOLID = "Background: Solid";
 VUHDO_I18N_DEF_BAR_BACKGROUND_CLASS_COLOR = "Background: Class Color";
 -- 2.0 alpha #9
+-- @STABLE = false
 VUHDO_I18N_BOUQUET_DEBUFF_BAR_COLOR = "Flag: Debuff, configured";
 -- 2.0 alpha #11
+-- @STABLE = true
 VUHDO_I18N_DEF_BOUQUET_BAR_HEALTH = "Health Bar: (generic, gradient)";
+-- @STABLE = false
 VUHDO_I18N_UPDATE_RAID_TARGET = "Flag: Raid target color";
 VUHDO_I18N_BOUQUET_OVERHEAL_HIGHLIGHT = "Color: Overheal Highlighter";
 VUHDO_I18N_BOUQUET_EMERGENCY_COLOR = "Color: Emergency";
@@ -288,9 +304,11 @@ VUHDO_I18N_BOUQUET_HEALTH_ABOVE = "Flag: Health > %";
 VUHDO_I18N_BOUQUET_RESURRECTION = "Flag: Resurrection";
 VUHDO_I18N_BOUQUET_STACKS_COLOR = "Color: #Stacks";
 -- 2.1
+-- @STABLE = true
 VUHDO_I18N_DEF_BOUQUET_BAR_HEALTH_SOLID = "Health (generic, solid)";
 VUHDO_I18N_DEF_BOUQUET_BAR_HEALTH_CLASS_COLOR = "Health (generic, class col)";
 -- 2.9
+-- @STABLE = false
 VUHDO_I18N_NO_TARGET = "[no target]";
 VUHDO_I18N_TT_LEFT = " Left: ";
 VUHDO_I18N_TT_RIGHT = " Right: ";
@@ -325,7 +343,9 @@ VUHDO_I18N_TAR = "tar";
 VUHDO_I18N_VEHICLE = "O-O";
 -- 2.67
 VUHDO_I18N_BUFF_WATCH = "BuffWatch";
+-- @STABLE = true
 VUHDO_I18N_HOTS = "HoTs";
+-- @STABLE = false
 VUHDO_I18N_DEBUFFS = "Debuffs";
 VUHDO_I18N_BOUQUET_PLAYER_FOCUS = "Flag: Player Focus";
 -- 2.69
@@ -352,17 +372,23 @@ VUHDO_I18N_DISABLE_BY_MAX_VERSION = "!!! VUHDO IS DISABLED !!! This version (%s)
 
 VUHDO_I18N_BOUQUET_STATUS_ALTERNATE_POWERS = "Statusbar: Altern. Power %"
 VUHDO_I18N_BOUQUET_ALTERNATE_POWERS_ABOVE = "Flag: Altern.Power > %";
+-- @STABLE = true
 VUHDO_I18N_DEF_ALTERNATE_POWERS = "Alternative Powers";
 VUHDO_I18N_DEF_TANK_CDS_EXTENDED = "Tank Cooldowns extd";
+-- @STABLE = false
 VUHDO_I18N_BOUQUET_HOLY_POWER_EQUALS = "Flag: Own Holy Power ==";
+-- @STABLE = true
 VUHDO_I18N_DEF_PLAYER_HOLY_POWER = "Player Holy Power";
+-- @STABLE = false
 VUHDO_I18N_CUSTOM_ICON_ONE_THIRD = "Thirds: One";
 VUHDO_I18N_CUSTOM_ICON_TWO_THIRDS = "Thirds: Two"
 VUHDO_I18N_CUSTOM_ICON_THREE_THIRDS = "Thirds: Three";
+-- @STABLE = true
 VUHDO_I18N_DEF_ROLE_ICON = "Role Icon";
 
 VUHDO_I18N_DEF_BOUQUET_TARGET_HEALTH = "Health (generic, target)";
 
+-- @STABLE = false
 VUHDO_I18N_TAPPED_COLOR = "Flag: Tapped";
 VUHDO_I18N_ENEMY_STATE_COLOR = "Color: Friend/Foe";
 VUHDO_I18N_FRIEND_STATUS = "Flag: Friend";
@@ -370,19 +396,24 @@ VUHDO_I18N_FOE_STATUS = "Flag: Foe";
 VUHDO_I18N_BOUQUET_STATUS_ALWAYS_FULL = "Statusbar: Always Full";
 VUHDO_I18N_BOUQUET_STATUS_FULL_IF_ACTIVE = "Statusbar: Full if active";
 VUHDO_I18N_AOE_ADVICE = "Icon: AOE Advice";
+-- @STABLE = true
 VUHDO_I18N_DEF_AOE_ADVICE = "AOE Advice";
 
+-- @STABLE = false
 VUHDO_I18N_BOUQUET_DURATION_ABOVE = "Flag: Duration > sec";
 VUHDO_I18N_BOUQUET_DURATION_BELOW = "Flag: Duration < sec";
 VUHDO_I18N_DEF_WRACK = "Sinestra: Wrack";
 
+-- @STABLE = true
 VUHDO_I18N_DEF_DIRECTION_ARROW = "Direction Arrow";
 VUHDO_I18N_BOUQUET_DIRECTION_ARROW = "Direction Arrow";
+-- @STABLE = false
 VUHDO_I18N_DEF_RAID_LEADER = "Icon: Raid leader";
 VUHDO_I18N_DEF_RAID_ASSIST = "Icon: Raid assist";
 VUHDO_I18N_DEF_MASTER_LOOTER = "Icon: Master looter";
 VUHDO_I18N_DEF_PVP_STATUS = "Icon: PvP Status";
 
+-- @STABLE = true
 VUHDO_I18N_GRID_MOUSEOVER_SINGLE = "Grid: Mouseover Single";
 VUHDO_I18N_GRID_BACKGROUND_BAR = "Grid: Background Bar";
 VUHDO_I18N_DEF_BIT_O_GRID = "Bit'o'Grid";
@@ -390,26 +421,35 @@ VUHDO_I18N_DEF_VUHDO_ESQUE = "Vuhdo'esque";
 
 
 VUHDO_I18N_DEF_ROLE_COLOR = "Role Color";
+-- @STABLE = false
 VUHDO_I18N_BOUQUET_ROLE_TANK = "Flag: Role Tank";
 VUHDO_I18N_BOUQUET_ROLE_DAMAGE = "Flag: Role Damager";
 VUHDO_I18N_BOUQUET_ROLE_HEALER = "Flag: Role Healer";
 
 VUHDO_I18N_BOUQUET_STACKS = "Flag: Stacks >";
+-- @STABLE = true
 VUHDO_I18N_DEF_PLAYER_CHI = "Player Chi";
 
+-- @STABLE = false
 VUHDO_I18N_BOUQUET_TARGET_RAID_ICON = "Icon: Target's Raid Symbol";
 VUHDO_I18N_BOUQUET_OWN_CHI_EQUALS = "Flag: Own Chi ==";
 VUHDO_I18N_CUSTOM_ICON_FOUR_THIRDS = "Thirds: Four";
 VUHDO_I18N_CUSTOM_ICON_FIVE_THIRDS = "Thirds: Five";
+-- @STABLE = true
 VUHDO_I18N_DEF_RAID_CDS = "Raid Cooldowns";
+-- @STABLE = false
 VUHDO_I18N_BOUQUET_STATUS_CLASS_COLOR_IF_ACTIVE = "Flag: Class Color if active";
 
+-- @STABLE = true
 VUHDO_I18N_LETHAL_POISONS = "Lethal Poisons";
 VUHDO_I18N_NON_LETHAL_POISONS = "Non-lethal Poisons";
+-- @STABLE = false
 VUHDO_I18N_DEF_COUNTER_SHIELD_ABSORB = "Counter: All Shield Absorb #k";
+-- @STABLE = true
 VUHDO_I18N_BUFFC_WEAPON_ENCHANT_OFF = "Weapon Enchant (offhand)";
 
 VUHDO_I18N_DEF_PVP_FLAGS="PvP Flag Carriers";
+-- @STABLE = false
 VUHDO_I18N_DEF_STATUS_SHIELD = "Statusbar: Shield";
 
 VUHDO_I18N_TARGET = "Target";
@@ -426,7 +466,9 @@ VUHDO_I18N_BOUQUET_MONK_TANK = "Flag: Role Tank, Monk";
 VUHDO_I18N_BOUQUET_DRUID_TANK = "Flag: Role Tank, Druid";
 
 -- 3.66
+-- @STABLE = true
 VUHDO_I18N_BOUQUET_PALADIN_BEACON = "Paladin Beacon";
+-- @STABLE = false
 VUHDO_I18N_BOUQUET_STATUS_EXCESS_ABSORB = "Statusbar: Excess Absorption %";
 VUHDO_I18N_BOUQUET_STATUS_TOTAL_ABSORB = "Statusbar: Total Absorption %";
 
@@ -452,36 +494,54 @@ VUHDO_I18N_DEF_COUNTER_OVERFLOW_ABSORB = "Counter: Mythic+ Overflow Absorb #k";
 VUHDO_I18N_DEFAULT_RES_ANNOUNCE_MASS = "Casting mass resurrection!";
 
 -- 3.81
+-- @STABLE = true
 VUHDO_I18N_BOUQUET_OVERFLOW_COUNTER = "Overflow Mythic+ Affix";
 
 -- 3.82
+-- @STABLE = false
 VUHDO_I18N_SPELL_TRACE = "Icon: Spell Trace";
+-- @STABLE = true
 VUHDO_I18N_DEF_SPELL_TRACE = "Spell Trace";
+-- @STABLE = false
 VUHDO_I18N_TRAIL_OF_LIGHT = "Icon: Trail of Light";
+-- @STABLE = true
 VUHDO_I18N_DEF_TRAIL_OF_LIGHT = "Trail of Light";
 
 -- 3.83
+-- @STABLE = false
 VUHDO_I18N_BOUQUET_STATUS_MANA_HEALER_ONLY = "Statusbar: Mana % (Healer Only)";
+-- @STABLE = true
 VUHDO_I18N_DEF_BOUQUET_BAR_MANA_HEALER_ONLY = "Manabars: Mana (Healer Only)";
 
 -- 3.98
+-- @STABLE = false
 VUHDO_I18N_BOUQUET_HAS_SUMMON_ICON = "Icon: Has Summon";
+-- @STABLE = true
 VUHDO_I18N_DEF_BOUQUET_HAS_SUMMON = "Summon Status Icon";
 VUHDO_I18N_DEF_BOUQUET_ROLE_AND_SUMMON = "Role & Summon Status Icon";
 
 -- 3.99
+-- @STABLE = false
 VUHDO_I18N_BOUQUET_IS_PHASED = "Icon: Is Phased";
 VUHDO_I18N_BOUQUET_IS_WAR_MODE_PHASED = "Icon: Is War Mode Phased";
+-- @STABLE = true
 VUHDO_I18N_DEF_BOUQUET_IS_PHASED = "Is Phased Icon";
 
 -- 3.101
 VUHDO_I18N_DEF_PLAYER_COMBO_POINTS = "Player Combo Points";
+-- @STABLE = false
 VUHDO_I18N_BOUQUET_OWN_COMBO_POINTS_EQUALS = "Flag: Own Combo Points ==";
+-- @STABLE = true
 VUHDO_I18N_DEF_PLAYER_SOUL_SHARDS = "Player Soul Shards";
+-- @STABLE = false
 VUHDO_I18N_BOUQUET_OWN_SOUL_SHARDS_EQUALS = "Flag: Own Soul Shards ==";
+-- @STABLE = true
 VUHDO_I18N_DEF_PLAYER_RUNES = "Player Runes";
+-- @STABLE = false
 VUHDO_I18N_BOUQUET_OWN_RUNES_EQUALS = "Flag: Own Runes ==";
+-- @STABLE = true
 VUHDO_I18N_DEF_PLAYER_ARCANE_CHARGES = "Player Arcane Charges";
+-- @STABLE = false
 VUHDO_I18N_BOUQUET_OWN_ARCANE_CHARGES_EQUALS = "Flag: Own Arcane Charges ==";
 VUHDO_I18N_DEBUFF_BLACKLIST_ADDED = "Added \"[%s] %s\" to the debuff backlist.";
 
@@ -492,10 +552,12 @@ VUHDO_I18N_PLAY_SOUND_FILE_CUSTOM_DEBUFF_ERR = "Could not play sound \"%s\" for 
 
 -- 3.122
 VUHDO_I18N_BOUQUET_STATUS_POWER_TANK_ONLY = "Statusbar: Power % (Tank Only)";
+-- @STABLE = true
 VUHDO_I18N_DEF_BOUQUET_BAR_MANA_TANK_ONLY = "Manabars: Power (Tank Only)";
 
 -- 3.131
 VUHDO_I18N_DEF_COUNTER_HEAL_ABSORB = "Counter: All Heal Absorb #k";
+-- @STABLE = false
 VUHDO_I18N_DEF_STATUS_HEAL_ABSORB = "Statusbar: Heal Absorb";
 
 -- 3.135
@@ -521,6 +583,7 @@ VUHDO_I18N_SPELL_TRACE_HEAL = "Icon: Spell Trace (Heal)";
 -- 3.157
 VUHDO_I18N_BOUQUET_STATUS_HEALTH_IF_ACTIVE = "Statusbar: Health % if active";
 
+-- @STABLE = true
 VUHDO_I18N_DEF_COUNTER_ACTIVE_AURAS = "Counter: Active Bouquet Auras #k";
 
 VUHDO_I18N_BOUQUET_EVOKER_REVERSION = "Evoker Reversion (non-echo)";
@@ -529,10 +592,14 @@ VUHDO_I18N_BOUQUET_EVOKER_DREAM_BREATH = "Evoker Dream Breath (non-echo)";
 VUHDO_I18N_BOUQUET_EVOKER_DREAM_BREATH_ECHO = "Evoker Dream Breath (echo)";
 VUHDO_I18N_BOUQUET_EVOKER_ALL_ECHO = "Evoker All HoT Echoes";
 
+-- @STABLE = false
 VUHDO_I18N_TRAIL_OF_LIGHT_NEXT = "Flag: Trail of Light (Next)";
+-- @STABLE = true
 VUHDO_I18N_DEF_TRAIL_OF_LIGHT_NEXT = "Trail of Light (Next)";
+-- @STABLE = false
 VUHDO_I18N_BOUQUET_DEBUFF_BLEED = "Flag: Debuff Bleed";
 
+-- @STABLE = true
 VUHDO_I18N_DEF_SPELL_TRACE_INCOMING = "Spell Trace (Incoming)";
 
 VUHDO_I18N_BOUQUET_CHI_HARMONY_ICON_MINE = "Icon: Chi Harmony (Mine)";
@@ -542,6 +609,7 @@ VUHDO_I18N_DEF_BOUQUET_CHI_HARMONY_ICON_OTHERS = "Chi Harmony (Others)";
 VUHDO_I18N_BOUQUET_CHI_HARMONY_ICON_BOTH = "Icon: Chi Harmony (Both)";
 VUHDO_I18N_DEF_BOUQUET_CHI_HARMONY_ICON_BOTH = "Chi Harmony (Both)";
 
+-- @STABLE = false
 VUHDO_I18N_BOUQUET_DEBUFF_ENRAGE = "Flag: Debuff Enrage";
 
 VUHDO_I18N_AURA_GROUP_MY_HOTS = "My HoTs (Combat Auras)";
@@ -656,9 +724,11 @@ VUHDO_I18N_BW_OFF_HAND = "Off Hand";
 VUHDO_I18N_ERROR_NO_LIST_GROUP_BOUQUET = "Aura group \"%s\" contains bouquet \"%s\" which doesn't exist!";
 
 VUHDO_I18N_BOUQUET_STATUS_POWER_HEALER_ONLY = "Statusbar: Power % (Healer Only)";
+-- @STABLE = true
 VUHDO_I18N_DEF_BOUQUET_BAR_POWER_HEALER_ONLY = "Manabars: Power (Healer Only)";
 VUHDO_I18N_DEF_BOUQUET_PW_S_WEAKENED_SOUL_ICONS = "PW:S & Weakened Soul (Icons)";
 
+-- @STABLE = false
 VUHDO_I18N_CLICK_BINDING_CONFLICT = "WARNING: Blizzard Click Casting binds |cffffffff\"%s\"|r to |cffffffff%s|r and overrides VuhDo's binding for that click! Remove it under Game Menu > Options > Gameplay > Keybindings > Click Casting.";
 
 VUHDO_I18N_AFK = "afk";
