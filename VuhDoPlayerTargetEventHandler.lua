@@ -64,7 +64,7 @@ local VUHDO_CURR_PLAYER_TARGET = nil;
 local tTargetUnit;
 local tOldTarget;
 local tEmptyInfo = { };
-function VUHDO_updatePlayerTarget(anIsFullRefreshQueued)
+function VUHDO_updatePlayerTarget(anIsFullRefreshPending)
 
 	tTargetUnit = nil;
 
@@ -108,7 +108,7 @@ function VUHDO_updatePlayerTarget(anIsFullRefreshQueued)
 
 			VUHDO_setHealth("target", 1); -- VUHDO_UPDATE_ALL
 
-			if anIsFullRefreshQueued and VUHDO_getUnitButtons("target") then
+			if anIsFullRefreshPending and VUHDO_getUnitButtons("target") then
 				VUHDO_invalidateUnitBouquetChangeStates("target");
 			else
 				VUHDO_initHealthBarsFor("target");

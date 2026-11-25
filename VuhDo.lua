@@ -110,6 +110,8 @@ local VUHDO_tableUniqueAdd;
 local VUHDO_getTargetUnit;
 local VUHDO_updateHealthBarsFor;
 local VUHDO_initHealthBarsFor;
+local VUHDO_getUnitButtons;
+local VUHDO_invalidateUnitBouquetChangeStates;
 local VUHDO_trimInspected;
 
 local VUHDO_getPlayerRaidUnit;
@@ -200,6 +202,8 @@ function VUHDO_vuhdoInitLocalOverrides()
 	VUHDO_getUnitGroup = _G["VUHDO_getUnitGroup"];
 	VUHDO_updateHealthBarsFor = _G["VUHDO_updateHealthBarsFor"];
 	VUHDO_initHealthBarsFor = _G["VUHDO_initHealthBarsFor"];
+	VUHDO_getUnitButtons = _G["VUHDO_getUnitButtons"];
+	VUHDO_invalidateUnitBouquetChangeStates = _G["VUHDO_invalidateUnitBouquetChangeStates"];
 	VUHDO_tableUniqueAdd = _G["VUHDO_tableUniqueAdd"];
 	VUHDO_trimInspected = _G["VUHDO_trimInspected"];
 	VUHDO_getTargetUnit = _G["VUHDO_getTargetUnit"];
@@ -406,7 +410,7 @@ end
 
 
 --
-function VUHDO_invalidateUnitVisuals(aUnit)
+function VUHDO_invalidateUnitVisuals(aUnit, anIsFullRefreshPending)
 
 	if not aUnit then
 		return;
@@ -425,7 +429,11 @@ function VUHDO_invalidateUnitVisuals(aUnit)
 		VUHDO_cleanupSpellTraceForUnit(aUnit);
 	end
 
-	VUHDO_initEventBouquetsFor(aUnit);
+	if anIsFullRefreshPending and VUHDO_getUnitButtons(aUnit) then
+		VUHDO_invalidateUnitBouquetChangeStates(aUnit);
+	else
+		VUHDO_initEventBouquetsFor(aUnit);
+	end
 
 	return;
 
@@ -465,7 +473,8 @@ function VUHDO_setHealth(aUnit, aMode)
 		tIsDead = UnitIsDeadOrGhost(aUnit) and not UnitIsFeignDeath(aUnit);
 
 		if tIsDead then
-			VUHDO_invalidateUnitVisuals(aUnit);
+			-- mode 1 callers always follow with a full mode 1 bouquet refresh
+			VUHDO_invalidateUnitVisuals(aUnit, 1 == aMode);
 		end
 
 		if 1 == aMode then -- VUHDO_UPDATE_ALL

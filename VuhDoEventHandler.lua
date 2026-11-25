@@ -1498,7 +1498,6 @@ do
 
 				VUHDO_updatePlayerTarget(true);
 
-				VUHDO_updateHealth("player", 1);
 				VUHDO_updateBouquetsForEvent("player", 22); -- VUHDO_UPDATE_UNIT_TARGET
 
 				if UnitExists("target") then
