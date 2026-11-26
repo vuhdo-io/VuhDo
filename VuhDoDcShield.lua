@@ -1,6 +1,8 @@
 
 -----------------------------------------------------------------------------------
 local twipe = table.wipe;
+local tinsert = table.insert;
+local floor = floor;
 local CreateMacro = CreateMacro;
 local EditMacro = EditMacro;
 local strsub = strsub;
@@ -9,21 +11,39 @@ local GetMacroIndexByName = GetMacroIndexByName;
 local tonumber = tonumber;
 local pairs = pairs;
 local GetNumMacros = GetNumMacros;
+local InCombatLockdown = InCombatLockdown;
 local _;
 local format = format;
 
 local VUHDO_RAID;
+local VUHDO_CONFIG;
+local VUHDO_GROUPS;
 
 local VUHDO_getOrCreateUnitInfo;
 local VUHDO_unregisterAllUnitEventFrames;
 local VUHDO_utf8Cut;
+local VUHDO_initDynamicPanelModels;
+local VUHDO_refreshUiNoMembers;
+local VUHDO_deferRefreshUiNoMembers;
 
+
+
+--
 function VUHDO_dcShieldInitLocalOverrides()
+
 	VUHDO_RAID = _G["VUHDO_RAID"];
+	VUHDO_CONFIG = _G["VUHDO_CONFIG"];
+	VUHDO_GROUPS = _G["VUHDO_GROUPS"];
 
 	VUHDO_getOrCreateUnitInfo = _G["VUHDO_getOrCreateUnitInfo"];
 	VUHDO_unregisterAllUnitEventFrames = _G["VUHDO_unregisterAllUnitEventFrames"];
 	VUHDO_utf8Cut = _G["VUHDO_utf8Cut"];
+	VUHDO_initDynamicPanelModels = _G["VUHDO_initDynamicPanelModels"];
+	VUHDO_refreshUiNoMembers = _G["VUHDO_refreshUiNoMembers"];
+	VUHDO_deferRefreshUiNoMembers = _G["VUHDO_deferRefreshUiNoMembers"];
+
+	return;
+
 end
 
 -----------------------------------------------------------------------------------
@@ -284,25 +304,64 @@ local VUHDO_SAFE_PARTY = { "player", "party1", "party2", "party3", "party4" };
 
 
 --
+local function VUHDO_buildSafePartyGroup(aGroupId)
+
+	if not VUHDO_GROUPS[aGroupId] then
+		VUHDO_GROUPS[aGroupId] = { };
+	end
+
+	twipe(VUHDO_GROUPS[aGroupId]);
+
+	for tCnt = 1, #VUHDO_SAFE_PARTY do
+		tinsert(VUHDO_GROUPS[aGroupId], VUHDO_SAFE_PARTY[tCnt]);
+	end
+
+	return;
+
+end
+
+
+
+--
+local tSubtypeId;
+local tUnit;
+local tGroupId;
 function VUHDO_buildSafeParty()
-	if InCombatLockdown() then return; end
 
-	local _, _, _, tSubtypeID = GetLFGProposal();
-	if LFG_SUBTYPEID_RAID == tSubtypeID then
-		local tUnit, tGroup;
+	if InCombatLockdown() then
+		return;
+	end
+
+	_, _, _, tSubtypeId = GetLFGProposal();
+
+	if LFG_SUBTYPEID_RAID == tSubtypeId then
 		for tCnt = 0, 25 do
-			tGroup = floor(tCnt / 5) + 1;
+			tGroupId = floor(tCnt / 5) + 1;
 			tUnit = tCnt == 0 and "player" or "raid" .. tCnt;
-			if not VUHDO_GROUPS[tGroup] then VUHDO_GROUPS[tGroup] = { }; end
-			if tCnt % 5 == 0 then twipe(VUHDO_GROUPS[tGroup]); end
 
-			tinsert(VUHDO_GROUPS[tGroup], tUnit);
+			if not VUHDO_GROUPS[tGroupId] then
+				VUHDO_GROUPS[tGroupId] = { };
+			end
+
+			if tCnt % 5 == 0 then
+				twipe(VUHDO_GROUPS[tGroupId]);
+			end
+
+			tinsert(VUHDO_GROUPS[tGroupId], tUnit);
 		end
 	else
-		VUHDO_GROUPS[1] = VUHDO_deepCopyTable(VUHDO_SAFE_PARTY);
-		VUHDO_GROUPS[10] = VUHDO_deepCopyTable(VUHDO_SAFE_PARTY);
+		VUHDO_buildSafePartyGroup(1); -- VUHDO_ID_GROUP_1
+		VUHDO_buildSafePartyGroup(10); -- VUHDO_ID_GROUP_OWN
 	end
 
 	VUHDO_initDynamicPanelModels();
-	VUHDO_refreshUiNoMembers();
+
+	if VUHDO_CONFIG["USE_DEFERRED_REDRAW"] then
+		VUHDO_deferRefreshUiNoMembers();
+	else
+		VUHDO_refreshUiNoMembers();
+	end
+
+	return;
+
 end

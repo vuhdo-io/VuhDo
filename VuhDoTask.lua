@@ -143,6 +143,8 @@ local sDeferredTaskDelegates;
 local sNextTaskEnqueueOrder = 0;
 local sCombatHeldTasks = { };
 local sCombatHeldTaskMap = { };
+local sCombatSafeTasks = { };
+local sCombatUnsafeTasks = { };
 local sSortedCostHistory = { };
 local sSkippedHighPriorityTasks = { };
 local sIsStarvationTaskDue = false;
@@ -2378,8 +2380,6 @@ local tIterationCount;
 local tTotalTasksProcessed;
 local tCurrentTask;
 local tTasksProcessedThisIteration;
-local tCombatSafeTasks;
-local tCombatUnsafeTasks;
 function VUHDO_processCombatUnsafeTasksBeforeLockdown()
 
 	if not VUHDO_CONFIG["USE_DEFERRED_REDRAW"] then
@@ -2391,20 +2391,20 @@ function VUHDO_processCombatUnsafeTasksBeforeLockdown()
 
 	repeat
 		tTasksProcessedThisIteration = 0;
-		tCombatSafeTasks = { };
-		tCombatUnsafeTasks = { };
+		twipe(sCombatSafeTasks);
+		twipe(sCombatUnsafeTasks);
 
 		while #VUHDO_TASK_PRIORITY_QUEUE > 0 do
 			tCurrentTask = VUHDO_heapExtractTop(VUHDO_TASK_PRIORITY_QUEUE, VUHDO_TASK_QUEUE_MAP);
 
 			if VUHDO_COMBAT_UNSAFE_TASKS[tCurrentTask["type"]] then
-				tinsert(tCombatUnsafeTasks, tCurrentTask);
+				tinsert(sCombatUnsafeTasks, tCurrentTask);
 			else
-				tinsert(tCombatSafeTasks, tCurrentTask);
+				tinsert(sCombatSafeTasks, tCurrentTask);
 			end
 		end
 
-		for _, tTask in ipairs(tCombatUnsafeTasks) do
+		for _, tTask in ipairs(sCombatUnsafeTasks) do
 			tSuccess, _ = VUHDO_executeSingleTask(tTask);
 
 			if tSuccess then
@@ -2415,7 +2415,7 @@ function VUHDO_processCombatUnsafeTasksBeforeLockdown()
 			VUHDO_DEFERRED_TASK_POOL:release(tTask);
 		end
 
-		for _, tTask in ipairs(tCombatSafeTasks) do
+		for _, tTask in ipairs(sCombatSafeTasks) do
 			VUHDO_heapInsert(VUHDO_TASK_PRIORITY_QUEUE, tTask, VUHDO_TASK_QUEUE_MAP);
 		end
 
@@ -2423,6 +2423,9 @@ function VUHDO_processCombatUnsafeTasksBeforeLockdown()
 		VUHDO_checkAllSemaphoreTimeouts();
 
 	until tTasksProcessedThisIteration == 0 or tIterationCount > 10;
+
+	twipe(sCombatSafeTasks);
+	twipe(sCombatUnsafeTasks);
 
 	if VUHDO_DEFERRED_TASK_PROFILING_ENABLED then
 		VUHDO_Msg("WARNING: Processed " .. tTotalTasksProcessed .. " combat-unsafe tasks in " .. tIterationCount .. " iterations before combat lockdown.");

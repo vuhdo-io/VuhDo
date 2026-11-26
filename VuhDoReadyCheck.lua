@@ -5,6 +5,8 @@ local GetReadyCheckStatus = GetReadyCheckStatus;
 
 local VUHDO_RAID;
 
+local VUHDO_deferInitAllEventBouquets;
+
 local sIsChecking = false;
 
 
@@ -13,6 +15,7 @@ local sIsChecking = false;
 function VUHDO_readyCheckInitLocalOverrides()
 
 	VUHDO_RAID = _G["VUHDO_RAID"];
+	VUHDO_deferInitAllEventBouquets = _G["VUHDO_deferInitAllEventBouquets"];
 
 	return;
 
@@ -125,10 +128,14 @@ end
 
 --
 function VUHDO_readyCheckEnds()
+
 	if sIsChecking then -- Client send READY_CHECK_ENDS on startup
 		VUHDO_hideAllReadyIcons();
-		VUHDO_initAllEventBouquets();
+		VUHDO_deferInitAllEventBouquets();
+
 		sIsChecking = false;
 	end
-end
 
+	return;
+
+end

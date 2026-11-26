@@ -6273,7 +6273,9 @@ function VUHDO_initAllEventBouquets()
 	VUHDO_registerAllTextIndicators();
 
 	for tUnit, _ in pairs(VUHDO_RAID) do
-		VUHDO_updateBouquetsForEvent(tUnit, 1); -- VUHDO_UPDATE_ALL
+		if "focus" ~= tUnit and "target" ~= tUnit then
+			VUHDO_updateBouquetsForEvent(tUnit, 1); -- VUHDO_UPDATE_ALL
+		end
 	end
 
 	VUHDO_updateBouquetsForEvent("focus", 1); -- VUHDO_UPDATE_ALL
@@ -6293,7 +6295,9 @@ function VUHDO_deferInitAllEventBouquetsDelegate()
 	VUHDO_registerAllTextIndicators();
 
 	for tUnit, _ in pairs(VUHDO_RAID) do
-		VUHDO_deferUpdateBouquetsForEvent(tUnit, 1); -- VUHDO_UPDATE_ALL
+		if "focus" ~= tUnit and "target" ~= tUnit then
+			VUHDO_deferUpdateBouquetsForEvent(tUnit, 1); -- VUHDO_UPDATE_ALL
+		end
 	end
 
 	VUHDO_deferUpdateBouquetsForEvent("focus", 1); -- VUHDO_UPDATE_ALL

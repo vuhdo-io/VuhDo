@@ -1581,7 +1581,9 @@ do
 			VUHDO_aoeUpdateSpellAverages();
 
 		elseif "LFG_PROPOSAL_SHOW" == anEvent then
-			VUHDO_buildSafeParty();
+			if VUHDO_VARIABLES_LOADED then
+				VUHDO_buildSafeParty();
+			end
 
 		elseif "LFG_PROPOSAL_FAILED" == anEvent then
 			VUHDO_quickRaidReload();
