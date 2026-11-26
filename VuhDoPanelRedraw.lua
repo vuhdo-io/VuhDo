@@ -3463,7 +3463,7 @@ do
 
 		VUHDO_buildGenericHealthBarBouquet();
 		VUHDO_buildGenericTargetHealthBouquet();
-		VUHDO_bouqetsChanged();
+		VUHDO_bouqetsChanged(true);
 
 		_G["VUHDO_redrawAllPanels"](false);
 

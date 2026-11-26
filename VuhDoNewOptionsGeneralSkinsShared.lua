@@ -2892,7 +2892,7 @@ function VUHDO_loadProfile(aName)
 	VUHDO_initPanelModels();
 	VUHDO_initDynamicPanelModels();
 	VUHDO_initDebuffs();
-	VUHDO_bouqetsChanged();
+	VUHDO_bouqetsChanged(not InCombatLockdown());
 	VUHDO_reloadUI(true);
 	VUHDO_resetTooltip();
 	VUHDO_initBlizzFrames();

@@ -5858,7 +5858,7 @@ do
 	--
 	local tHotSlots;
 	local tAlreadyRegistered = { };
-	function VUHDO_registerAllBouquets(aDoCompress)
+	function VUHDO_registerAllBouquets(aDoCompress, anIsFullRefreshPending)
 
 		twipe(VUHDO_REGISTERED_BOUQUETS);
 		twipe(VUHDO_CYCLIC_BOUQUETS);
@@ -6018,7 +6018,10 @@ do
 
 		VUHDO_updateGlobalToggles();
 		VUHDO_buildEventInterestCache();
-		VUHDO_initAllEventBouquets();
+
+		if not anIsFullRefreshPending then
+			VUHDO_initAllEventBouquets();
+		end
 
 		VUHDO_rebuildCanColorBarGroupsCache();
 
@@ -6478,7 +6481,7 @@ end
 
 
 --
-function VUHDO_bouqetsChanged()
+function VUHDO_bouqetsChanged(anIsFullRefreshPending)
 
 	twipe(VUHDO_EVENT_BOUQUETS);
 
@@ -6487,7 +6490,7 @@ function VUHDO_bouqetsChanged()
 	end
 
 	VUHDO_initFromSpellbook();
-	VUHDO_registerAllBouquets(false);
+	VUHDO_registerAllBouquets(false, anIsFullRefreshPending);
 
 	return;
 

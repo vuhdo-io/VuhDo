@@ -1011,9 +1011,7 @@ function VUHDO_syncApply(anIsReplace)
 	VUHDO_initAllBurstCaches();
 
 	if tNeedReload then
-		VUHDO_registerAllBouquets(false);
-		VUHDO_initAllEventBouquets();
-		VUHDO_bouqetsChanged();
+		VUHDO_bouqetsChanged(not InCombatLockdown());
 		VUHDO_rebuildAuraAnchorsForBouquetListGroups();
 		VUHDO_reloadUI(false);
 	end
