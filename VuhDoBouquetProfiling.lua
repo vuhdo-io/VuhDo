@@ -138,6 +138,7 @@ do
 				["duplicates"] = 0,
 				["secretForced"] = 0,
 				["secretSkipped"] = 0,
+				["secretSkipMismatch"] = 0,
 				["dupEventTypePairs"] = { },
 				["dupCallers"] = { },
 				["merged"] = 0,
@@ -166,6 +167,20 @@ do
 	function VUHDO_recordBouquetSecretSkipped()
 
 		sIsSecretSkipped = true;
+
+		return;
+
+	end
+
+
+
+	--
+	local tBouquetMetrics;
+	function VUHDO_recordBouquetSecretSkipMismatch(aBouquetName)
+
+		tBouquetMetrics = VUHDO_getBouquetMetrics(aBouquetName);
+
+		tBouquetMetrics["secretSkipMismatch"] = (tBouquetMetrics["secretSkipMismatch"] or 0) + 1;
 
 		return;
 
@@ -668,6 +683,7 @@ do
 	local tDupPct;
 	local tSecretForced;
 	local tSecretSkipped;
+	local tSecretSkipMismatch;
 	local tSecretPct;
 	local tSecretSkipPct;
 	local tEvalTracker;
@@ -719,6 +735,7 @@ do
 			tDuplicates = tRowStats["duplicates"] or 0;
 			tSecretForced = tRowStats["secretForced"] or 0;
 			tSecretSkipped = tRowStats["secretSkipped"] or 0;
+			tSecretSkipMismatch = tRowStats["secretSkipMismatch"] or 0;
 			tEvalTotalUs = tEvalTracker and tEvalTracker:getCumulativeTotal() or 0;
 			tDelegateTotalUs = tDelegateTracker and tDelegateTracker:getCumulativeTotal() or 0;
 			tTotalUs = tEvalTotalUs + tDelegateTotalUs;
@@ -728,8 +745,13 @@ do
 			tSecretSkipPct = tEvals > 0 and (100 * tSecretSkipped / tEvals) or 0;
 			tMerged = tRowStats["merged"] or 0;
 
-			VUHDO_Msg(format("|cff98FB98Bouquet[%s]:|r E=%d, Chg=%.1f%%, Secret=%.1f%%, SecretSkip=%.1f%%, Dup=%.1f%%, Merged=%d, Total=%s",
-				tRowName, tEvals, tChangedPct, tSecretPct, tSecretSkipPct, tDupPct, tMerged, VUHDO_formatTime(tTotalUs)));
+			if tSecretSkipMismatch > 0 then
+				VUHDO_Msg(format("|cff98FB98Bouquet[%s]:|r E=%d, Chg=%.1f%%, Secret=%.1f%%, SecretSkip=%.1f%%, SkipMismatch=%d, Dup=%.1f%%, Merged=%d, Total=%s",
+					tRowName, tEvals, tChangedPct, tSecretPct, tSecretSkipPct, tSecretSkipMismatch, tDupPct, tMerged, VUHDO_formatTime(tTotalUs)));
+			else
+				VUHDO_Msg(format("|cff98FB98Bouquet[%s]:|r E=%d, Chg=%.1f%%, Secret=%.1f%%, SecretSkip=%.1f%%, Dup=%.1f%%, Merged=%d, Total=%s",
+					tRowName, tEvals, tChangedPct, tSecretPct, tSecretSkipPct, tDupPct, tMerged, VUHDO_formatTime(tTotalUs)));
+			end
 
 			tDupEventTypePairs = tRowStats["dupEventTypePairs"];
 
