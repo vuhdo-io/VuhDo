@@ -14,6 +14,8 @@ wiki/
   _Sidebar.md                     Navigation shown on every page
   _Footer.md                      Footer shown on every page
   Contributing-to-the-Wiki.md     This page
+  images/                         Home page banners and other site-wide art
+    home-banner.jpg
   VuhDo-Classic-FAQ.md            Short standalone pages live at the top level
   Guides/
     Some-Guide-Name/              One folder per guide
