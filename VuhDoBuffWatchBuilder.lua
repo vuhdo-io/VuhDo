@@ -264,6 +264,7 @@ end
 
 --
 local sIsOutOfCombat = false;
+local sIsBuffPanelReloadPending = false;
 function VUHDO_getIsOutOfCombat()
 
 	return sIsOutOfCombat;
@@ -272,14 +273,20 @@ end
 
 
 
+--
 function VUHDO_setIsOutOfCombat(anIsEnded)
+
 	sIsOutOfCombat = anIsEnded;
 
-	if VuhDoBuffWatchMainFrame and sIsOutOfCombat and VUHDO_BUFF_SETTINGS["CONFIG"]["HIDE_OUT_OF_COMBAT"] then
-		VuhDoBuffWatchMainFrame:Hide();
-	else
+	if not VuhDoBuffWatchMainFrame or sIsBuffPanelReloadPending
+		or (VUHDO_BUFF_SETTINGS["CONFIG"] and VUHDO_BUFF_SETTINGS["CONFIG"]["HIDE_OUT_OF_COMBAT"]) then
 		VUHDO_reloadBuffPanel();
+	elseif not anIsEnded then
+		VUHDO_updateBuffPanel();
 	end
+
+	return;
+
 end
 
 
@@ -288,6 +295,10 @@ end
 function VUHDO_reloadBuffPanel()
 
 	if InCombatLockdown() or sIsForceHide then
+		if InCombatLockdown() then
+			sIsBuffPanelReloadPending = true;
+		end
+
 		return;
 	end
 
@@ -298,6 +309,8 @@ function VUHDO_reloadBuffPanel()
 
 		return;
 	end
+
+	sIsBuffPanelReloadPending = false;
 
 	VUHDO_resetBuffSwatchInfos();
 	VUHDO_resetAllBuffPanels();
@@ -330,5 +343,7 @@ function VUHDO_reloadBuffPanel()
 	else
 		VuhDoBuffWatchMainFrame:Hide();
 	end
+
+	return;
 
 end
