@@ -28,7 +28,7 @@ VUHDO_I18N_OWN_GROUP = "Mon groupe";
 -- @EXACT = false
 VUHDO_I18N_PETS = "Familiers";
 VUHDO_I18N_MAINTANKS = "Tanks \nprincipaux";
-VUHDO_I18N_PRIVATE_TANKS = "Cibles personnalisées";
+VUHDO_I18N_PRIVATE_TANKS = "Tanks personnalisés";
 -- General Labels
 -- @EXACT = false
 VUHDO_I18N_OKAY = "Valider";
@@ -67,8 +67,8 @@ VUHDO_I18N_COMMAND_LIST = "\n|cffffe566 - [ Commandes VuhDo ] -|r\n" ..
 "|cffffe566mm, map, minimap|r - Afficher/Masquer l'icône de la minicarte\n" ..
 "|cffffe566compart|r[ment] - Afficher/Masquer l'icône du compartiment d'addon\n" ..
 "|cffffe566show, hide, toggle|r - Afficher/Masquer les panneaux\n" ..
-"|cffffe566load|r - [Profil],[Assignation de touche]\n" ..
-"[broad]|cffffe566cast, mt|r[s] - Annoncer les tanks principaux\n" ..
+"|cffffe566load|r - [Profil],[Disposition de touches]\n" ..
+"[broad]|cffffe566cast, mt|r[s] - Diffuser les tanks principaux\n" ..
 "|cffffe566role|r - Réinitialiser les rôles des joueurs\n" ..
 "|cffffe566ab|r[out] - À propos de cet addon\n" ..
 "|cffffe566help,?|r - Liste des commandes\n";
@@ -86,7 +86,7 @@ VUHDO_I18N_PANELS_RESET = "La position des panneaux a été réinitialisée.";
 -- Config Pop-Up
 -- @EXACT = false
 VUHDO_I18N_ROLE = "Rôle";
-VUHDO_I18N_PRIVATE_TANK = "Cibles personnalisées";
+VUHDO_I18N_PRIVATE_TANK = "Tank personnalisé";
 VUHDO_I18N_SET_BUFF = "Définir les buffs";
 -- Minimap
 -- @EXACT = false
@@ -185,9 +185,9 @@ VUHDO_I18N_RANGED_DPS = "À distance - DPS";
 VUHDO_I18N_RANGED_HEALERS = "À distance - Soigneur";
 VUHDO_I18N_AUTO_DETECT = "<détection auto>";
 VUHDO_I18N_PROMOTE_ASSIST_MSG_1 = "Promu |cffffe566";
-VUHDO_I18N_PROMOTE_ASSIST_MSG_2 = "|r assistant.";
+VUHDO_I18N_PROMOTE_ASSIST_MSG_2 = "|r au rang d'assistant.";
 VUHDO_I18N_DEMOTE_ASSIST_MSG_1 = "Rétrogradé |cffffe566";
-VUHDO_I18N_DEMOTE_ASSIST_MSG_2 = "|r assistant.";
+VUHDO_I18N_DEMOTE_ASSIST_MSG_2 = "|r du rang d'assistant.";
 VUHDO_I18N_RESET_ROLES = "Réinitialiser les rôles";
 VUHDO_I18N_LOAD_KEY_SETUP = "Charger la configuration des touches";
 VUHDO_I18N_BUFF_ASSIGN_1 = "Buff |cffffe566";
@@ -240,11 +240,11 @@ VUHDO_I18N_BOUQUET_MOUSEOVER_GROUP = "Drapeau : Survol de souris, groupe";
 VUHDO_I18N_BOUQUET_HEALTH_BELOW = "Drapeau : Santé < %";
 VUHDO_I18N_BOUQUET_MANA_BELOW = "Drapeau : Mana < %";
 VUHDO_I18N_BOUQUET_THREAT_ABOVE = "Drapeau : Menace > %";
-VUHDO_I18N_BOUQUET_NUM_IN_CLUSTER = "Drapeau : Groupe >= joueurs";
+VUHDO_I18N_BOUQUET_NUM_IN_CLUSTER = "Drapeau : Cluster >= joueurs";
 VUHDO_I18N_BOUQUET_CLASS_COLOR = "Drapeau : Toujours couleur de classe";
 VUHDO_I18N_BOUQUET_ALWAYS = "Drapeau : Toujours plein";
 VUHDO_I18N_SWIFTMEND_POSSIBLE = "Drapeau : Soin rapide possible";
-VUHDO_I18N_BOUQUET_MOUSEOVER_CLUSTER = "Drapeau : Groupe, survol de souris";
+VUHDO_I18N_BOUQUET_MOUSEOVER_CLUSTER = "Drapeau : Cluster, survol de souris";
 VUHDO_I18N_THREAT_LEVEL_MEDIUM = "Drapeau : Menace, élevée";
 VUHDO_I18N_THREAT_LEVEL_HIGH = "Drapeau : Menace, maximale";
 VUHDO_I18N_BOUQUET_STATUS_HEALTH = "Barre d'état : Santé %";
@@ -273,7 +273,7 @@ VUHDO_I18N_DEF_BOUQUET_BAR_THREAT = "Menace : Barre d'état";
 VUHDO_I18N_CUSTOM_ICON_NONE = "- Aucun / Défaut -";
 VUHDO_I18N_CUSTOM_ICON_GLOSSY = "Brillant";
 VUHDO_I18N_CUSTOM_ICON_MOSAIC = "Mosaïque";
-VUHDO_I18N_CUSTOM_ICON_CLUSTER = "Groupe";
+VUHDO_I18N_CUSTOM_ICON_CLUSTER = "Cluster";
 VUHDO_I18N_CUSTOM_ICON_FLAT = "Plat";
 VUHDO_I18N_CUSTOM_ICON_SPOT = "Point";
 VUHDO_I18N_CUSTOM_ICON_CIRCLE = "Cercle";
@@ -660,11 +660,11 @@ VUHDO_I18N_AURA_GROUP_MIGRATED_HOTS = "HoTs migrés";
 VUHDO_I18N_AURA_GROUP_MIGRATED_HOT_ICONS = "Icônes de HoTs migrées";
 VUHDO_I18N_AURA_GROUP_MIGRATED_HOT_BARS = "Barres de HoTs migrées";
 
-VUHDO_I18N_BOUQUET_AURA_GROUP_ACTIVE = "Marqueur : Groupe d'auras actif";
+VUHDO_I18N_BOUQUET_AURA_GROUP_ACTIVE = "Drapeau : Groupe d'auras actif";
 VUHDO_I18N_AURA_GROUP_FERAL_DRUID_BUFFS = "Buffs Druide Farouche";
 VUHDO_I18N_BW_MISS = "|cffff0000RATÉ|r";
 VUHDO_I18N_BW_LOCK = "|cff4488ffVERR|r";
-VUHDO_I18N_BW_TARGET_MODE = "Ciblé par";
+VUHDO_I18N_BW_TARGET_MODE = "Cibler par";
 VUHDO_I18N_BW_TARGET_BY_NAME = "Nom du joueur";
 VUHDO_I18N_BW_TARGET = "Cible";
 VUHDO_I18N_BW_FOCUS = "Focus";
@@ -714,7 +714,7 @@ VUHDO_I18N_AURA_GROUP_BOSS_DEBUFFS = "Débuffs de boss et de rôle";
 VUHDO_I18N_AURA_GROUP_PRIORITY_DEBUFFS = "Débuffs prioritaires";
 VUHDO_I18N_AURA_GROUP_RELEVANT_BUFFS = "Buffs pertinents";
 VUHDO_I18N_AURA_GROUP_RELEVANT_DEBUFFS = "Débuffs pertinents";
-VUHDO_I18N_AURA_GROUP_TIMED_DEBUFFS = "Débuffs chronométrés";
+VUHDO_I18N_AURA_GROUP_TIMED_DEBUFFS = "Débuffs à durée limitée";
 
 VUHDO_I18N_PT_NAME_AMBIGUOUS = "Nom de tank personnalisé ambigu : %s. Utilisez le nom complet (Nom-Royaume ou Prénom-Nom).";
 
@@ -735,4 +735,5 @@ VUHDO_I18N_CLICK_BINDING_CONFLICT = "AVERTISSEMENT : Le lancer au clic de Blizza
 VUHDO_I18N_AFK = "abs";
 VUHDO_I18N_CUSTOM = "Personnalisé";
 VUHDO_I18N_TEXT_PROVIDER_EMPTY = "- vide / rien -";
+
 
